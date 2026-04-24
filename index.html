@@ -78,15 +78,14 @@
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbwoz7fGFbbV5kDdKDGCvYxHsJG3Nm5_0KAk-9Nu7kYO05U_FW1MwI8DBch2amyT45pZmQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwoz7fGFbbV5kDdKDGCvYxHsJG3Nm5_0KAk-9Nu7kY0O5U_FW1MwI8DBch2amyT45pZmQ/exec";
 
-// Load dropdown nama
+// Load nama (GET)
 async function loadUsers() {
   try {
     const res = await fetch(API_URL);
-    const data = await res.json();
-
-    console.log("DATA:", data);
+    const text = await res.text();
+    const data = JSON.parse(text);
 
     const select = document.getElementById("nama");
 
@@ -103,7 +102,7 @@ async function loadUsers() {
   }
 }
 
-// Login pakai POST (AMAN)
+// Login (POST aman)
 async function login() {
   const nama = document.getElementById("nama").value;
   const pin = document.getElementById("pin").value.trim();
@@ -128,23 +127,18 @@ async function login() {
     const res = await fetch(API_URL, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/x-www-form-urlencoded"
       },
-      body: JSON.stringify({
-        nama: nama,
-        pin: pin
-      })
+      body: `nama=${encodeURIComponent(nama)}&pin=${encodeURIComponent(pin)}`
     });
 
-    const result = await res.json();
-
-    console.log("LOGIN RESULT:", result);
+    const text = await res.text();
+    const result = JSON.parse(text);
 
     if (result.success) {
       msg.innerHTML = "Login berhasil!";
       msg.className = "msg success";
 
-      // Simpan session
       localStorage.setItem("user", JSON.stringify(result));
 
       setTimeout(() => {
@@ -163,7 +157,6 @@ async function login() {
   }
 }
 
-// Jalankan saat halaman load
 window.onload = loadUsers;
 </script>
 
