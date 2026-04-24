@@ -22,37 +22,33 @@
       border-radius: 10px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
       width: 320px;
-      box-sizing: border-box; /* Memastikan padding tidak melebarkan kotak */
+      box-sizing: border-box;
     }
 
     h2 {
       text-align: center;
       margin-bottom: 20px;
-      color: #333;
     }
 
-    /* Merapikan ukuran kotak isian */
+    /* Merapikan ukuran kotak agar seragam dan dropdown muncul di bawah */
     input {
       width: 100%;
-      padding: 12px;
-      margin: 10px 0;
+      padding: 10px;
+      margin: 8px 0;
       border: 1px solid #ccc;
       border-radius: 6px;
-      display: block;
-      box-sizing: border-box; /* Menyamakan lebar input nama dan PIN */
-      font-size: 14px;
+      display: block; /* Memastikan elemen turun ke bawah */
+      box-sizing: border-box; 
     }
 
     button {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       background: #007bff;
       color: white;
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
       margin-top: 10px;
     }
 
@@ -61,14 +57,13 @@
     }
 
     .msg {
-      margin-top: 15px;
+      margin-top: 10px;
       text-align: center;
       font-size: 14px;
-      min-height: 20px;
     }
 
-    .error { color: #dc3545; }
-    .success { color: #28a745; }
+    .error { color: red; }
+    .success { color: green; }
   </style>
 </head>
 
@@ -77,7 +72,7 @@
 <div class="login-box">
   <h2>Login SOT</h2>
 
-  <input type="text" id="nama" list="list-nama" placeholder="Ketik atau pilih nama...">
+  <input type="text" id="nama" list="list-nama" placeholder="Ketik Nama Anda">
   <datalist id="list-nama">
     </datalist>
 
@@ -102,7 +97,7 @@ async function loadUsers() {
 
     data.forEach(u => {
       const opt = document.createElement("option");
-      opt.value = u.nama; // Nilai yang akan muncul saat dipilih/diketik
+      opt.value = u.nama;
       datalist.appendChild(opt);
     });
 
@@ -112,14 +107,14 @@ async function loadUsers() {
   }
 }
 
-// Login (POST aman)
+// Login (POST)
 async function login() {
   const nama = document.getElementById("nama").value.trim();
   const pin = document.getElementById("pin").value.trim();
   const msg = document.getElementById("msg");
 
   if (!nama) {
-    msg.innerHTML = "Isi nama dulu!";
+    msg.innerHTML = "Pilih/Ketik nama dulu!";
     msg.className = "msg error";
     return;
   }
@@ -148,13 +143,10 @@ async function login() {
     if (result.success) {
       msg.innerHTML = "Login berhasil!";
       msg.className = "msg success";
-
       localStorage.setItem("user", JSON.stringify(result));
-
       setTimeout(() => {
         window.location.href = "dashboard.html";
       }, 1000);
-
     } else {
       msg.innerHTML = result.message || "Login gagal";
       msg.className = "msg error";
