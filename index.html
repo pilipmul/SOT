@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -21,7 +20,7 @@
       padding: 30px;
       border-radius: 10px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      width: 300px;
+      width: 320px;
     }
 
     h2 {
@@ -71,7 +70,7 @@
     <option value="">-- Pilih Nama --</option>
   </select>
 
-  <input type="password" id="pin" placeholder="PIN">
+  <input type="password" id="pin" placeholder="Masukkan PIN">
 
   <button onclick="login()">Login</button>
 
@@ -81,63 +80,91 @@
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwoz7fGFbbV5kDdKDGCvYxHsJG3Nm5_0KAk-9Nu7kY0O5U_FW1MwI8DBch2amyT45pZmQ/exec";
 
-let users = [];
-
-// Load data saat halaman dibuka
+// Load dropdown nama
 async function loadUsers() {
   try {
     const res = await fetch(API_URL);
-    users = await res.json();
+    const data = await res.json();
+
+    console.log("DATA:", data);
 
     const select = document.getElementById("nama");
 
-    users.forEach(u => {
-      const option = document.createElement("option");
-      option.value = u.nama;
-      option.textContent = u.nama;
-      select.appendChild(option);
+    data.forEach(u => {
+      const opt = document.createElement("option");
+      opt.value = u.nama;
+      opt.textContent = u.nama;
+      select.appendChild(opt);
     });
 
   } catch (err) {
+    console.error(err);
     document.getElementById("msg").innerHTML = "Gagal load data";
   }
 }
 
+// Login pakai POST (AMAN)
 async function login() {
   const nama = document.getElementById("nama").value;
   const pin = document.getElementById("pin").value.trim();
   const msg = document.getElementById("msg");
 
-  msg.innerHTML = "Loading...";
-  msg.className = "msg";
-
-  const user = users.find(u => u.nama === nama);
-
-  if (!user) {
+  if (!nama) {
     msg.innerHTML = "Pilih nama dulu!";
     msg.className = "msg error";
     return;
   }
 
-  if (user.pin !== pin) {
-    msg.innerHTML = "PIN salah!";
+  if (!pin) {
+    msg.innerHTML = "Masukkan PIN!";
     msg.className = "msg error";
     return;
   }
 
-  msg.innerHTML = "Login berhasil!";
-  msg.className = "msg success";
+  msg.innerHTML = "Loading...";
+  msg.className = "msg";
 
-  // Simpan session sederhana
-  localStorage.setItem("user", JSON.stringify(user));
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        nama: nama,
+        pin: pin
+      })
+    });
 
-  setTimeout(() => {
-    window.location.href = "dashboard.html";
-  }, 1000);
+    const result = await res.json();
+
+    console.log("LOGIN RESULT:", result);
+
+    if (result.success) {
+      msg.innerHTML = "Login berhasil!";
+      msg.className = "msg success";
+
+      // Simpan session
+      localStorage.setItem("user", JSON.stringify(result));
+
+      setTimeout(() => {
+        window.location.href = "dashboard.html";
+      }, 1000);
+
+    } else {
+      msg.innerHTML = result.message || "Login gagal";
+      msg.className = "msg error";
+    }
+
+  } catch (err) {
+    console.error(err);
+    msg.innerHTML = "Gagal koneksi ke server";
+    msg.className = "msg error";
+  }
 }
 
-// jalankan saat load
-loadUsers();
+// Jalankan saat halaman load
+window.onload = loadUsers;
 </script>
 
 </body>
