@@ -2,10 +2,9 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Form Eskalasi Budget</title>
+  <title>Eskalasi Budget</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>
-    // SECURITY CHECK: Wajib Login & Punya Akses 'Eskalasi'
     const userData = JSON.parse(localStorage.getItem("user"));
     if (!userData || userData.akses.eskalasi !== "Y") {
       window.location.replace("login.html");
@@ -13,75 +12,131 @@
     }
   </script>
   <style>
-    body { font-family: sans-serif; background: #f4f6f9; padding: 20px; }
-    .form-container { background: white; max-width: 500px; margin: auto; padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    input, textarea, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-    button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-    button:hover { background: #218838; }
-    .back-link { display: block; margin-bottom: 15px; text-decoration: none; color: #007bff; }
+    body { font-family: sans-serif; background: #f4f6f9; padding: 15px; margin: 0; }
+    .container { max-width: 900px; margin: auto; }
+    .header-actions { display: flex; justify-content: space-between; margin-bottom: 15px; align-items: center; }
+    
+    /* Tabel Style */
+    .table-container { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { border: 1px solid #eee; padding: 10px; text-align: left; }
+    th { background: #007bff; color: white; }
+    .status-pending { color: orange; font-weight: bold; }
+
+    /* Form Style */
+    .form-box { display: none; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    
+    .btn { padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; text-decoration: none; }
+    .btn-primary { background: #007bff; color: white; }
+    .btn-success { background: #28a745; color: white; width: 100%; }
+    .btn-secondary { background: #6c757d; color: white; }
   </style>
 </head>
 <body>
 
-<div class="form-container">
-  <a href="dashboard.html" class="back-link">← Kembali</a>
-  <h2>Input Eskalasi Baru</h2>
-  <form id="formEskalasi">
-    <label>Nomor Surat</label>
-    <input type="text" id="nomorSurat" placeholder="Otomatis atau Manual" required>
+<div class="container">
+  <div id="listView">
+    <div class="header-actions">
+      <a href="dashboard.html" style="text-decoration:none;">← Kembali</a>
+      <button class="btn btn-primary" onclick="showForm()">+ Eskalasi Baru</button>
+    </div>
     
-    <label>Unit / Bagian</label>
-    <input type="text" id="unit" required>
-    
-    <label>Keperluan</label>
-    <textarea id="keperluan" rows="3" required></textarea>
-    
-    <label>Nominal Budget (Rp)</label>
-    <input type="number" id="nominal" required>
-    
-    <button type="submit" id="btnSubmit">Kirim Eskalasi</button>
-  </form>
-  <p id="msg" style="text-align:center;"></p>
+    <div class="table-container">
+      <h3>Daftar Eskalasi</h3>
+      <div id="loading" style="text-align:center;">Memuat data...</div>
+      <table id="eskalasiTable" style="display:none;">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>No. Surat</th>
+            <th>Keperluan</th>
+            <th>Nominal</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="formView" class="form-box">
+    <h3>Buat Eskalasi Baru</h3>
+    <form id="formEskalasi">
+      <input type="text" id="nomorSurat" placeholder="Nomor Surat" required>
+      <input type="text" id="unit" placeholder="Unit/Bagian" required>
+      <textarea id="keperluan" placeholder="Detail Keperluan" rows="3" required></textarea>
+      <input type="number" id="nominal" placeholder="Nominal Rp" required>
+      <button type="submit" class="btn btn-success" id="btnSubmit">Kirim Sekarang</button>
+      <button type="button" class="btn btn-secondary" onclick="hideForm()" style="margin-top:10px; width:100%;">Batal</button>
+    </form>
+  </div>
 </div>
 
 <script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbzq9eOM9xHp0vJg2tFKhCLn-OLmz_brHdeVqqAgkTMe0NiGVFvyqbVv4RoiF9AxZ8r4/exec"; // Tempel URL Deployment GAS di sini
+  const API_URL = "https://script.google.com/macros/s/AKfycbzq9eOM9xHp0vJg2tFKhCLn-OLmz_brHdeVqqAgkTMe0NiGVFvyqbVv4RoiF9AxZ8r4/exec";
+
+  function showForm() {
+    document.getElementById("listView").style.display = "none";
+    document.getElementById("formView").style.display = "block";
+  }
+
+  function hideForm() {
+    document.getElementById("formView").style.display = "none";
+    document.getElementById("listView").style.display = "block";
+  }
+
+  async function loadData() {
+    try {
+      const res = await fetch(API_URL + "?action=getEskalasi", { method: "POST" });
+      const data = await res.json();
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+
+      data.forEach(item => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${item.tanggal}</td>
+            <td>${item.nomor}</td>
+            <td>${item.keperluan}</td>
+            <td>Rp ${Number(item.nominal).toLocaleString()}</td>
+            <td class="status-pending">${item.status}</td>
+          </tr>
+        `;
+      });
+
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("eskalasiTable").style.display = "table";
+    } catch (e) {
+      document.getElementById("loading").innerText = "Gagal memuat data.";
+    }
+  }
 
   document.getElementById("formEskalasi").onsubmit = async (e) => {
     e.preventDefault();
     const btn = document.getElementById("btnSubmit");
-    const msg = document.getElementById("msg");
-    
     btn.disabled = true;
-    msg.innerText = "Mengirim...";
 
     const payload = {
       nomorSurat: document.getElementById("nomorSurat").value,
-      pemohon: userData.nama, // Diambil dari data login
+      pemohon: userData.nama,
       unit: document.getElementById("unit").value,
       keperluan: document.getElementById("keperluan").value,
       nominal: document.getElementById("nominal").value
     };
 
-    try {
-      const response = await fetch(API_URL + "?action=submitEskalasi", {
-        method: "POST",
-        body: JSON.stringify(payload)
-      });
-      const res = await response.json();
-      
-      if (res.success) {
-        msg.style.color = "green";
-        msg.innerText = "Berhasil disimpan!";
-        document.getElementById("formEskalasi").reset();
-      }
-    } catch (err) {
-      msg.style.color = "red";
-      msg.innerText = "Gagal mengirim data.";
-    } finally {
-      btn.disabled = false;
-    }
+    await fetch(API_URL + "?action=submitEskalasi", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+    hideForm();
+    loadData(); // Refresh tabel
+    document.getElementById("formEskalasi").reset();
+    btn.disabled = false;
   };
+
+  window.onload = loadData;
 </script>
 
 </body>
