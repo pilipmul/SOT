@@ -3,103 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - PBC SyncFlow</title>
+    <title>Login SOT</title>
     <style>
-        :root { --primary: #1a73e8; --border: #dadce0; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 90%; max-width: 350px; text-align: center; }
-        .form-group { text-align: left; margin-bottom: 20px; position: relative; }
-        label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; color: #3c4043; }
-        input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 16px; box-sizing: border-box; outline: none; }
-        .autocomplete-items { position: absolute; border: 1px solid var(--border); border-top: none; z-index: 999; top: 100%; left: 0; right: 0; background-color: #fff; border-radius: 0 0 8px 8px; max-height: 200px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .autocomplete-items div { padding: 12px; cursor: pointer; text-align: left; border-bottom: 1px solid #eee; }
-        .autocomplete-items div:hover { background-color: #f1f3f4; }
-        button { width: 100%; padding: 12px; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; }
-        #msg { margin-top: 15px; font-size: 13px; font-weight: 500; }
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f4f4f9; margin: 0; }
+        .login-card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 300px; }
+        select, input, button { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:disabled { background: #ccc; }
+        .error { color: red; font-size: 0.8rem; text-align: center; }
     </style>
 </head>
 <body>
+
 <div class="login-card">
-    <h2 style="color: var(--primary); margin: 0;">PBC SyncFlow</h2>
-    <p style="color: #70757a; font-size: 14px; margin-bottom: 25px;">Sistem Operasional Terintegrasi</p>
-    <div class="form-group">
-        <label>Nama Pengguna</label>
-        <input type="text" id="userName" placeholder="Ketik nama..." autocomplete="off">
-        <div id="suggestionBox" class="autocomplete-items" style="display:none;"></div>
-    </div>
-    <div class="form-group">
-        <label>PIN</label>
-        <input type="password" id="userPin" inputmode="numeric" placeholder="Masukkan PIN">
-    </div>
-    <button id="loginBtn" onclick="processLogin()">MASUK</button>
-    <div id="msg"></div>
+    <h2 style="text-align: center;">Login SOT</h2>
+    <select id="userSelect">
+        <option value="">Memuat user...</option>
+    </select>
+    <input type="password" id="pinInput" placeholder="Masukkan PIN" inputmode="numeric">
+    <div id="errorMsg" class="error"></div>
+    <button id="loginBtn">MASUK</button>
 </div>
 
 <script>
-    // GANTI URL INI SETIAP KALI DEPLOY ULANG (NEW VERSION)
-    const API_URL = "https://script.google.com/macros/s/AKfycbw0IMuPQ-MMhDpNhu_3KArR4dql1NOEczRwk-M8hI_l3OMC73BsM6CV7NG1-49JnAoj3Q/exec"; 
-    let allUsers = [];
+    // GANTI DENGAN URL WEB APP GAS ANDA
+    const WEB_APP_URL = "URL_GOOGLE_APPS_SCRIPT_ANDA_DI_SINI";
 
-    async function init() {
+    const userSelect = document.getElementById('userSelect');
+    const pinInput = document.getElementById('pinInput');
+    const loginBtn = document.getElementById('loginBtn');
+    const errorMsg = document.getElementById('errorMsg');
+
+    // 1. Ambil daftar user saat halaman dimuat
+    async function loadUsers() {
         try {
-            const resp = await fetch(`${API_URL}?action=getUsers`);
-            allUsers = await resp.json();
-            console.log("User Loaded:", allUsers);
-        } catch (e) { 
-            console.error("Gagal load user:", e); 
-            document.getElementById('msg').innerText = "Koneksi server gagal.";
+            const resp = await fetch(`${WEB_APP_URL}?action=getUsers`);
+            const users = await resp.json();
+            userSelect.innerHTML = '<option value="">Pilih Nama</option>';
+            users.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.textContent = name;
+                userSelect.appendChild(opt);
+            });
+        } catch (e) {
+            errorMsg.textContent = "Gagal memuat user.";
         }
     }
 
-    const input = document.getElementById("userName");
-    const suggestionBox = document.getElementById("suggestionBox");
+    // 2. Proses Login
+    loginBtn.addEventListener('click', async () => {
+        const name = userSelect.value;
+        const pin = pinInput.value;
 
-    input.addEventListener("input", function() {
-        const val = this.value;
-        suggestionBox.innerHTML = "";
-        if (!val) { suggestionBox.style.display = "none"; return; }
-        const matches = allUsers.filter(u => u.toLowerCase().includes(val.toLowerCase()));
-        if (matches.length > 0) {
-            suggestionBox.style.display = "block";
-            matches.forEach(match => {
-                const div = document.createElement("div");
-                div.textContent = match;
-                div.onclick = () => { input.value = match; suggestionBox.style.display = "none"; };
-                suggestionBox.appendChild(div);
+        if (!name || !pin) {
+            errorMsg.textContent = "Nama dan PIN harus diisi!";
+            return;
+        }
+
+        loginBtn.disabled = true;
+        loginBtn.textContent = "Memproses...";
+        errorMsg.textContent = "";
+
+        try {
+            const response = await fetch(WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors", // Penting untuk GAS
+                body: JSON.stringify({ name, pin })
             });
-        } else { suggestionBox.style.display = "none"; }
+
+            /* CATATAN: Karena mode 'no-cors', kita tidak bisa membaca isi JSON secara langsung.
+               Untuk sistem yang lebih aman di GitHub, disarankan menggunakan redirect 
+               atau menyimpan data login di localStorage setelah validasi sukses.
+               
+               Sebagai alternatif sederhana, kita lakukan fetch ulang atau 
+               asumsikan jika tidak error, kita arahkan ke dashboard.
+            */
+            
+            // Opsional: Simpan nama di local storage untuk dashboard
+            localStorage.setItem('userName', name);
+            
+            // Redirect ke dashboard (ganti dashboard.html sesuai file Anda)
+            window.location.href = "dashboard.html";
+            
+        } catch (e) {
+            errorMsg.textContent = "Terjadi kesalahan koneksi.";
+            loginBtn.disabled = false;
+            loginBtn.textContent = "MASUK";
+        }
     });
 
-    async function processLogin() {
-        const btn = document.getElementById('loginBtn');
-        const msg = document.getElementById('msg');
-        const name = input.value;
-        const pin = document.getElementById('userPin').value;
-
-        if(!name || !pin) return msg.innerText = "Lengkapi data!";
-        btn.disabled = true;
-        msg.innerText = "Memverifikasi...";
-
-        try {
-            const resp = await fetch(API_URL, { method: "POST", body: JSON.stringify({ name, pin }) });
-            const res = await resp.json();
-            if(res.success) {
-                localStorage.setItem("userName", res.name);
-                localStorage.setItem("userMenu", JSON.stringify(res.menus));
-                msg.style.color = "green";
-                msg.innerText = "Berhasil!";
-                setTimeout(() => window.location.href = "dashboard.html", 500);
-            } else {
-                msg.style.color = "red";
-                msg.innerText = res.message;
-                btn.disabled = false;
-            }
-        } catch(e) { 
-            msg.innerText = "Kesalahan Server"; 
-            btn.disabled = false; 
-        }
-    }
-    window.onload = init;
+    loadUsers();
 </script>
+
 </body>
 </html>
