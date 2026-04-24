@@ -10,10 +10,12 @@
       font-family: Arial, sans-serif;
       background: #f4f6f9;
       display: flex;
-      height: 100vh;
-      justify-content: center;
+      flex-direction: column;
+      min-height: 100vh; /* Gunakan min-height agar bisa discroll jika perlu */
+      justify-content: flex-start; /* Ubah ke start agar bisa kita kontrol marginnya */
       align-items: center;
       margin: 0;
+      padding-top: 15vh; /* Naikan kotak login (15% dari tinggi layar) */
     }
 
     .login-box {
@@ -23,12 +25,13 @@
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
       width: 320px;
       box-sizing: border-box;
-      position: relative; /* Penting untuk posisi dropdown */
+      position: relative;
     }
 
     h2 {
       text-align: center;
       margin-bottom: 20px;
+      margin-top: 0;
     }
 
     .input-group {
@@ -42,7 +45,7 @@
       border: 1px solid #ccc;
       border-radius: 6px;
       box-sizing: border-box;
-      font-size: 14px;
+      font-size: 16px; /* Font 16px mencegah auto-zoom di iPhone */
       display: block;
     }
 
@@ -56,7 +59,7 @@
       border: 1px solid #ccc;
       border-top: none;
       border-radius: 0 0 6px 6px;
-      max-height: 200px;
+      max-height: 180px;
       overflow-y: auto;
       z-index: 1000;
       display: none;
@@ -64,14 +67,10 @@
     }
 
     .autocomplete-item {
-      padding: 10px 12px;
+      padding: 12px;
       cursor: pointer;
       font-size: 14px;
       border-bottom: 1px solid #eee;
-    }
-
-    .autocomplete-item:last-child {
-      border-bottom: none;
     }
 
     .autocomplete-item:hover {
@@ -88,10 +87,7 @@
       cursor: pointer;
       font-weight: bold;
       margin-top: 10px;
-    }
-
-    button:hover {
-      background: #0056b3;
+      font-size: 16px;
     }
 
     .msg {
@@ -102,6 +98,13 @@
 
     .error { color: red; }
     .success { color: green; }
+
+    /* Tambahan agar saat keyboard muncul di layar kecil, box tetap aman */
+    @media (max-height: 500px) {
+      body {
+        padding-top: 20px;
+      }
+    }
   </style>
 </head>
 
@@ -128,11 +131,9 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbwoz7fGFbbV5kDdKDGCvYxHsJG3Nm5_0KAk-9Nu7kYO05U_FW1MwI8DBch2amyT45pZmQ/exec";
 let userDataNames = [];
 
-// Logika Autocomplete sesuai permintaan Anda
 function setupAutocomplete(input, box, data) {
     input.oninput = () => {
         const val = input.value.trim().toLowerCase();
-
         if (!val) {
             box.style.display = "none";
             return;
@@ -156,7 +157,6 @@ function setupAutocomplete(input, box, data) {
         });
     };
 
-    // Menutup box jika klik di luar
     document.addEventListener("click", (e) => {
         if (e.target !== input && e.target !== box) {
             box.style.display = "none";
@@ -167,20 +167,12 @@ function setupAutocomplete(input, box, data) {
 async function loadUsers() {
     try {
         const res = await fetch(API_URL);
-        const text = await res.text();
-        const data = JSON.parse(text);
-
-        // Ambil hanya array nama untuk autocomplete
+        const data = await res.json();
         userDataNames = data.map(u => u.nama);
         
-        const inputNama = document.getElementById("nama");
-        const boxNama = document.getElementById("autocomplete-box");
-        
-        setupAutocomplete(inputNama, boxNama, userDataNames);
-
+        setupAutocomplete(document.getElementById("nama"), document.getElementById("autocomplete-box"), userDataNames);
     } catch (err) {
         console.error(err);
-        document.getElementById("msg").innerHTML = "Gagal load data";
     }
 }
 
@@ -217,7 +209,7 @@ async function login() {
             msg.className = "msg error";
         }
     } catch (err) {
-        msg.innerHTML = "Gagal koneksi ke server";
+        msg.innerHTML = "Gagal koneksi";
         msg.className = "msg error";
     }
 }
