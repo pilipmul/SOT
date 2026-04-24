@@ -1,19 +1,25 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Access Control</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <script>
-    // --- PROTEKSI KETAT (Dijalankan sebelum HTML dimuat) ---
-    const userData = JSON.parse(localStorage.getItem("user"));
+<script>
+  (function() {
+    // 1. Ambil data login
+    const session = localStorage.getItem("user");
+    const userData = session ? JSON.parse(session) : null;
 
-    // 1. Jika tidak ada data login ATAU akses accesControl bukan 'Y', tendang balik
+    // 2. Cek apakah user ada DAN punya akses 'Y' di kolom Access Control
+    // Perhatikan: Sesuaikan "accesControl" dengan nama property di GAS kamu
     if (!userData || !userData.akses || userData.akses.accesControl !== "Y") {
-      window.location.href = "login.html";
+      
+      // Paksa pindah ke login
+      window.location.replace("login.html"); 
+      
+      // Hapus konten body secara instan agar tidak sempat terlihat
+      document.documentElement.style.display = "none";
+      throw new Error("Akses ditolak"); // Menghentikan eksekusi script selanjutnya
     }
-  </script>
+  })();
+</script>
 
   <style>
     body { font-family: sans-serif; background: #f4f6f9; padding: 20px; margin: 0; }
