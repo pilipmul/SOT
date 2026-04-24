@@ -7,7 +7,7 @@
 
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: #f4f6f9;
       display: flex;
       height: 100vh;
@@ -19,26 +19,33 @@
     .login-box {
       background: #fff;
       padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      width: 320px;
-      box-sizing: border-box; /* Menjaga lebar tetap 320px termasuk padding */
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      width: 350px;
+      box-sizing: border-box;
     }
 
     h2 {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
+      color: #333;
     }
 
-    /* Merapikan ukuran kotak isian agar seragam */
+    /* Mengatur kotak input agar seragam dan rapi */
     input {
       width: 100%;
-      padding: 12px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-sizing: border-box; /* Penting: agar Nama dan PIN lebarnya sama persis */
-      display: block;
+      padding: 12px 15px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      border-color: #007bff;
     }
 
     button {
@@ -47,10 +54,12 @@
       background: #007bff;
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
-      font-weight: bold;
-      margin-top: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 15px;
+      transition: background 0.3s;
     }
 
     button:hover {
@@ -58,13 +67,14 @@
     }
 
     .msg {
-      margin-top: 10px;
+      margin-top: 15px;
       text-align: center;
       font-size: 14px;
+      min-height: 20px;
     }
 
-    .error { color: red; }
-    .success { color: green; }
+    .error { color: #d93025; }
+    .success { color: #188038; }
   </style>
 </head>
 
@@ -73,8 +83,8 @@
 <div class="login-box">
   <h2>Login SOT</h2>
 
-  <input type="text" id="nama" list="nama-list" placeholder="Ketik Nama Anda..." autocomplete="off">
-  <datalist id="nama-list">
+  <input type="text" id="nama" list="list-nama" placeholder="Ketik Nama Anda..." autocomplete="off">
+  <datalist id="list-nama">
     </datalist>
 
   <input type="password" id="pin" placeholder="Masukkan PIN">
@@ -87,77 +97,63 @@
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwoz7fGFbbV5kDdKDGCvYxHsJG3Nm5_0KAk-9Nu7kYO05U_FW1MwI8DBch2amyT45pZmQ/exec";
 
-// Load nama (GET)
+// Load data nama untuk mengisi sugesti (GET)
 async function loadUsers() {
   try {
     const res = await fetch(API_URL);
     const text = await res.text();
     const data = JSON.parse(text);
 
-    const list = document.getElementById("nama-list");
+    const datalist = document.getElementById("list-nama");
+    datalist.innerHTML = ""; // Bersihkan list sebelum isi ulang
 
     data.forEach(u => {
       const opt = document.createElement("option");
-      opt.value = u.nama; // Nama yang akan muncul sebagai sugesti
-      list.appendChild(opt);
+      opt.value = u.nama;
+      datalist.appendChild(opt);
     });
 
   } catch (err) {
     console.error(err);
-    document.getElementById("msg").innerHTML = "Gagal load data nama";
+    document.getElementById("msg").innerHTML = "Gagal memuat daftar nama";
   }
 }
 
-// Login (POST)
+// Fungsi Login (POST)
 async function login() {
   const nama = document.getElementById("nama").value.trim();
   const pin = document.getElementById("pin").value.trim();
   const msg = document.getElementById("msg");
 
-  if (!nama) {
-    msg.innerHTML = "Pilih atau ketik nama!";
+  if (!nama || !pin) {
+    msg.innerHTML = "Nama dan PIN harus diisi!";
     msg.className = "msg error";
     return;
   }
 
-  if (!pin) {
-    msg.innerHTML = "Masukkan PIN!";
-    msg.className = "msg error";
-    return;
-  }
-
-  msg.innerHTML = "Loading...";
+  msg.innerHTML = "Memverifikasi...";
   msg.className = "msg";
 
   try {
     const res = await fetch(API_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: `nama=${encodeURIComponent(nama)}&pin=${encodeURIComponent(pin)}`
     });
 
-    const text = await res.text();
-    const result = JSON.parse(text);
+    const result = await res.json();
 
     if (result.success) {
       msg.innerHTML = "Login berhasil!";
       msg.className = "msg success";
-
       localStorage.setItem("user", JSON.stringify(result));
-
-      setTimeout(() => {
-        window.location.href = "dashboard.html";
-      }, 1000);
-
+      setTimeout(() => { window.location.href = "dashboard.html"; }, 1000);
     } else {
       msg.innerHTML = result.message || "Login gagal";
       msg.className = "msg error";
     }
 
   } catch (err) {
-    console.error(err);
     msg.innerHTML = "Gagal koneksi ke server";
     msg.className = "msg error";
   }
