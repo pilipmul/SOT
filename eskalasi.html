@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <script>
-    // --- PROTEKSI KEAMANAN INSTAN ---
     (function() {
       const session = localStorage.getItem("user");
       const userData = session ? JSON.parse(session) : null;
@@ -20,8 +19,6 @@
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f9; margin: 0; padding: 15px; }
     .container { max-width: 1100px; margin: auto; }
-    
-    /* Header & Action */
     .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; text-decoration: none; font-size: 14px; transition: 0.2s; }
     .btn-primary { background: #007bff; color: white; }
@@ -29,24 +26,18 @@
     .btn-secondary { background: #6c757d; color: white; width: 100%; margin-top: 10px; }
     .btn:hover { opacity: 0.8; }
 
-    /* Tabel Style 100% Sesuai Database */
     .table-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
-    th { 
-      background: #e8f0fe; color: #333; font-weight: bold; padding: 12px; border: 1px solid #dee2e6; 
-      text-align: left; cursor: pointer; position: relative;
-    }
+    th { background: #e8f0fe; color: #333; font-weight: bold; padding: 12px; border: 1px solid #dee2e6; text-align: left; cursor: pointer; position: relative; }
     th:hover { background: #d0e0fb; }
     th::after { content: ' ↕'; font-size: 10px; color: #aaa; }
     td { padding: 12px; border: 1px solid #dee2e6; color: #444; font-size: 14px; }
     tr:hover { background-color: #f9f9f9; }
     .text-center { text-align: center; }
 
-    /* Form View */
     .form-box { display: none; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
     label { display: block; margin-top: 15px; font-weight: 600; color: #555; }
     input, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 14px; }
-    .info-auto { font-size: 11px; color: #28a745; font-style: italic; margin-top: 5px; }
   </style>
 </head>
 <body>
@@ -82,7 +73,6 @@
     <form id="formEskalasi">
       <label>Kode Eskalasi</label>
       <input type="text" value="Otomatis Sistem" disabled style="background: #f0f0f0; color: #888;">
-      <span class="info-auto">*Nomor urut akan direset setiap bulan baru.</span>
       
       <label>Subject / Keperluan</label>
       <textarea id="subject" rows="3" placeholder="Contoh: Perbaikan Pompa Sumur" required></textarea>
@@ -91,7 +81,7 @@
       <input type="text" id="tanggal" placeholder="Contoh: Apr 2026" required>
 
       <label>Nilai Budget (Rp)</label>
-      <input type="number" id="nilai" placeholder="Masukkan angka saja tanpa titik" required>
+      <input type="number" id="nilai" placeholder="Masukkan angka saja" required>
       
       <button type="submit" class="btn btn-success" id="btnSubmit">Simpan Eskalasi</button>
       <button type="button" class="btn btn-secondary" onclick="hideForm()">Batal</button>
@@ -100,7 +90,7 @@
 </div>
 
 <script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbzq9eOM9xHp0vJg2tFKhCLn-OLmz_brHdeVqqAgkTMe0NiGVFvyqbVv4RoiF9AxZ8r4/exec"; // Ganti dengan URL Web App GAS Eskalasi
+  const API_URL = "https://script.google.com/macros/s/AKfycbzq9eOM9xHp0vJg2tFKhCLn-OLmz_brHdeVqqAgkTMe0NiGVFvyqbVv4RoiF9AxZ8r4/exec";
   const userData = JSON.parse(localStorage.getItem("user"));
 
   function showForm() {
@@ -113,7 +103,21 @@
     document.getElementById("listView").style.display = "block";
   }
 
-  // --- FUNGSI SORT TABEL ---
+  // --- LOGIKA SORT TABEL DENGAN PARSING TANGGAL Mmm YYYY ---
+  function parseDateMmmYYYY(str) {
+    const months = {
+      "jan": 0, "feb": 1, "mar": 2, "apr": 3, "may": 4, "jun": 5,
+      "jul": 6, "aug": 7, "sep": 8, "oct": 9, "nov": 10, "dec": 11
+    };
+    const parts = str.toLowerCase().split(' ');
+    if (parts.length === 2) {
+      const m = months[parts[0].substring(0, 3)];
+      const y = parseInt(parts[1]);
+      return new Date(y, m, 1);
+    }
+    return new Date(0); // Fallback
+  }
+
   function sortTable(n) {
     let table = document.getElementById("eskalasiTable");
     let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
@@ -127,19 +131,27 @@
         x = rows[i].getElementsByTagName("TD")[n];
         y = rows[i + 1].getElementsByTagName("TD")[n];
         
-        let valX = x.innerText.toLowerCase();
-        let valY = y.innerText.toLowerCase();
+        let valX = x.innerText;
+        let valY = y.innerText;
 
-        // Cek jika kolom No (0) atau Nilai (4) untuk sorting angka
-        if (n === 0 || n === 4) {
-          valX = parseFloat(valX.replace(/[^\d.-]/g, '')) || 0;
-          valY = parseFloat(valY.replace(/[^\d.-]/g, '')) || 0;
+        // Logika sortir berdasarkan tipe kolom
+        let compX, compY;
+
+        if (n === 0 || n === 4) { // Angka (No & Nilai)
+          compX = parseFloat(valX.replace(/[^\d.-]/g, '')) || 0;
+          compY = parseFloat(valY.replace(/[^\d.-]/g, '')) || 0;
+        } else if (n === 3) { // Kolom Tanggal (Apr 2026)
+          compX = parseDateMmmYYYY(valX).getTime();
+          compY = parseDateMmmYYYY(valY).getTime();
+        } else { // Teks biasa
+          compX = valX.toLowerCase();
+          compY = valY.toLowerCase();
         }
 
         if (dir == "asc") {
-          if (valX > valY) { shouldSwitch = true; break; }
+          if (compX > compY) { shouldSwitch = true; break; }
         } else if (dir == "desc") {
-          if (valX < valY) { shouldSwitch = true; break; }
+          if (compX < compY) { shouldSwitch = true; break; }
         }
       }
       if (shouldSwitch) {
@@ -155,7 +167,6 @@
     }
   }
 
-  // --- AMBIL DATA DARI SPREADSHEET ---
   async function loadData() {
     try {
       const res = await fetch(API_URL + "?action=getEskalasi", { method: "POST" });
@@ -178,11 +189,10 @@
       document.getElementById("loading").style.display = "none";
       document.getElementById("eskalasiTable").style.display = "table";
     } catch (e) {
-      document.getElementById("loading").innerHTML = "<span style='color:red;'>Gagal terhubung ke database. Pastikan URL GAS benar.</span>";
+      document.getElementById("loading").innerHTML = "<span style='color:red;'>Gagal terhubung ke database.</span>";
     }
   }
 
-  // --- SIMPAN DATA KE SPREADSHEET ---
   document.getElementById("formEskalasi").onsubmit = async (e) => {
     e.preventDefault();
     const btn = document.getElementById("btnSubmit");
@@ -200,7 +210,6 @@
         method: "POST",
         body: JSON.stringify(payload)
       });
-      
       const res = await response.json();
       if (res.success) {
         document.getElementById("formEskalasi").reset();
@@ -208,7 +217,7 @@
         loadData();
       }
     } catch (err) {
-      alert("Gagal menyimpan data. Silakan coba lagi.");
+      alert("Gagal menyimpan data.");
     } finally {
       btn.disabled = false;
       btn.innerText = "Simpan Eskalasi";
