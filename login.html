@@ -22,7 +22,8 @@
       border-radius: 10px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
       width: 320px;
-      box-sizing: border-box; /* Memastikan padding tidak merusak lebar kotak */
+      box-sizing: border-box;
+      position: relative; /* Penting untuk posisi dropdown */
     }
 
     h2 {
@@ -30,16 +31,51 @@
       margin-bottom: 20px;
     }
 
-    /* Merapikan ukuran kotak isian nama dan PIN agar seragam */
+    .input-group {
+      position: relative;
+      margin: 8px 0;
+    }
+
     input {
       width: 100%;
       padding: 12px;
-      margin: 8px 0;
       border: 1px solid #ccc;
       border-radius: 6px;
-      display: block;
-      box-sizing: border-box; /* Kunci agar lebar input Nama & PIN sama persis */
+      box-sizing: border-box;
       font-size: 14px;
+      display: block;
+    }
+
+    /* Style untuk Box Autocomplete */
+    .autocomplete-box {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #ccc;
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .autocomplete-item {
+      padding: 10px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .autocomplete-item:last-child {
+      border-bottom: none;
+    }
+
+    .autocomplete-item:hover {
+      background-color: #f0f0f0;
     }
 
     button {
@@ -74,11 +110,14 @@
 <div class="login-box">
   <h2>Login SOT</h2>
 
-  <input type="text" id="nama" list="list-nama" placeholder="Ketik nama..." autocomplete="off">
-  <datalist id="list-nama">
-    </datalist>
+  <div class="input-group">
+    <input type="text" id="nama" placeholder="Ketik nama..." autocomplete="off">
+    <div id="autocomplete-box" class="autocomplete-box"></div>
+  </div>
 
-  <input type="password" id="pin" placeholder="Masukkan PIN">
+  <div class="input-group">
+    <input type="password" id="pin" placeholder="Masukkan PIN">
+  </div>
 
   <button onclick="login()">Login</button>
 
@@ -87,78 +126,100 @@
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbwoz7fGFbbV5kDdKDGCvYxHsJG3Nm5_0KAk-9Nu7kYO05U_FW1MwI8DBch2amyT45pZmQ/exec";
+let userDataNames = [];
 
-// Load data nama (GET)
-async function loadUsers() {
-  try {
-    const res = await fetch(API_URL);
-    const text = await res.text();
-    const data = JSON.parse(text);
+// Logika Autocomplete sesuai permintaan Anda
+function setupAutocomplete(input, box, data) {
+    input.oninput = () => {
+        const val = input.value.trim().toLowerCase();
 
-    const datalist = document.getElementById("list-nama");
+        if (!val) {
+            box.style.display = "none";
+            return;
+        }
 
-    data.forEach(u => {
-      const opt = document.createElement("option");
-      opt.value = u.nama;
-      datalist.appendChild(opt);
+        const match = data
+            .filter(d => d.toLowerCase().includes(val))
+            .slice(0, 10);
+
+        box.innerHTML = match.map(m =>
+            `<div class="autocomplete-item">${m}</div>`
+        ).join('');
+
+        box.style.display = match.length ? "block" : "none";
+
+        box.querySelectorAll(".autocomplete-item").forEach(div => {
+            div.onclick = () => {
+                input.value = div.textContent;
+                box.style.display = "none";
+            };
+        });
+    };
+
+    // Menutup box jika klik di luar
+    document.addEventListener("click", (e) => {
+        if (e.target !== input && e.target !== box) {
+            box.style.display = "none";
+        }
     });
-
-  } catch (err) {
-    console.error(err);
-    document.getElementById("msg").innerHTML = "Gagal load data";
-  }
 }
 
-// Login (POST tetap sama)
+async function loadUsers() {
+    try {
+        const res = await fetch(API_URL);
+        const text = await res.text();
+        const data = JSON.parse(text);
+
+        // Ambil hanya array nama untuk autocomplete
+        userDataNames = data.map(u => u.nama);
+        
+        const inputNama = document.getElementById("nama");
+        const boxNama = document.getElementById("autocomplete-box");
+        
+        setupAutocomplete(inputNama, boxNama, userDataNames);
+
+    } catch (err) {
+        console.error(err);
+        document.getElementById("msg").innerHTML = "Gagal load data";
+    }
+}
+
 async function login() {
-  const nama = document.getElementById("nama").value.trim();
-  const pin = document.getElementById("pin").value.trim();
-  const msg = document.getElementById("msg");
+    const nama = document.getElementById("nama").value.trim();
+    const pin = document.getElementById("pin").value.trim();
+    const msg = document.getElementById("msg");
 
-  if (!nama) {
-    msg.innerHTML = "Isi nama dulu!";
-    msg.className = "msg error";
-    return;
-  }
-
-  if (!pin) {
-    msg.innerHTML = "Masukkan PIN!";
-    msg.className = "msg error";
-    return;
-  }
-
-  msg.innerHTML = "Loading...";
-  msg.className = "msg";
-
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
-      body: `nama=${encodeURIComponent(nama)}&pin=${encodeURIComponent(pin)}`
-    });
-
-    const text = await res.text();
-    const result = JSON.parse(text);
-
-    if (result.success) {
-      msg.innerHTML = "Login berhasil!";
-      msg.className = "msg success";
-      localStorage.setItem("user", JSON.stringify(result));
-      setTimeout(() => {
-        window.location.href = "dashboard.html";
-      }, 1000);
-    } else {
-      msg.innerHTML = result.message || "Login gagal";
-      msg.className = "msg error";
+    if (!nama || !pin) {
+        msg.innerHTML = "Isi nama dan PIN!";
+        msg.className = "msg error";
+        return;
     }
 
-  } catch (err) {
-    console.error(err);
-    msg.innerHTML = "Gagal koneksi ke server";
-    msg.className = "msg error";
-  }
+    msg.innerHTML = "Loading...";
+    msg.className = "msg";
+
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `nama=${encodeURIComponent(nama)}&pin=${encodeURIComponent(pin)}`
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+            msg.innerHTML = "Login berhasil!";
+            msg.className = "msg success";
+            localStorage.setItem("user", JSON.stringify(result));
+            setTimeout(() => { window.location.href = "dashboard.html"; }, 1000);
+        } else {
+            msg.innerHTML = result.message || "Login gagal";
+            msg.className = "msg error";
+        }
+    } catch (err) {
+        msg.innerHTML = "Gagal koneksi ke server";
+        msg.className = "msg error";
+    }
 }
 
 window.onload = loadUsers;
