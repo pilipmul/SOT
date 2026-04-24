@@ -36,20 +36,29 @@
 
     // 1. Ambil daftar user saat halaman dimuat
     async function loadUsers() {
-        try {
-            const resp = await fetch(`${WEB_APP_URL}?action=getUsers`);
-            const users = await resp.json();
-            userSelect.innerHTML = '<option value="">Pilih Nama</option>';
-            users.forEach(name => {
-                const opt = document.createElement('option');
-                opt.value = name;
-                opt.textContent = name;
-                userSelect.appendChild(opt);
-            });
-        } catch (e) {
-            errorMsg.textContent = "Gagal memuat user.";
-        }
+    try {
+        // Tambahkan pengalihan (redirect) manual jika diperlukan, 
+        // tapi fetch standar biasanya cukup jika deployment-nya "Anyone"
+        const resp = await fetch(`${WEB_APP_URL}?action=getUsers`, {
+            method: 'GET',
+            redirect: 'follow' // Memastikan browser mengikuti redirect Google
+        });
+        
+        if (!resp.ok) throw new Error('Network response was not ok');
+        
+        const users = await resp.json();
+        userSelect.innerHTML = '<option value="">Pilih Nama</option>';
+        users.forEach(name => {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            userSelect.appendChild(opt);
+        });
+    } catch (e) {
+        console.error("Detail Error:", e);
+        errorMsg.textContent = "Gagal memuat user. Cek koneksi atau izin script.";
     }
+}
 
     // 2. Proses Login
     loginBtn.addEventListener('click', async () => {
