@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Access Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: sans-serif; background: #f4f6f9; padding: 20px; margin: 0; }
+    .container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow-x: auto; }
+    h2 { color: #333; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+    th { background: #007bff; color: white; }
+    tr:nth-child(even) { background: #f9f9f9; }
+    .status-msg { margin-bottom: 10px; font-weight: bold; color: green; }
+    .back-btn { display: inline-block; margin-bottom: 15px; text-decoration: none; color: #007bff; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <a href="dashboard.html" class="back-btn">← Kembali ke Dashboard</a>
+  <h2>Pengaturan Akses Pengguna</h2>
+  <div id="status" class="status-msg"></div>
+
+  <table id="userTable">
+    <thead>
+      <tr>
+        <th>Nama</th>
+        <th>Eskalasi</th>
+        <th>Teguran</th>
+        <th>Perbaikan</th>
+        <th>Schedule</th>
+        <th>Syncflow</th>
+        <th>Access</th>
+      </tr>
+    </thead>
+    <tbody id="userBody">
+      </tbody>
+  </table>
+</div>
+
+<script>
+  const API_URL = "https://script.google.com/macros/s/AKfycbwoz7fGFbbV5kDdKDGCvYxHsJG3Nm5_0KAk-9Nu7kYO05U_FW1MwI8DBch2amyT45pZmQ/exec";
+
+  async function loadUsers() {
+    const status = document.getElementById("status");
+    status.innerHTML = "Memuat data...";
+    
+    try {
+      const res = await fetch(API_URL + "?action=getUsers", { method: "POST" });
+      const users = await res.json();
+      
+      const tbody = document.getElementById("userBody");
+      tbody.innerHTML = "";
+
+      users.forEach(user => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td style="text-align:left">${user.nama}</td>
+          <td>${createCheckbox(user.row, 4, user.eskalasi)}</td>
+          <td>${createCheckbox(user.row, 5, user.suratTeguran)}</td>
+          <td>${createCheckbox(user.row, 6, user.dokPerbaikan)}</td>
+          <td>${createCheckbox(user.row, 7, user.schedulePD)}</td>
+          <td>${createCheckbox(user.row, 8, user.syncflow)}</td>
+          <td>${createCheckbox(user.row, 9, user.accesControl)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      status.innerHTML = "";
+    } catch (e) {
+      status.innerHTML = "Gagal memuat data";
+    }
+  }
+
+  function createCheckbox(row, col, value) {
+    const checked = value === "Y" ? "checked" : "";
+    return `<input type="checkbox" ${checked} onchange="updateAkses(${row}, ${col}, this)">`;
+  }
+
+  async function updateAkses(row, col, el) {
+    const val = el.checked ? "Y" : "";
+    const status = document.getElementById("status");
+    status.style.color = "orange";
+    status.innerHTML = "Menyimpan perubahan...";
+
+    try {
+      await fetch(`${API_URL}?action=updateAkses&row=${row}&col=${col}&value=${val}`, { method: "POST" });
+      status.style.color = "green";
+      status.innerHTML = "Perubahan tersimpan!";
+      setTimeout(() => status.innerHTML = "", 2000);
+    } catch (e) {
+      status.style.color = "red";
+      status.innerHTML = "Gagal menyimpan!";
+    }
+  }
+
+  window.onload = loadUsers;
+</script>
+
+</body>
+</html>
