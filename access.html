@@ -4,6 +4,17 @@
   <meta charset="UTF-8">
   <title>Access Control</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <script>
+    // --- PROTEKSI KETAT (Dijalankan sebelum HTML dimuat) ---
+    const userData = JSON.parse(localStorage.getItem("user"));
+
+    // 1. Jika tidak ada data login ATAU akses accesControl bukan 'Y', tendang balik
+    if (!userData || !userData.akses || userData.akses.accesControl !== "Y") {
+      window.location.href = "login.html";
+    }
+  </script>
+
   <style>
     body { font-family: sans-serif; background: #f4f6f9; padding: 20px; margin: 0; }
     .container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow-x: auto; }
@@ -12,8 +23,8 @@
     th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
     th { background: #007bff; color: white; }
     tr:nth-child(even) { background: #f9f9f9; }
-    .status-msg { margin-bottom: 10px; font-weight: bold; color: green; }
-    .back-btn { display: inline-block; margin-bottom: 15px; text-decoration: none; color: #007bff; }
+    .status-msg { margin-bottom: 10px; font-weight: bold; }
+    .back-btn { display: inline-block; margin-bottom: 15px; text-decoration: none; color: #007bff; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -41,10 +52,12 @@
 </div>
 
 <script>
- const API_URL = "https://script.google.com/macros/s/AKfycbz8R3zOYKJFGry12tqkeJqn4AgFTOaFKs1xhJ5yp_UPbNbIPmL_ox3nuQkXb4ghngu6xw/exec";
+  // URL Web App GAS Anda
+  const API_URL = "https://script.google.com/macros/s/AKfycbz8R3zOYKJFGry12tqkeJqn4AgFTOaFKs1xhJ5yp_UPbNbIPmL_ox3nuQkXb4ghngu6xw/exec";
 
   async function loadUsers() {
     const status = document.getElementById("status");
+    status.style.color = "blue";
     status.innerHTML = "Memuat data...";
     
     try {
@@ -69,7 +82,8 @@
       });
       status.innerHTML = "";
     } catch (e) {
-      status.innerHTML = "Gagal memuat data";
+      status.style.color = "red";
+      status.innerHTML = "Gagal memuat data server";
     }
   }
 
@@ -82,19 +96,20 @@
     const val = el.checked ? "Y" : "";
     const status = document.getElementById("status");
     status.style.color = "orange";
-    status.innerHTML = "Menyimpan perubahan...";
+    status.innerHTML = "Menyimpan...";
 
     try {
       await fetch(`${API_URL}?action=updateAkses&row=${row}&col=${col}&value=${val}`, { method: "POST" });
       status.style.color = "green";
-      status.innerHTML = "Perubahan tersimpan!";
-      setTimeout(() => status.innerHTML = "", 2000);
+      status.innerHTML = "Tersimpan!";
+      setTimeout(() => status.innerHTML = "", 1500);
     } catch (e) {
       status.style.color = "red";
-      status.innerHTML = "Gagal menyimpan!";
+      status.innerHTML = "Gagal simpan!";
     }
   }
 
+  // Jalankan load data hanya setelah dipastikan lolos proteksi head
   window.onload = loadUsers;
 </script>
 
