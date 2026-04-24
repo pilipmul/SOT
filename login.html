@@ -22,7 +22,7 @@
       border-radius: 10px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
       width: 320px;
-      box-sizing: border-box;
+      box-sizing: border-box; /* Menjaga lebar tetap 320px termasuk padding */
     }
 
     h2 {
@@ -30,25 +30,26 @@
       margin-bottom: 20px;
     }
 
-    /* Merapikan ukuran kotak agar seragam dan dropdown muncul di bawah */
+    /* Merapikan ukuran kotak isian agar seragam */
     input {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       margin: 8px 0;
       border: 1px solid #ccc;
       border-radius: 6px;
-      display: block; /* Memastikan elemen turun ke bawah */
-      box-sizing: border-box; 
+      box-sizing: border-box; /* Penting: agar Nama dan PIN lebarnya sama persis */
+      display: block;
     }
 
     button {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       background: #007bff;
       color: white;
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      font-weight: bold;
       margin-top: 10px;
     }
 
@@ -72,8 +73,8 @@
 <div class="login-box">
   <h2>Login SOT</h2>
 
-  <input type="text" id="nama" list="list-nama" placeholder="Ketik Nama Anda">
-  <datalist id="list-nama">
+  <input type="text" id="nama" list="nama-list" placeholder="Ketik Nama Anda..." autocomplete="off">
+  <datalist id="nama-list">
     </datalist>
 
   <input type="password" id="pin" placeholder="Masukkan PIN">
@@ -93,17 +94,17 @@ async function loadUsers() {
     const text = await res.text();
     const data = JSON.parse(text);
 
-    const datalist = document.getElementById("list-nama");
+    const list = document.getElementById("nama-list");
 
     data.forEach(u => {
       const opt = document.createElement("option");
-      opt.value = u.nama;
-      datalist.appendChild(opt);
+      opt.value = u.nama; // Nama yang akan muncul sebagai sugesti
+      list.appendChild(opt);
     });
 
   } catch (err) {
     console.error(err);
-    document.getElementById("msg").innerHTML = "Gagal load data";
+    document.getElementById("msg").innerHTML = "Gagal load data nama";
   }
 }
 
@@ -114,7 +115,7 @@ async function login() {
   const msg = document.getElementById("msg");
 
   if (!nama) {
-    msg.innerHTML = "Pilih/Ketik nama dulu!";
+    msg.innerHTML = "Pilih atau ketik nama!";
     msg.className = "msg error";
     return;
   }
@@ -143,10 +144,13 @@ async function login() {
     if (result.success) {
       msg.innerHTML = "Login berhasil!";
       msg.className = "msg success";
+
       localStorage.setItem("user", JSON.stringify(result));
+
       setTimeout(() => {
         window.location.href = "dashboard.html";
       }, 1000);
+
     } else {
       msg.innerHTML = result.message || "Login gagal";
       msg.className = "msg error";
