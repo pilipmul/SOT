@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard SOT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .user-info { font-weight: bold; color: #333; }
+    
+    .menu-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 15px;
+    }
+
+    .menu-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      text-decoration: none;
+      color: #007bff;
+      font-weight: bold;
+      display: none; /* Default sembunyi */
+      transition: transform 0.2s;
+    }
+
+    .menu-card:hover { transform: translateY(-5px); background: #007bff; color: white; }
+    
+    .logout-btn { background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="user-info">Halo, <span id="user-name">User</span></div>
+  <button class="logout-btn" onclick="logout()">Logout</button>
+</div>
+
+<h2>Menu Utama</h2>
+
+<div class="menu-container" id="menu-wrapper">
+  <a href="eskalasi.html" class="menu-card" id="eskalasi">Eskalasi</a>
+  <a href="teguran.html" class="menu-card" id="suratTeguran">Surat Teguran</a>
+  <a href="perbaikan.html" class="menu-card" id="dokPerbaikan">Dok. Perbaikan</a>
+  <a href="schedule.html" class="menu-card" id="schedulePD">Schedule PD</a>
+  <a href="syncflow.html" class="menu-card" id="syncflow">Syncflow</a>
+  <a href="access.html" class="menu-card" id="accesControl">Access Control</a>
+</div>
+
+<script>
+  // 1. Ambil data dari localStorage
+  const userData = JSON.parse(localStorage.getItem("user"));
+
+  // 2. Proteksi Halaman: Jika belum login, tendang ke login.html
+  if (!userData) {
+    window.location.href = "login.html";
+  } else {
+    document.getElementById("user-name").textContent = userData.nama;
+    
+    // 3. Logika Menampilkan Menu berdasarkan Akses
+    const akses = userData.akses;
+    for (let key in akses) {
+      if (akses[key] === "Y") {
+        const menuElement = document.getElementById(key);
+        if (menuElement) {
+          menuElement.style.display = "block";
+        }
+      }
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem("user");
+    window.location.href = "login.html";
+  }
+</script>
+
+</body>
+</html>
