@@ -7,20 +7,23 @@
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
     .form-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
-    h3 { margin-top: 0; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    .status-badge { font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; display: inline-block; }
+    .online { background: #d4edda; color: #155724; }
+    .offline { background: #f8d7da; color: #721c24; }
     label { display: block; margin-top: 15px; font-weight: 600; color: #555; }
-    input, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 14px; }
-    .btn { padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; font-size: 15px; }
+    input, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    .btn { padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; }
     .btn-success { background: #28a745; color: white; }
-    .btn-secondary { background: #6c757d; color: white; margin-top: 10px; text-decoration: none; display: block; text-align: center; }
   </style>
 </head>
 <body>
 <div class="form-box">
+  <div id="koneksiStatus" class="status-badge offline">Mengecek Koneksi...</div>
   <h3>Input Eskalasi Baru</h3>
+  
   <form id="formEskin">
-    <label>Kode Eskalasi</label>
-    <input type="text" value="Otomatis Sistem" disabled style="background: #eee;">
+    <label>Nomor Eskalasi (Otomatis)</label>
+    <input type="text" id="displayKode" value="Memuat nomor..." disabled style="background: #eee; font-weight: bold; color: #007bff;">
     
     <label>Subject / Keperluan</label>
     <textarea id="subject" rows="3" placeholder="Contoh: Perbaikan Pompa Sumur" required></textarea>
@@ -31,14 +34,41 @@
     <label>Nilai Budget (Rp)</label>
     <input type="number" id="nilai" placeholder="Contoh: 500000" required>
     
-    <button type="submit" class="btn btn-success" id="btnSubmit">Kirim Eskalasi</button>
-    <a href="eskalasi.html" class="btn btn-secondary">Kembali ke Database</a>
+    <button type="submit" class="btn btn-success" id="btnSubmit" disabled>Kirim Eskalasi</button>
+    <a href="eskalasi.html" style="display:block; text-align:center; margin-top:15px; color:#666; font-size:13px; text-decoration:none;">← Kembali</a>
   </form>
 </div>
 
 <script>
-  const ESKIN_API = "https://script.google.com/macros/s/AKfycbwfkmEdz-8zWoRDoWyi0YOunZwvLofGOUCywP8JK9LMM2lBCUPuiBEC9KbGcLuTflSo-g/exec"; 
+  const ESKIN_API = "https://script.google.com/macros/s/AKfycbwfkmEdz-8zWoRDoWyi0YOunZwvLofGOUCywP8JK9LMM2lBCUPuiBEC9KbGcLuTflSo-g/exec"; // PASTIKAN URL INI BENAR (Hasil Deploy Baru)
 
+  // 1. FUNGSI CEK KONEKSI SAAT LOAD
+  async function cekKoneksi() {
+    const statusDiv = document.getElementById("koneksiStatus");
+    const displayKode = document.getElementById("displayKode");
+    const btn = document.getElementById("btnSubmit");
+
+    try {
+      const response = await fetch(ESKIN_API + "?action=getNextNomor", { method: "POST" });
+      const res = await response.json();
+      
+      if (res.success) {
+        statusDiv.innerText = "● Terhubung ke Database";
+        statusDiv.className = "status-badge online";
+        displayKode.value = res.nextKode;
+        btn.disabled = false;
+      } else {
+        throw new Error(res.error);
+      }
+    } catch (err) {
+      statusDiv.innerText = "● Koneksi Gagal";
+      statusDiv.className = "status-badge offline";
+      displayKode.value = "Gagal memuat kode";
+      console.error(err);
+    }
+  }
+
+  // 2. FUNGSI SUBMIT
   document.getElementById("formEskin").onsubmit = async (e) => {
     e.preventDefault();
     const btn = document.getElementById("btnSubmit");
@@ -58,15 +88,21 @@
       });
       const res = await response.json();
       if (res.success) {
-        alert("Berhasil! Nomor Eskalasi: " + res.kode);
-        window.location.href = "eskalasi.html"; // Balik ke tabel setelah sukses
+        alert("Berhasil disimpan dengan nomor: " + res.kode);
+        window.location.href = "eskalasi.html";
+      } else {
+        alert("Error Server: " + res.error);
       }
     } catch (err) {
-      alert("Gagal mengirim data.");
+      alert("Gagal koneksi saat mengirim data.");
+    } finally {
       btn.disabled = false;
       btn.innerText = "Kirim Eskalasi";
     }
   };
+
+  // Jalankan cek koneksi saat halaman terbuka
+  window.onload = cekKoneksi;
 </script>
 </body>
 </html>
