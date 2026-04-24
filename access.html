@@ -41,6 +41,10 @@
 </div>
 
 <script>
+  const userData = JSON.parse(localStorage.getItem("user"));
+  if (!userData || userData.akses.accesControl !== "Y") {
+    window.location.href = "login.html";
+  }
   const API_URL = "https://script.google.com/macros/s/AKfycbz8R3zOYKJFGry12tqkeJqn4AgFTOaFKs1xhJ5yp_UPbNbIPmL_ox3nuQkXb4ghngu6xw/exec";
 
   async function loadUsers() {
