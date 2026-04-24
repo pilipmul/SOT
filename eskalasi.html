@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <script>
-    // --- PROTEKSI KEAMANAN INSTAN ---
     (function() {
       const session = localStorage.getItem("user");
       const userData = session ? JSON.parse(session) : null;
@@ -20,15 +19,13 @@
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f9; margin: 0; padding: 15px; }
     .container { max-width: 1000px; margin: auto; }
-    
-    /* Header & Action */
     .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; text-decoration: none; font-size: 14px; }
     .btn-primary { background: #007bff; color: white; }
     .btn-success { background: #28a745; color: white; width: 100%; margin-top: 10px; }
     .btn-secondary { background: #6c757d; color: white; width: 100%; margin-top: 10px; }
 
-    /* Tabel Style (Sesuai Database) */
+    /* Tabel Style 100% Sesuai Database */
     .table-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th { background: #e8f0fe; color: #333; font-weight: bold; padding: 12px; border: 1px solid #dee2e6; text-align: left; }
@@ -62,10 +59,10 @@
             <th>Kode Eskalasi</th>
             <th>Subject</th>
             <th>Tanggal</th>
+            <th>Nilai</th>
           </tr>
         </thead>
-        <tbody id="tableBody">
-          </tbody>
+        <tbody id="tableBody"></tbody>
       </table>
     </div>
   </div>
@@ -74,13 +71,16 @@
     <h3>Input Data Eskalasi</h3>
     <form id="formEskalasi">
       <label>Kode Eskalasi</label>
-      <input type="text" id="kodeEskalasi" placeholder="Masukkan kode..." required>
+      <input type="text" id="kodeEskalasi" required>
       
       <label>Subject</label>
-      <textarea id="subject" rows="3" placeholder="Isi subjek atau keperluan..." required></textarea>
+      <textarea id="subject" rows="2" required></textarea>
       
       <label>Tanggal</label>
-      <input type="text" id="tanggal" placeholder="Contoh: Jan 2026 atau 01/01/2026" required>
+      <input type="text" id="tanggal" placeholder="Contoh: Jan 2026" required>
+
+      <label>Nilai (Rp)</label>
+      <input type="number" id="nilai" placeholder="Masukkan angka saja" required>
       
       <button type="submit" class="btn btn-success" id="btnSubmit">Simpan ke Database</button>
       <button type="button" class="btn btn-secondary" onclick="hideForm()">Batal</button>
@@ -89,7 +89,6 @@
 </div>
 
 <script>
-  // GANTI DENGAN URL WEB APP GAS ANDA
   const API_URL = "https://script.google.com/macros/s/AKfycbzq9eOM9xHp0vJg2tFKhCLn-OLmz_brHdeVqqAgkTMe0NiGVFvyqbVv4RoiF9AxZ8r4/exec";
   const userData = JSON.parse(localStorage.getItem("user"));
 
@@ -103,7 +102,6 @@
     document.getElementById("listView").style.display = "block";
   }
 
-  // Fungsi ambil data (GET)
   async function loadData() {
     try {
       const res = await fetch(API_URL + "?action=getEskalasi", { method: "POST" });
@@ -118,6 +116,7 @@
             <td>${item.kode}</td>
             <td>${item.subject}</td>
             <td>${item.tanggal}</td>
+            <td>${item.nilai ? 'Rp ' + Number(item.nilai).toLocaleString('id-ID') : '-'}</td>
           </tr>
         `;
       });
@@ -125,44 +124,37 @@
       document.getElementById("loading").style.display = "none";
       document.getElementById("eskalasiTable").style.display = "table";
     } catch (e) {
-      document.getElementById("loading").innerText = "Gagal memuat data dari spreadsheet.";
+      document.getElementById("loading").innerText = "Gagal memuat data.";
     }
   }
 
-  // Fungsi kirim data (POST)
   document.getElementById("formEskalasi").onsubmit = async (e) => {
     e.preventDefault();
     const btn = document.getElementById("btnSubmit");
     btn.disabled = true;
-    btn.innerText = "Menyimpan...";
 
     const payload = {
       kode: document.getElementById("kodeEskalasi").value,
       subject: document.getElementById("subject").value,
-      tanggal: document.getElementById("tanggal").value
+      tanggal: document.getElementById("tanggal").value,
+      nilai: document.getElementById("nilai").value
     };
 
     try {
-      const response = await fetch(API_URL + "?action=submitEskalasi", {
+      await fetch(API_URL + "?action=submitEskalasi", {
         method: "POST",
         body: JSON.stringify(payload)
       });
-      
-      const res = await response.json();
-      if (res.success) {
-        document.getElementById("formEskalasi").reset();
-        hideForm();
-        loadData(); // Segarkan tabel
-      }
+      document.getElementById("formEskalasi").reset();
+      hideForm();
+      loadData();
     } catch (err) {
-      alert("Terjadi kesalahan saat menyimpan data.");
+      alert("Gagal menyimpan!");
     } finally {
       btn.disabled = false;
-      btn.innerText = "Simpan ke Database";
     }
   };
 
-  // Jalankan saat halaman dibuka
   window.onload = loadData;
 </script>
 
