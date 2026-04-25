@@ -12,14 +12,15 @@
     .offline { background: #f8d7da; color: #721c24; }
     label { display: block; margin-top: 15px; font-weight: 600; color: #555; }
     input, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    
+    .input-group { position: relative; }
     table { width: 100%; margin-top: 20px; border-collapse: collapse; font-size: 13px; }
     table th { background: #eee; padding: 10px; text-align: left; }
     table td { padding: 5px; border-bottom: 1px solid #eee; position: relative; }
     
-    /* STYLE DROPDOWN CUSTOM */
     .autocomplete-list {
       position: absolute; border: 1px solid #ddd; border-top: none; z-index: 99;
-      top: 100%; left: 5px; right: 5px; background: #fff; max-height: 150px;
+      top: 100%; left: 0; right: 0; background: #fff; max-height: 150px;
       overflow-y: auto; border-radius: 0 0 5px 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .autocomplete-list div { padding: 8px 10px; cursor: pointer; border-bottom: 1px solid #f1f1f1; }
@@ -42,6 +43,24 @@
     
     <label>Subject / Keperluan</label>
     <textarea id="subject" rows="2" placeholder="Judul keperluan..." required></textarea>
+
+    <div class="input-group">
+      <label>Diajukan Oleh</label>
+      <input type="text" id="diajukan" class="user-search" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
+      <div class="autocomplete-list"></div>
+    </div>
+
+    <div class="input-group">
+      <label>Diketahui Oleh</label>
+      <input type="text" id="diketahui" class="user-search" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
+      <div class="autocomplete-list"></div>
+    </div>
+
+    <div class="input-group">
+      <label>Disetujui Oleh</label>
+      <input type="text" id="disetujui" class="user-search" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
+      <div class="autocomplete-list"></div>
+    </div>
 
     <label>Daftar Item (Maks 10)</label>
     <table>
@@ -66,27 +85,29 @@
 <script>
   const ESKIN_API = "https://script.google.com/macros/s/AKfycbwfkmEdz-8zWoRDoWyi0YOunZwvLofGOUCywP8JK9LMM2lBCUPuiBEC9KbGcLuTflSo-g/exec"; 
   let itemOptions = [];
+  const userList = ["Dede H.", "Edo S.", "Sutriono", "(....................)"];
   let rowCount = 0;
 
-  function tambahBaris() {
-    if (rowCount >= 10) return;
-    rowCount++;
-    const tbody = document.getElementById("itemRows");
-    const tr = document.createElement("tr");
+  function showUserSuggestions(input) {
+    const listContainer = input.nextElementSibling;
+    const val = input.value.toLowerCase();
+    listContainer.innerHTML = "";
     
-    tr.innerHTML = `
-      <td>
-        <input type="text" class="item-name" placeholder="Ketik nama..." oninput="showSuggestions(this)">
-        <div class="autocomplete-list"></div>
-      </td>
-      <td><input type="number" class="item-qty" placeholder="0" oninput="hitungTotal()"></td>
-      <td><input type="number" class="item-cost" placeholder="0" oninput="hitungTotal()"></td>
-    `;
-    tbody.appendChild(tr);
-    if (rowCount >= 10) { document.getElementById("btnAddRow").disabled = true; }
+    // Tampilkan semua jika kosong, atau filter jika ada isi
+    const filtered = val === "" ? userList : userList.filter(x => x.toLowerCase().includes(val));
+    
+    filtered.forEach(name => {
+      const div = document.createElement("div");
+      div.innerHTML = name;
+      div.onclick = () => {
+        input.value = name;
+        listContainer.innerHTML = "";
+      };
+      listContainer.appendChild(div);
+    });
   }
 
-  function showSuggestions(input) {
+  function showItemSuggestions(input) {
     const listContainer = input.nextElementSibling;
     const val = input.value.toLowerCase();
     listContainer.innerHTML = "";
@@ -104,12 +125,22 @@
     });
   }
 
-  // Klik di luar untuk menutup suggestion
-  document.addEventListener("click", (e) => {
-    if (!e.target.classList.contains("item-name")) {
-      document.querySelectorAll(".autocomplete-list").forEach(l => l.innerHTML = "");
-    }
-  });
+  function tambahBaris() {
+    if (rowCount >= 10) return;
+    rowCount++;
+    const tbody = document.getElementById("itemRows");
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>
+        <input type="text" class="item-name" placeholder="Ketik nama item..." oninput="showItemSuggestions(this)">
+        <div class="autocomplete-list"></div>
+      </td>
+      <td><input type="number" class="item-qty" placeholder="0" oninput="hitungTotal()"></td>
+      <td><input type="number" class="item-cost" placeholder="0" oninput="hitungTotal()"></td>
+    `;
+    tbody.appendChild(tr);
+    if (rowCount >= 10) document.getElementById("btnAddRow").disabled = true;
+  }
 
   function hitungTotal() {
     let total = 0;
@@ -120,6 +151,12 @@
     });
     document.getElementById("nilai").value = total;
   }
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.matches('.user-search, .item-name')) {
+      document.querySelectorAll(".autocomplete-list").forEach(l => l.innerHTML = "");
+    }
+  });
 
   async function init() {
     try {
@@ -145,6 +182,7 @@
     e.preventDefault();
     const btn = document.getElementById("btnSubmit");
     btn.disabled = true;
+    
     const items = [];
     document.querySelectorAll("#itemRows tr").forEach(tr => {
       const name = tr.querySelector(".item-name").value;
@@ -157,14 +195,19 @@
       }
     });
 
+    const payload = {
+      subject: document.getElementById("subject").value,
+      diajukan: document.getElementById("diajukan").value,
+      diketahui: document.getElementById("diketahui").value,
+      disetujui: document.getElementById("disetujui").value,
+      nilai: document.getElementById("nilai").value,
+      items: items
+    };
+
     try {
       const response = await fetch(ESKIN_API + "?action=submitEskalasi", {
         method: "POST",
-        body: JSON.stringify({
-          subject: document.getElementById("subject").value,
-          nilai: document.getElementById("nilai").value,
-          items: items
-        })
+        body: JSON.stringify(payload)
       });
       const res = await response.json();
       if (res.success) { alert("Berhasil! Nomor: " + res.kode); location.reload(); }
