@@ -62,7 +62,7 @@
 </div>
 
 <script>
-  const ESKIN_API = "https://script.google.com/macros/s/AKfycbwfkmEdz-8zWoRDoWyi0YOunZwvLofGOUCywP8JK9LMM2lBCUPuiBEC9KbGcLuTflSo-g/exec"; 
+  const ESKIN_API = "YOUR_NEW_DEPLOYMENT_URL"; // Ganti dengan URL deployment terbaru
   let itemOptions = [];
   const userList = ["Dede H.", "Edo S.", "Sutriono", "(....................)"];
   let rowCount = 0;
@@ -158,7 +158,6 @@
       });
       const res = await response.json();
       if (res.success) { 
-        // DOWNLOAD PDF LOGIC
         const link = document.createElement("a");
         link.href = "data:application/pdf;base64," + res.pdfData;
         link.download = res.fileName;
