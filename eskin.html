@@ -5,12 +5,20 @@
   <title>Input Eskalasi Baru</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script>
+    /* SCRIPT PROTEKSI HALAMAN */
     (function() {
       const session = localStorage.getItem("user");
       const userData = session ? JSON.parse(session) : null;
+      const loginPage = "https://pilipmul.github.io/SOT/login.html";
+
+      // Cek apakah user sudah login DAN memiliki akses eskalasi "Y"
       if (!userData || !userData.akses || userData.akses.eskalasi !== "Y") {
-        window.location.replace("login.html");
+        // Jika tidak valid, langsung arahkan ke login
+        window.location.replace(loginPage);
+        
+        // Proteksi tambahan: Sembunyikan elemen dan hentikan loading script
         document.documentElement.style.display = "none";
+        window.stop(); 
       }
     })();
   </script>
@@ -50,7 +58,7 @@
 </div>
 
 <script>
-  const ESKIN_API = "https://script.google.com/macros/s/AKfycbwfkmEdz-8zWoRDoWyi0YOunZwvLofGOUCywP8JK9LMM2lBCUPuiBEC9KbGcLuTflSo-g/exec"; // PASTIKAN URL INI BENAR (Hasil Deploy Baru)
+  const ESKIN_API = "https://script.google.com/macros/s/AKfycbwfkmEdz-8zWoRDoWyi0YOunZwvLofGOUCywP8JK9LMM2lBCUPuiBEC9KbGcLuTflSo-g/exec"; 
 
   // 1. FUNGSI CEK KONEKSI SAAT LOAD
   async function cekKoneksi() {
