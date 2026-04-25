@@ -6,12 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; margin: 0; padding: 20px; display: flex; justify-content: center; }
-    .form-box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 100%; max-width: 700px; }
+    .form-box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 100%; max-width: 750px; }
     .status-badge { font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; display: inline-block; }
     .online { background: #d4edda; color: #155724; }
     .offline { background: #f8d7da; color: #721c24; }
     label { display: block; margin-top: 15px; font-weight: 600; color: #555; }
-    input, textarea, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    input, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
     table { width: 100%; margin-top: 20px; border-collapse: collapse; font-size: 13px; }
     table th { background: #eee; padding: 10px; text-align: left; }
     table td { padding: 5px; border-bottom: 1px solid #eee; }
@@ -35,6 +35,8 @@
     <textarea id="subject" rows="2" placeholder="Masukkan judul keperluan..." required></textarea>
 
     <label>Daftar Item</label>
+    <datalist id="itemList"></datalist>
+
     <table>
       <thead>
         <tr>
@@ -56,7 +58,6 @@
 
 <script>
   const ESKIN_API = "https://script.google.com/macros/s/AKfycbwfkmEdz-8zWoRDoWyi0YOunZwvLofGOUCywP8JK9LMM2lBCUPuiBEC9KbGcLuTflSo-g/exec"; 
-  let itemOptions = [];
   let rowCount = 0;
 
   // FUNGSI TAMBAH BARIS
@@ -67,20 +68,14 @@
     const tbody = document.getElementById("itemRows");
     const tr = document.createElement("tr");
     
-    // Siapkan pilihan option dari itemOptions yang sudah diambil saat init
-    let optionsHtml = '<option value="">-- Pilih Item --</option>';
-    itemOptions.forEach(itm => {
-      optionsHtml += `<option value="${itm}">${itm}</option>`;
-    });
-
+    // Menggunakan input dengan list="itemList" agar bisa free-type + filter
     tr.innerHTML = `
-      <td><select class="item-select">${optionsHtml}</select></td>
+      <td><input type="text" class="item-name" list="itemList" placeholder="Ketik nama item..."></td>
       <td><input type="number" class="item-qty" placeholder="0" oninput="hitungTotal()"></td>
       <td><input type="number" class="item-cost" placeholder="0" oninput="hitungTotal()"></td>
     `;
     tbody.appendChild(tr);
 
-    // Disable tombol jika sudah 10 baris
     if (rowCount >= 10) {
       document.getElementById("btnAddRow").disabled = true;
       document.getElementById("btnAddRow").innerText = "Maksimal 10 Baris";
@@ -100,18 +95,20 @@
 
   async function init() {
     try {
-      // 1. Ambil Nomor Eskalasi
       const resNo = await fetch(ESKIN_API + "?action=getNextNomor", { method: "POST" });
       const dataNo = await resNo.json();
       if(dataNo.success) document.getElementById("displayKode").value = dataNo.nextKode;
 
-      // 2. Ambil Daftar Item (Simpan ke global variable)
       const resItem = await fetch(ESKIN_API + "?action=getItems", { method: "POST" });
       const dataItem = await resItem.json();
       if(dataItem.success) {
-        itemOptions = dataItem.items;
-        // Munculkan baris pertama setelah data item berhasil diambil
-        tambahBaris();
+        const datalist = document.getElementById("itemList");
+        dataItem.items.forEach(itm => {
+          const opt = document.createElement("option");
+          opt.value = itm;
+          datalist.appendChild(opt);
+        });
+        tambahBaris(); // Munculkan baris pertama
       }
 
       document.getElementById("koneksiStatus").innerText = "● Terhubung";
@@ -129,7 +126,7 @@
 
     const items = [];
     document.querySelectorAll("#itemRows tr").forEach(tr => {
-      const name = tr.querySelector(".item-select").value;
+      const name = tr.querySelector(".item-name").value;
       if(name) {
         items.push({
           name: name,
