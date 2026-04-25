@@ -14,11 +14,20 @@
     input, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
     table { width: 100%; margin-top: 20px; border-collapse: collapse; font-size: 13px; }
     table th { background: #eee; padding: 10px; text-align: left; }
-    table td { padding: 5px; border-bottom: 1px solid #eee; }
+    table td { padding: 5px; border-bottom: 1px solid #eee; position: relative; }
+    
+    /* STYLE DROPDOWN CUSTOM */
+    .autocomplete-list {
+      position: absolute; border: 1px solid #ddd; border-top: none; z-index: 99;
+      top: 100%; left: 5px; right: 5px; background: #fff; max-height: 150px;
+      overflow-y: auto; border-radius: 0 0 5px 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .autocomplete-list div { padding: 8px 10px; cursor: pointer; border-bottom: 1px solid #f1f1f1; }
+    .autocomplete-list div:hover { background-color: #e9e9e9; }
+
     .btn { padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; }
     .btn-success { background: #28a745; color: white; }
     .btn-add { background: #007bff; color: white; width: auto; padding: 8px 15px; font-size: 12px; margin-top: 10px; }
-    .btn-add:disabled { background: #ccc; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -27,20 +36,18 @@
   <div id="koneksiStatus" class="status-badge offline">Mengecek Koneksi...</div>
   <h3>Input Eskalasi Baru</h3>
   
-  <form id="formEskin">
+  <form id="formEskin" autocomplete="off">
     <label>Nomor Eskalasi</label>
     <input type="text" id="displayKode" value="Memuat..." disabled style="background: #eee;">
     
     <label>Subject / Keperluan</label>
-    <textarea id="subject" rows="2" placeholder="Masukkan judul keperluan..." required></textarea>
+    <textarea id="subject" rows="2" placeholder="Judul keperluan..." required></textarea>
 
-    <label>Daftar Item</label>
-    <datalist id="itemList"></datalist>
-
+    <label>Daftar Item (Maks 10)</label>
     <table>
       <thead>
         <tr>
-          <th style="width: 50%;">Nama Item</th>
+          <th style="width: 55%;">Nama Item</th>
           <th style="width: 15%;">Qty</th>
           <th>Biaya (Rp)</th>
         </tr>
@@ -49,7 +56,7 @@
     </table>
     <button type="button" id="btnAddRow" class="btn btn-add" onclick="tambahBaris()">+ Tambah Baris</button>
 
-    <label>Total Nilai Budget (Total Qty x Biaya)</label>
+    <label>Total Nilai Budget</label>
     <input type="number" id="nilai" readonly style="background: #f9f9f9; font-weight: bold; color: #28a745;">
     
     <button type="submit" class="btn btn-success" id="btnSubmit" disabled>Kirim Eskalasi</button>
@@ -58,39 +65,60 @@
 
 <script>
   const ESKIN_API = "https://script.google.com/macros/s/AKfycbwfkmEdz-8zWoRDoWyi0YOunZwvLofGOUCywP8JK9LMM2lBCUPuiBEC9KbGcLuTflSo-g/exec"; 
+  let itemOptions = [];
   let rowCount = 0;
 
-  // FUNGSI TAMBAH BARIS
   function tambahBaris() {
     if (rowCount >= 10) return;
-
     rowCount++;
     const tbody = document.getElementById("itemRows");
     const tr = document.createElement("tr");
     
-    // Menggunakan input dengan list="itemList" agar bisa free-type + filter
     tr.innerHTML = `
-      <td><input type="text" class="item-name" list="itemList" placeholder="Ketik nama item..."></td>
+      <td>
+        <input type="text" class="item-name" placeholder="Ketik nama..." oninput="showSuggestions(this)">
+        <div class="autocomplete-list"></div>
+      </td>
       <td><input type="number" class="item-qty" placeholder="0" oninput="hitungTotal()"></td>
       <td><input type="number" class="item-cost" placeholder="0" oninput="hitungTotal()"></td>
     `;
     tbody.appendChild(tr);
-
-    if (rowCount >= 10) {
-      document.getElementById("btnAddRow").disabled = true;
-      document.getElementById("btnAddRow").innerText = "Maksimal 10 Baris";
-    }
+    if (rowCount >= 10) { document.getElementById("btnAddRow").disabled = true; }
   }
 
-  function hitungTotal() {
-    let totalAkhir = 0;
-    const rows = document.querySelectorAll("#itemRows tr");
-    rows.forEach(row => {
-      const qty = Number(row.querySelector(".item-qty").value) || 0;
-      const cost = Number(row.querySelector(".item-cost").value) || 0;
-      totalAkhir += (qty * cost);
+  function showSuggestions(input) {
+    const listContainer = input.nextElementSibling;
+    const val = input.value.toLowerCase();
+    listContainer.innerHTML = "";
+    if (!val) return;
+
+    const filtered = itemOptions.filter(x => x.toLowerCase().includes(val));
+    filtered.forEach(item => {
+      const div = document.createElement("div");
+      div.innerHTML = item;
+      div.onclick = () => {
+        input.value = item;
+        listContainer.innerHTML = "";
+      };
+      listContainer.appendChild(div);
     });
-    document.getElementById("nilai").value = totalAkhir;
+  }
+
+  // Klik di luar untuk menutup suggestion
+  document.addEventListener("click", (e) => {
+    if (!e.target.classList.contains("item-name")) {
+      document.querySelectorAll(".autocomplete-list").forEach(l => l.innerHTML = "");
+    }
+  });
+
+  function hitungTotal() {
+    let total = 0;
+    document.querySelectorAll("#itemRows tr").forEach(row => {
+      const q = Number(row.querySelector(".item-qty").value) || 0;
+      const c = Number(row.querySelector(".item-cost").value) || 0;
+      total += (q * c);
+    });
+    document.getElementById("nilai").value = total;
   }
 
   async function init() {
@@ -102,15 +130,9 @@
       const resItem = await fetch(ESKIN_API + "?action=getItems", { method: "POST" });
       const dataItem = await resItem.json();
       if(dataItem.success) {
-        const datalist = document.getElementById("itemList");
-        dataItem.items.forEach(itm => {
-          const opt = document.createElement("option");
-          opt.value = itm;
-          datalist.appendChild(opt);
-        });
-        tambahBaris(); // Munculkan baris pertama
+        itemOptions = dataItem.items;
+        tambahBaris();
       }
-
       document.getElementById("koneksiStatus").innerText = "● Terhubung";
       document.getElementById("koneksiStatus").className = "status-badge online";
       document.getElementById("btnSubmit").disabled = false;
@@ -123,7 +145,6 @@
     e.preventDefault();
     const btn = document.getElementById("btnSubmit");
     btn.disabled = true;
-
     const items = [];
     document.querySelectorAll("#itemRows tr").forEach(tr => {
       const name = tr.querySelector(".item-name").value;
@@ -136,27 +157,18 @@
       }
     });
 
-    const payload = {
-      subject: document.getElementById("subject").value,
-      nilai: document.getElementById("nilai").value,
-      items: items
-    };
-
     try {
       const response = await fetch(ESKIN_API + "?action=submitEskalasi", {
         method: "POST",
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          subject: document.getElementById("subject").value,
+          nilai: document.getElementById("nilai").value,
+          items: items
+        })
       });
       const res = await response.json();
-      if (res.success) {
-        alert("Berhasil! Nomor: " + res.kode);
-        location.reload();
-      }
-    } catch (err) {
-      alert("Gagal kirim data.");
-    } finally {
-      btn.disabled = false;
-    }
+      if (res.success) { alert("Berhasil! Nomor: " + res.kode); location.reload(); }
+    } catch (err) { alert("Gagal kirim data."); } finally { btn.disabled = false; }
   };
 
   window.onload = init;
