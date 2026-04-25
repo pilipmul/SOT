@@ -46,36 +46,18 @@
       <input type="text" id="diajukan" class="user-search" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
       <div class="autocomplete-list"></div>
     </div>
-
-    <div class="input-group">
-      <label>Diketahui Oleh</label>
-      <input type="text" id="diketahui" class="user-search" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
-      <div class="autocomplete-list"></div>
-    </div>
-
-    <div class="input-group">
-      <label>Disetujui Oleh</label>
-      <input type="text" id="disetujui" class="user-search" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
-      <div class="autocomplete-list"></div>
-    </div>
+    <div class="input-group"><label>Diketahui Oleh</label><input type="text" id="diketahui" class="user-search" placeholder="Cari nama..." oninput="showUserSuggestions(this)"><div class="autocomplete-list"></div></div>
+    <div class="input-group"><label>Disetujui Oleh</label><input type="text" id="disetujui" class="user-search" placeholder="Cari nama..." oninput="showUserSuggestions(this)"><div class="autocomplete-list"></div></div>
 
     <label>Daftar Item (Maks 10)</label>
     <table>
-      <thead>
-        <tr>
-          <th style="width: 55%;">Nama Item</th>
-          <th style="width: 15%;">Qty</th>
-          <th>Biaya (Rp)</th>
-        </tr>
-      </thead>
+      <thead><tr><th style="width: 55%;">Nama Item</th><th style="width: 15%;">Qty</th><th>Biaya (Rp)</th></tr></thead>
       <tbody id="itemRows"></tbody>
     </table>
     <button type="button" id="btnAddRow" class="btn btn-add" onclick="tambahBaris()">+ Tambah Baris</button>
-
     <label>Total Nilai Budget</label>
     <input type="number" id="nilai" readonly style="background: #f9f9f9; font-weight: bold; color: #28a745;">
-    
-    <button type="submit" class="btn btn-success" id="btnSubmit" disabled>Kirim Eskalasi</button>
+    <button type="submit" class="btn btn-success" id="btnSubmit" disabled>Kirim & Download PDF</button>
   </form>
 </div>
 
@@ -117,11 +99,7 @@
     rowCount++;
     const tbody = document.getElementById("itemRows");
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td><input type="text" class="item-name" placeholder="Ketik nama item..." oninput="showItemSuggestions(this)"><div class="autocomplete-list"></div></td>
-      <td><input type="number" class="item-qty" placeholder="0" oninput="hitungTotal()"></td>
-      <td><input type="number" class="item-cost" placeholder="0" oninput="hitungTotal()"></td>
-    `;
+    tr.innerHTML = `<td><input type="text" class="item-name" placeholder="Ketik nama item..." oninput="showItemSuggestions(this)"><div class="autocomplete-list"></div></td><td><input type="number" class="item-qty" placeholder="0" oninput="hitungTotal()"></td><td><input type="number" class="item-cost" placeholder="0" oninput="hitungTotal()"></td>`;
     tbody.appendChild(tr);
     if (rowCount >= 10) document.getElementById("btnAddRow").disabled = true;
   }
@@ -157,7 +135,9 @@
   document.getElementById("formEskin").onsubmit = async (e) => {
     e.preventDefault();
     const btn = document.getElementById("btnSubmit");
+    btn.innerText = "Mengirim & Menyiapkan PDF...";
     btn.disabled = true;
+    
     const items = [];
     document.querySelectorAll("#itemRows tr").forEach(tr => {
       const name = tr.querySelector(".item-name").value;
@@ -178,11 +158,19 @@
       });
       const res = await response.json();
       if (res.success) { 
-        alert("Berhasil! Nomor: " + res.kode); 
-        // OTOMATIS KE HALAMAN DAFTAR ESKALASI
+        // DOWNLOAD PDF LOGIC
+        const link = document.createElement("a");
+        link.href = "data:application/pdf;base64," + res.pdfData;
+        link.download = res.fileName;
+        link.click();
+        
+        alert("Data Berhasil Terkirim dan PDF sedang diunduh!"); 
         window.location.href = "eskalasi.html"; 
       }
-    } catch (err) { alert("Gagal kirim data."); } finally { btn.disabled = false; }
+    } catch (err) { alert("Gagal kirim data."); } finally { 
+      btn.disabled = false; 
+      btn.innerText = "Kirim & Download PDF";
+    }
   };
 
   window.onload = init;
