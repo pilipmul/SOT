@@ -30,7 +30,7 @@
     <input type="text" id="displayKode" value="Memuat..." disabled style="background: #eee;">
     
     <label>Subject / Keperluan</label>
-    <textarea id="subject" rows="2" required></textarea>
+    <textarea id="subject" rows="2" placeholder="Masukkan judul keperluan..." required></textarea>
 
     <label>Daftar Item (Maks 10)</label>
     <table>
@@ -41,12 +41,11 @@
           <th>Biaya (Rp)</th>
         </tr>
       </thead>
-      <tbody id="itemRows">
-        </tbody>
+      <tbody id="itemRows"></tbody>
     </table>
 
-    <label>Total Nilai Budget</label>
-    <input type="number" id="nilai" placeholder="Otomatis dari total biaya" readonly style="background: #f9f9f9;">
+    <label>Total Nilai Budget (Total Qty x Biaya)</label>
+    <input type="number" id="nilai" readonly style="background: #f9f9f9; font-weight: bold; color: #28a745;">
     
     <button type="submit" class="btn btn-success" id="btnSubmit" disabled>Kirim Eskalasi</button>
   </form>
@@ -54,36 +53,38 @@
 
 <script>
   const ESKIN_API = "https://script.google.com/macros/s/AKfycbwfkmEdz-8zWoRDoWyi0YOunZwvLofGOUCywP8JK9LMM2lBCUPuiBEC9KbGcLuTflSo-g/exec"; 
-  let itemOptions = [];
 
-  // Buat 10 baris input
   const tbody = document.getElementById("itemRows");
   for (let i = 0; i < 10; i++) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><select class="item-select"><option value="">-- Pilih Item --</option></select></td>
-      <td><input type="number" class="item-qty" placeholder="0"></td>
+      <td><input type="number" class="item-qty" placeholder="0" oninput="hitungTotal()"></td>
       <td><input type="number" class="item-cost" placeholder="0" oninput="hitungTotal()"></td>
     `;
     tbody.appendChild(tr);
   }
 
+  // FUNGSI HITUNG TOTAL (QTY * BIAYA)
   function hitungTotal() {
-    let total = 0;
-    document.querySelectorAll(".item-cost").forEach(input => {
-      total += Number(input.value) || 0;
+    let totalAkhir = 0;
+    const rows = document.querySelectorAll("#itemRows tr");
+    
+    rows.forEach(row => {
+      const qty = Number(row.querySelector(".item-qty").value) || 0;
+      const cost = Number(row.querySelector(".item-cost").value) || 0;
+      totalAkhir += (qty * cost);
     });
-    document.getElementById("nilai").value = total;
+    
+    document.getElementById("nilai").value = totalAkhir;
   }
 
   async function init() {
     try {
-      // 1. Ambil Nomor Terakhir
       const resNo = await fetch(ESKIN_API + "?action=getNextNomor", { method: "POST" });
       const dataNo = await resNo.json();
       if(dataNo.success) document.getElementById("displayKode").value = dataNo.nextKode;
 
-      // 2. Ambil Daftar Item untuk Dropdown
       const resItem = await fetch(ESKIN_API + "?action=getItems", { method: "POST" });
       const dataItem = await resItem.json();
       if(dataItem.success) {
@@ -102,7 +103,6 @@
       document.getElementById("koneksiStatus").className = "status-badge online";
       document.getElementById("btnSubmit").disabled = false;
     } catch (e) {
-      console.error(e);
       document.getElementById("koneksiStatus").innerText = "● Gagal Koneksi";
     }
   }
@@ -112,7 +112,6 @@
     const btn = document.getElementById("btnSubmit");
     btn.disabled = true;
 
-    // Kumpulkan data item
     const items = [];
     document.querySelectorAll("#itemRows tr").forEach(tr => {
       const name = tr.querySelector(".item-select").value;
