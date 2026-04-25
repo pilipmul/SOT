@@ -14,9 +14,11 @@
     input, textarea, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
     table { width: 100%; margin-top: 20px; border-collapse: collapse; font-size: 13px; }
     table th { background: #eee; padding: 10px; text-align: left; }
-    table td { padding: 5px; }
+    table td { padding: 5px; border-bottom: 1px solid #eee; }
     .btn { padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; }
     .btn-success { background: #28a745; color: white; }
+    .btn-add { background: #007bff; color: white; width: auto; padding: 8px 15px; font-size: 12px; margin-top: 10px; }
+    .btn-add:disabled { background: #ccc; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -32,7 +34,7 @@
     <label>Subject / Keperluan</label>
     <textarea id="subject" rows="2" placeholder="Masukkan judul keperluan..." required></textarea>
 
-    <label>Daftar Item (Maks 10)</label>
+    <label>Daftar Item</label>
     <table>
       <thead>
         <tr>
@@ -43,6 +45,7 @@
       </thead>
       <tbody id="itemRows"></tbody>
     </table>
+    <button type="button" id="btnAddRow" class="btn btn-add" onclick="tambahBaris()">+ Tambah Baris</button>
 
     <label>Total Nilai Budget (Total Qty x Biaya)</label>
     <input type="number" id="nilai" readonly style="background: #f9f9f9; font-weight: bold; color: #28a745;">
@@ -53,50 +56,62 @@
 
 <script>
   const ESKIN_API = "https://script.google.com/macros/s/AKfycbwfkmEdz-8zWoRDoWyi0YOunZwvLofGOUCywP8JK9LMM2lBCUPuiBEC9KbGcLuTflSo-g/exec"; 
+  let itemOptions = [];
+  let rowCount = 0;
 
-  const tbody = document.getElementById("itemRows");
-  for (let i = 0; i < 10; i++) {
+  // FUNGSI TAMBAH BARIS
+  function tambahBaris() {
+    if (rowCount >= 10) return;
+
+    rowCount++;
+    const tbody = document.getElementById("itemRows");
     const tr = document.createElement("tr");
+    
+    // Siapkan pilihan option dari itemOptions yang sudah diambil saat init
+    let optionsHtml = '<option value="">-- Pilih Item --</option>';
+    itemOptions.forEach(itm => {
+      optionsHtml += `<option value="${itm}">${itm}</option>`;
+    });
+
     tr.innerHTML = `
-      <td><select class="item-select"><option value="">-- Pilih Item --</option></select></td>
+      <td><select class="item-select">${optionsHtml}</select></td>
       <td><input type="number" class="item-qty" placeholder="0" oninput="hitungTotal()"></td>
       <td><input type="number" class="item-cost" placeholder="0" oninput="hitungTotal()"></td>
     `;
     tbody.appendChild(tr);
+
+    // Disable tombol jika sudah 10 baris
+    if (rowCount >= 10) {
+      document.getElementById("btnAddRow").disabled = true;
+      document.getElementById("btnAddRow").innerText = "Maksimal 10 Baris";
+    }
   }
 
-  // FUNGSI HITUNG TOTAL (QTY * BIAYA)
   function hitungTotal() {
     let totalAkhir = 0;
     const rows = document.querySelectorAll("#itemRows tr");
-    
     rows.forEach(row => {
       const qty = Number(row.querySelector(".item-qty").value) || 0;
       const cost = Number(row.querySelector(".item-cost").value) || 0;
       totalAkhir += (qty * cost);
     });
-    
     document.getElementById("nilai").value = totalAkhir;
   }
 
   async function init() {
     try {
+      // 1. Ambil Nomor Eskalasi
       const resNo = await fetch(ESKIN_API + "?action=getNextNomor", { method: "POST" });
       const dataNo = await resNo.json();
       if(dataNo.success) document.getElementById("displayKode").value = dataNo.nextKode;
 
+      // 2. Ambil Daftar Item (Simpan ke global variable)
       const resItem = await fetch(ESKIN_API + "?action=getItems", { method: "POST" });
       const dataItem = await resItem.json();
       if(dataItem.success) {
-        const selects = document.querySelectorAll(".item-select");
-        dataItem.items.forEach(itm => {
-          selects.forEach(sel => {
-            const opt = document.createElement("option");
-            opt.value = itm;
-            opt.textContent = itm;
-            sel.appendChild(opt);
-          });
-        });
+        itemOptions = dataItem.items;
+        // Munculkan baris pertama setelah data item berhasil diambil
+        tambahBaris();
       }
 
       document.getElementById("koneksiStatus").innerText = "● Terhubung";
