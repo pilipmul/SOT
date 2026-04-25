@@ -57,19 +57,18 @@
 </div>
 
 <script>
+  // Gunakan API URL yang sama untuk mengambil data
   const API_URL = "https://script.google.com/macros/s/AKfycbzq9eOM9xHp0vJg2tFKhCLn-OLmz_brHdeVqqAgkTMe0NiGVFvyqbVv4RoiF9AxZ8r4/exec"; 
 
-  // Fungsi parse disesuaikan agar tetap bisa menyortir format "Mmm YYYY" (contoh: Apr 2026)
   function parseDateMmmYYYY(str) {
-    if (!str) return new Date(0);
     const months = {"jan":0,"feb":1,"mar":2,"apr":3,"may":4,"jun":5,"jul":6,"aug":7,"sep":8,"oct":9,"nov":10,"dec":11};
-    const parts = str.toString().toLowerCase().split(' ');
+    const parts = str.toLowerCase().split(' ');
     if (parts.length === 2) {
       const m = months[parts[0].substring(0, 3)];
       const y = parseInt(parts[1]);
       return new Date(y, m, 1);
     }
-    return new Date(str); // Fallback jika format berbeda
+    return new Date(0);
   }
 
   function sortTable(n) {
@@ -107,24 +106,13 @@
       const data = await res.json();
       const tbody = document.getElementById("tableBody");
       tbody.innerHTML = "";
-      
       data.forEach(item => {
-        // Menampilkan data sesuai apa adanya dari database (item.tanggal)
-        // Tanpa konversi new Date() di sini agar format "Apr 2026" tidak berubah
-        tbody.innerHTML += `<tr>
-          <td class="text-center">${item.no}</td>
-          <td>${item.kode}</td>
-          <td>${item.subject}</td>
-          <td>${item.tanggal || '-'}</td>
-          <td>${item.nilai ? 'Rp ' + Number(item.nilai).toLocaleString('id-ID') : '-'}</td>
-        </tr>`;
+        tbody.innerHTML += `<tr><td class="text-center">${item.no}</td><td>${item.kode}</td><td>${item.subject}</td><td>${item.tanggal}</td><td>${item.nilai ? 'Rp ' + Number(item.nilai).toLocaleString('id-ID') : '-'}</td></tr>`;
       });
-      
       document.getElementById("loading").style.display = "none";
       document.getElementById("eskalasiTable").style.display = "table";
     } catch (e) {
       document.getElementById("loading").innerHTML = "Gagal memuat data.";
-      console.error(e);
     }
   }
   window.onload = loadData;
