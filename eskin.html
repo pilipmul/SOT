@@ -4,6 +4,16 @@
   <meta charset="UTF-8">
   <title>Input Eskalasi Baru</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (function() {
+      const session = localStorage.getItem("user");
+      const userData = session ? JSON.parse(session) : null;
+      if (!userData || !userData.akses || userData.akses.eskalasi !== "Y") {
+        window.location.replace("login.html");
+        document.documentElement.style.display = "none";
+      }
+    })();
+  </script>
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
     .form-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
