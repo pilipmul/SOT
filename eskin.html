@@ -4,24 +4,28 @@
   <meta charset="UTF-8">
   <title>Input Eskalasi Baru</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
   <script>
-    /* SCRIPT PROTEKSI HALAMAN */
     (function() {
       const session = localStorage.getItem("user");
       const userData = session ? JSON.parse(session) : null;
-      const loginPage = "https://pilipmul.github.io/SOT/login.html";
+      const loginUrl = "https://pilipmul.github.io/SOT/login.html";
 
-      // Cek apakah user sudah login DAN memiliki akses eskalasi "Y"
+      // Validasi: Cek apakah session ada DAN memiliki akses eskalasi 'Y'
       if (!userData || !userData.akses || userData.akses.eskalasi !== "Y") {
-        // Jika tidak valid, langsung arahkan ke login
-        window.location.replace(loginPage);
+        // Hentikan rendering dan arahkan ke login
+        window.location.replace(loginUrl);
         
-        // Proteksi tambahan: Sembunyikan elemen dan hentikan loading script
+        // Proteksi tambahan untuk mencegah konten "mengintip" (flicker)
         document.documentElement.style.display = "none";
-        window.stop(); 
+        
+        // Hapus elemen HTML dan hentikan semua proses loading script di bawahnya
+        document.documentElement.remove();
+        window.stop();
       }
     })();
   </script>
+
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
     .form-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
@@ -35,6 +39,7 @@
   </style>
 </head>
 <body>
+
 <div class="form-box">
   <div id="koneksiStatus" class="status-badge offline">Mengecek Koneksi...</div>
   <h3>Input Eskalasi Baru</h3>
@@ -122,5 +127,6 @@
   // Jalankan cek koneksi saat halaman terbuka
   window.onload = cekKoneksi;
 </script>
+
 </body>
 </html>
