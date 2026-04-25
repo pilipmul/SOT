@@ -6,22 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
   <script>
+    /* REDIRECT INSTAN KE LOGIN */
     (function() {
       const session = localStorage.getItem("user");
       const userData = session ? JSON.parse(session) : null;
-      const loginUrl = "https://pilipmul.github.io/SOT/login.html";
-
-      // Validasi: Cek apakah session ada DAN memiliki akses eskalasi 'Y'
+      
+      // Jika session kosong atau tidak punya akses eskalasi, langsung lempar ke login
       if (!userData || !userData.akses || userData.akses.eskalasi !== "Y") {
-        // Hentikan rendering dan arahkan ke login
-        window.location.replace(loginUrl);
-        
-        // Proteksi tambahan untuk mencegah konten "mengintip" (flicker)
-        document.documentElement.style.display = "none";
-        
-        // Hapus elemen HTML dan hentikan semua proses loading script di bawahnya
-        document.documentElement.remove();
-        window.stop();
+        window.location.href = "https://pilipmul.github.io/SOT/login.html";
       }
     })();
   </script>
