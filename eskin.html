@@ -4,25 +4,17 @@
   <meta charset="UTF-8">
   <title>Input Eskalasi Baru</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <script>
-    (function() {
-      const session = localStorage.getItem("user");
-      const userData = session ? JSON.parse(session) : null;
-      if (!userData || !userData.akses || userData.akses.eskalasi !== "Y") {
-        window.location.href = "https://pilipmul.github.io/SOT/login.html";
-      }
-    })();
-  </script>
-
   <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-    .form-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; margin: 0; padding: 20px; display: flex; justify-content: center; }
+    .form-box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 100%; max-width: 700px; }
     .status-badge { font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; display: inline-block; }
     .online { background: #d4edda; color: #155724; }
     .offline { background: #f8d7da; color: #721c24; }
     label { display: block; margin-top: 15px; font-weight: 600; color: #555; }
-    input, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    input, textarea, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+    table { width: 100%; margin-top: 20px; border-collapse: collapse; font-size: 13px; }
+    table th { background: #eee; padding: 10px; text-align: left; }
+    table td { padding: 5px; }
     .btn { padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; }
     .btn-success { background: #28a745; color: white; }
   </style>
@@ -34,45 +26,84 @@
   <h3>Input Eskalasi Baru</h3>
   
   <form id="formEskin">
-    <label>Nomor Eskalasi (Otomatis)</label>
-    <input type="text" id="displayKode" value="Memuat nomor..." disabled style="background: #eee; font-weight: bold; color: #007bff;">
+    <label>Nomor Eskalasi</label>
+    <input type="text" id="displayKode" value="Memuat..." disabled style="background: #eee;">
     
     <label>Subject / Keperluan</label>
-    <textarea id="subject" rows="3" placeholder="Contoh: Perbaikan Pompa Sumur" required></textarea>
+    <textarea id="subject" rows="2" required></textarea>
 
-    <label>Nilai Budget (Rp)</label>
-    <input type="number" id="nilai" placeholder="Contoh: 500000" required>
+    <label>Daftar Item (Maks 10)</label>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 50%;">Nama Item</th>
+          <th style="width: 15%;">Qty</th>
+          <th>Biaya (Rp)</th>
+        </tr>
+      </thead>
+      <tbody id="itemRows">
+        </tbody>
+    </table>
+
+    <label>Total Nilai Budget</label>
+    <input type="number" id="nilai" placeholder="Otomatis dari total biaya" readonly style="background: #f9f9f9;">
     
     <button type="submit" class="btn btn-success" id="btnSubmit" disabled>Kirim Eskalasi</button>
-    <a href="eskalasi.html" style="display:block; text-align:center; margin-top:15px; color:#666; font-size:13px; text-decoration:none;">← Kembali</a>
   </form>
 </div>
 
 <script>
   const ESKIN_API = "https://script.google.com/macros/s/AKfycbwfkmEdz-8zWoRDoWyi0YOunZwvLofGOUCywP8JK9LMM2lBCUPuiBEC9KbGcLuTflSo-g/exec"; 
+  let itemOptions = [];
 
-  async function cekKoneksi() {
-    const statusDiv = document.getElementById("koneksiStatus");
-    const displayKode = document.getElementById("displayKode");
-    const btn = document.getElementById("btnSubmit");
+  // Buat 10 baris input
+  const tbody = document.getElementById("itemRows");
+  for (let i = 0; i < 10; i++) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><select class="item-select"><option value="">-- Pilih Item --</option></select></td>
+      <td><input type="number" class="item-qty" placeholder="0"></td>
+      <td><input type="number" class="item-cost" placeholder="0" oninput="hitungTotal()"></td>
+    `;
+    tbody.appendChild(tr);
+  }
 
+  function hitungTotal() {
+    let total = 0;
+    document.querySelectorAll(".item-cost").forEach(input => {
+      total += Number(input.value) || 0;
+    });
+    document.getElementById("nilai").value = total;
+  }
+
+  async function init() {
     try {
-      const response = await fetch(ESKIN_API + "?action=getNextNomor", { method: "POST" });
-      const res = await response.json();
-      
-      if (res.success) {
-        statusDiv.innerText = "● Terhubung ke Database";
-        statusDiv.className = "status-badge online";
-        displayKode.value = res.nextKode;
-        btn.disabled = false;
-      } else {
-        throw new Error(res.error);
+      // 1. Ambil Nomor Terakhir
+      const resNo = await fetch(ESKIN_API + "?action=getNextNomor", { method: "POST" });
+      const dataNo = await resNo.json();
+      if(dataNo.success) document.getElementById("displayKode").value = dataNo.nextKode;
+
+      // 2. Ambil Daftar Item untuk Dropdown
+      const resItem = await fetch(ESKIN_API + "?action=getItems", { method: "POST" });
+      const dataItem = await resItem.json();
+      if(dataItem.success) {
+        const selects = document.querySelectorAll(".item-select");
+        dataItem.items.forEach(itm => {
+          selects.forEach(sel => {
+            const opt = document.createElement("option");
+            opt.value = itm;
+            opt.textContent = itm;
+            sel.appendChild(opt);
+          });
+        });
       }
-    } catch (err) {
-      statusDiv.innerText = "● Koneksi Gagal";
-      statusDiv.className = "status-badge offline";
-      displayKode.value = "Gagal memuat kode";
-      console.error(err);
+
+      document.getElementById("koneksiStatus").innerText = "● Terhubung";
+      document.getElementById("koneksiStatus").className = "status-badge online";
+      document.getElementById("btnSubmit").disabled = false;
+    } catch (e) {
+      console.error(e);
+      document.getElementById("koneksiStatus").innerText = "● Gagal Koneksi";
     }
   }
 
@@ -80,11 +111,24 @@
     e.preventDefault();
     const btn = document.getElementById("btnSubmit");
     btn.disabled = true;
-    btn.innerText = "Mengirim...";
+
+    // Kumpulkan data item
+    const items = [];
+    document.querySelectorAll("#itemRows tr").forEach(tr => {
+      const name = tr.querySelector(".item-select").value;
+      if(name) {
+        items.push({
+          name: name,
+          qty: tr.querySelector(".item-qty").value,
+          cost: tr.querySelector(".item-cost").value
+        });
+      }
+    });
 
     const payload = {
       subject: document.getElementById("subject").value,
-      nilai: document.getElementById("nilai").value
+      nilai: document.getElementById("nilai").value,
+      items: items
     };
 
     try {
@@ -94,21 +138,17 @@
       });
       const res = await response.json();
       if (res.success) {
-        alert("Berhasil disimpan dengan nomor: " + res.kode);
-        window.location.href = "eskalasi.html";
-      } else {
-        alert("Error Server: " + res.error);
+        alert("Berhasil! Nomor: " + res.kode);
+        location.reload();
       }
     } catch (err) {
-      alert("Gagal koneksi saat mengirim data.");
+      alert("Gagal kirim data.");
     } finally {
       btn.disabled = false;
-      btn.innerText = "Kirim Eskalasi";
     }
   };
 
-  window.onload = cekKoneksi;
+  window.onload = init;
 </script>
-
 </body>
 </html>
