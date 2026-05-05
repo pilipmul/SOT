@@ -135,6 +135,7 @@
   document.getElementById("formEskin").onsubmit = async (e) => {
     e.preventDefault();
     const btn = document.getElementById("btnSubmit");
+    const originalText = btn.innerText;
     btn.innerText = "Mengirim & Menyiapkan PDF...";
     btn.disabled = true;
     
@@ -156,40 +157,43 @@
           items: items
         })
       });
+      
       const res = await response.json();
 
-      if (res.success) { 
-        // ✅ FIX DOWNLOAD PDF (BLOB)
+      if (res.success && res.pdfData) { 
+        // Proses Download yang lebih aman
         const byteCharacters = atob(res.pdfData);
         const byteNumbers = new Array(byteCharacters.length);
-
         for (let i = 0; i < byteCharacters.length; i++) {
           byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
-
         const byteArray = new Uint8Array(byteNumbers);
         const blob = new Blob([byteArray], { type: "application/pdf" });
-
-        const url = URL.createObjectURL(blob);
-
+        
+        const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = res.fileName;
-
+        link.download = res.fileName || "Eskalasi.pdf";
+        
         document.body.appendChild(link);
         link.click();
+        
+        // Pembersihan
+        setTimeout(() => {
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+          alert("Data Berhasil Terkirim dan PDF sedang diunduh!");
+          location.reload(); // Reload untuk reset form dan nomor baru
+        }, 100);
 
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-
-        alert("Data Berhasil Terkirim dan PDF sedang diunduh!"); 
-        window.location.href = "eskalasi.html"; 
+      } else {
+        alert("Gagal memproses PDF: " + (res.error || "Unknown error"));
       }
     } catch (err) { 
-      alert("Gagal kirim data."); 
+      alert("Terjadi kesalahan: " + err.toString()); 
     } finally { 
       btn.disabled = false; 
-      btn.innerText = "Kirim & Download PDF";
+      btn.innerText = originalText;
     }
   };
 
