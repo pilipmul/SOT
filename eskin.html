@@ -62,11 +62,16 @@
 </div>
 
 <script>
-  // --- PROTEKSI LOGIN ---
-  if (localStorage.getItem("isLoggedIn") !== "true") {
-    window.location.href = "https://pilipmul.github.io/SOT/login.html";
-  }
-  // ----------------------
+  // --- PROTEKSI LOGIN & HAK AKSES ---
+  (function() {
+    const session = localStorage.getItem("user");
+    const userData = session ? JSON.parse(session) : null;
+    if (!userData || !userData.akses || userData.akses.eskalasi !== "Y") {
+      window.location.replace("https://pilipmul.github.io/SOT/login.html");
+      document.documentElement.style.display = "none";
+    }
+  })();
+  // ----------------------------------
 
   const ESKIN_API = "https://script.google.com/macros/s/AKfycbwfkmEdz-8zWoRDoWyi0YOunZwvLofGOUCywP8JK9LMM2lBCUPuiBEC9KbGcLuTflSo-g/exec"; 
   let itemOptions = [];
