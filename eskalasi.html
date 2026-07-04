@@ -9,7 +9,7 @@
       const session = localStorage.getItem("user");
       const userData = session ? JSON.parse(session) : null;
       if (!userData || !userData.akses || userData.akses.eskalasi !== "Y") {
-        window.location.replace("index.html");
+        window.location.replace("login.html");
         document.documentElement.style.display = "none";
       }
     })();
