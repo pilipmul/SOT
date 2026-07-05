@@ -20,11 +20,11 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-bold tracking-wide">SOT (Sistem Operasional Terintegrasi)</h1>
-                    <p class="text-xs text-slate-400">Dokumentasi Perbaikan & Perawatan (Sheet SR)</p>
+                    <p class="text-xs text-slate-400">Dokumentasi Laporan Perbaikan (Sheet SR)</p>
                 </div>
             </div>
             <div class="text-sm text-right hidden sm:block">
-                <span class="bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full font-medium border border-emerald-500/30">Direct CSV Sync</span>
+                <span class="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full font-medium border border-blue-500/30">CSV Dynamic Sync</span>
             </div>
         </div>
     </header>
@@ -36,7 +36,7 @@
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </span>
-                <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Cari data perbaikan..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Cari objek atau tanggal..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
             </div>
             <div class="flex items-center gap-2 self-end md:self-auto text-xs text-slate-500">
                 <button onclick="fetchCSVData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-xs transition flex items-center gap-2 cursor-pointer">
@@ -52,33 +52,45 @@
                     <thead class="bg-slate-900 text-white uppercase text-xs tracking-wider">
                         <tr>
                             <th scope="col" class="px-6 py-4 font-semibold w-16">No</th>
-                            <th scope="col" class="px-6 py-4 font-semibold">Nama Item / Kerusakan (X)</th>
-                            <th scope="col" class="px-6 py-4 font-semibold">Tindakan Perbaikan (Y)</th>
-                            <th scope="col" class="px-6 py-4 font-semibold">Teknisi / PIC (Z)</th>
-                            <th scope="col" class="px-6 py-4 font-semibold">Status / Tgl Selesai (AA)</th>
+                            <th scope="col" class="px-6 py-4 font-semibold">Objek Perbaikan (X)</th>
+                            <th scope="col" class="px-6 py-4 font-semibold">Tanggal (Y)</th>
+                            <th scope="col" class="px-6 py-4 font-semibold text-center">Before (Z)</th>
+                            <th scope="col" class="px-6 py-4 font-semibold text-center">After (AA)</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200" id="tableBody">
                         <tr id="loadingRow">
                             <td colspan="5" class="px-6 py-12 text-center text-slate-500">
                                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-300 border-t-blue-600 mb-2"></div>
-                                <p class="font-medium">Sedang memuat data langsung dari Google Sheets...</p>
+                                <p class="font-medium">Sedang memuat data dari Google Sheets...</p>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
             <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 text-xs text-slate-500 flex justify-between items-center">
-                <span>Total Data: <strong id="totalRecords" class="text-slate-700">0</strong> baris ditemukan</span>
+                <span>Total Laporan: <strong id="totalRecords" class="text-slate-700">0</strong> baris ditemukan</span>
                 <span>Power by: PBC Internal Dev Team</span>
             </div>
         </div>
     </main>
 
+    <div id="imageModal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="relative max-w-3xl w-full bg-white rounded-xl overflow-hidden shadow-2xl flex flex-col">
+            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-900 text-white">
+                <h3 id="modalTitle" class="font-semibold text-sm">Preview Dokumentasi</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white transition cursor-pointer text-xl font-bold">&times;</button>
+            </div>
+            <div class="p-2 flex justify-center items-center bg-slate-100 max-h-[75vh]">
+                <img id="modalImage" src="" alt="Dokumentasi Perbaikan" class="max-w-full max-h-[70vh] object-contain rounded">
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Masukkan URL CSV hasil langkah 1 di sini (Harus yang memiliki parameter &gid=...)
-        // Jika Anda belum mendapatkan gid, tempel dulu url Anda sementara di bawah ini untuk tes awal:
-        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vScnbvhwMQ-Ba56JEyetsYAQWXk4LFOKe8yM-gBBQueazPaL-6u5d3V6m_e9cO4sHxOIglIqxSjeAVl/pub?gid=708883768&single=true&output=csv";
+        // Gunakan GID spesifik dari sheet SR jika Anda sudah memilikinya. 
+        // Sementara ini menembak link dasar CSV publikasi Anda.
+        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vScnbvhwMQ-Ba56JEyetsYAQWXk4LFOKe8yM-gBBQueazPaL-6u5d3V6m_e9cO4sHxOIglIqxSjeAVl/pub?output=csv";
 
         async function fetchCSVData() {
             const tableBody = document.getElementById('tableBody');
@@ -91,7 +103,7 @@
                 const rows = parseCSV(csvText);
                 tableBody.innerHTML = '';
 
-                // Kolom X, Y, Z, AA (Indeks berbasis 0: X=23, Y=24, Z=25, AA=26)
+                // Mapping kolom berbasis indeks 0 (X=23, Y=24, Z=25, AA=26)
                 const colX = 23;
                 const colY = 24;
                 const colZ = 25;
@@ -99,41 +111,43 @@
 
                 let validRowCount = 0;
 
-                // Mulai dari indeks 1 untuk melewati baris header
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
-                    
                     if (!row || row.length <= colX) continue;
                     
-                    // Ambil data dan trim space kosong
                     const valX = (row[colX] || '').trim();
                     const valY = (row[colY] || '').trim();
                     const valZ = (row[colZ] || '').trim();
                     const valAA = (row[colAA] || '').trim();
 
-                    // Lewati jika kolom kritis kosong semua
-                    if (!valX && !valY && !valZ) continue;
+                    // Lewati jika baris data kosong utamanya pada nama objek
+                    if (!valX && !valY) continue;
 
                     validRowCount++;
+
+                    // Helper render kolom dokumentasi gambar
+                    const renderPhotoCell = (url, type, objectName) => {
+                        if (!url) return `<span class="text-slate-400 italic text-xs">Tidak ada foto</span>`;
+                        if (url.startsWith('http://') || url.startsWith('https://')) {
+                            return `
+                                <button onclick="openModal('${url}', '${type} - ${objectName.replace(/'/g, "\\'")}')" class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 px-3 py-1.5 rounded-lg font-medium text-xs border border-slate-200 hover:border-blue-200 transition cursor-pointer">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    Lihat Foto
+                                </button>
+                            `;
+                        }
+                        return `<span class="text-slate-600 break-all text-xs">${url}</span>`;
+                    };
 
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-slate-50/80 transition duration-150 odd:bg-white even:bg-slate-50/40";
                     
-                    // Badge status otomatis
-                    let statusBadge = `<span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md font-medium text-xs border border-slate-200">${valAA || '-'}</span>`;
-                    const statusTxt = valAA.toLowerCase();
-                    if (statusTxt.includes('selesai') || statusTxt.includes('done') || statusTxt.includes('success')) {
-                        statusBadge = `<span class="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-md font-medium text-xs border border-emerald-200">${valAA}</span>`;
-                    } else if (statusTxt.includes('proses') || statusTxt.includes('pending') || statusTxt.includes('progress') || statusTxt.includes('jalan')) {
-                        statusBadge = `<span class="bg-amber-50 text-amber-700 px-2.5 py-1 rounded-md font-medium text-xs border border-amber-200">${valAA}</span>`;
-                    }
-
                     tr.innerHTML = `
                         <td class="px-6 py-4 whitespace-nowrap text-slate-400 font-medium">${validRowCount}</td>
-                        <td class="px-6 py-4 font-medium text-slate-900">${valX || '-'}</td>
-                        <td class="px-6 py-4 text-slate-600 max-w-xs break-words">${valY || '-'}</td>
-                        <td class="px-6 py-4 text-slate-700 font-medium">${valZ || '-'}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">${statusBadge}</td>
+                        <td class="px-6 py-4 font-semibold text-slate-900">${valX || '-'}</td>
+                        <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${valY || '-'}</td>
+                        <td class="px-6 py-4 text-center whitespace-nowrap">${renderPhotoCell(valZ, 'Before', valX)}</td>
+                        <td class="px-6 py-4 text-center whitespace-nowrap">${renderPhotoCell(valAA, 'After', valX)}</td>
                     `;
                     tableBody.appendChild(tr);
                 }
@@ -141,7 +155,7 @@
                 totalRecords.innerText = validRowCount;
 
                 if (validRowCount === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400">Data pada sheet "SR" kolom X, Y, Z, AA tidak ditemukan. Pastikan parameter URL CSV sudah menyertakan GID sheet yang benar.</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400">Data laporan tidak ditemukan. Pastikan settingan Publish to Web sudah mengarah ke sheet "SR".</td></tr>`;
                 }
 
             } catch (error) {
@@ -150,7 +164,7 @@
             }
         }
 
-        // Robust CSV Parser Standard RFC 4180
+        // Standard CSV Parser (RFC 4180)
         function parseCSV(text) {
             let p = '', r = [];
             let q = false;
@@ -176,7 +190,7 @@
             return r;
         }
 
-        // Live Filter Search
+        // Live Search Filter
         function filterTable() {
             const input = document.getElementById("searchInput");
             const filter = input.value.toUpperCase();
@@ -188,7 +202,9 @@
                 if (tr[i].id === 'loadingRow') continue;
                 let match = false;
                 const tds = tr[i].getElementsByTagName("td");
-                for (let j = 1; j < tds.length; j++) {
+                
+                // Cari di kolom Objek (indeks 1) dan Tanggal (indeks 2)
+                for (let j = 1; j <= 2; j++) {
                     if (tds[j]) {
                         if (tds[j].textContent.toUpperCase().indexOf(filter) > -1) {
                             match = true;
@@ -205,6 +221,23 @@
             }
             document.getElementById("totalRecords").innerText = visibleCount;
         }
+
+        // Fungsi Modal Pop-up
+        function openModal(url, title) {
+            document.getElementById('modalImage').src = url;
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('imageModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').classList.add('hidden');
+            document.getElementById('modalImage').src = '';
+        }
+
+        // Tutup modal jika area luar gambar diklik
+        document.getElementById('imageModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
 
         window.onload = fetchCSVData;
     </script>
