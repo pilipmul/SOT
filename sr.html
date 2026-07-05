@@ -1,4 +1,4 @@
-\<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -6,7 +6,7 @@
     <title>SOT - Dokumentasi Perbaikan (SR)</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
@@ -39,7 +39,7 @@
                 <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Cari data perbaikan..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
             </div>
             <div class="flex items-center gap-2 self-end md:self-auto text-xs text-slate-500">
-                <button onclick="fetchCSVData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-xs transition flex items-center gap-2">
+                <button onclick="fetchCSVData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-xs transition flex items-center gap-2 cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.253 8H18"></path></svg>
                     Refresh Data
                 </button>
@@ -51,11 +51,11 @@
                 <table class="min-w-full divide-y divide-slate-200 text-left text-sm" id="reportTable">
                     <thead class="bg-slate-900 text-white uppercase text-xs tracking-wider">
                         <tr>
-                            <th scope="col" class="px-6 py-4 font-semibold">No</th>
+                            <th scope="col" class="px-6 py-4 font-semibold w-16">No</th>
                             <th scope="col" class="px-6 py-4 font-semibold">Nama Item / Kerusakan (X)</th>
                             <th scope="col" class="px-6 py-4 font-semibold">Tindakan Perbaikan (Y)</th>
                             <th scope="col" class="px-6 py-4 font-semibold">Teknisi / PIC (Z)</th>
-                            <th scope="col" class="px-6 py-4 font-semibold">Status / Tanggal Selesai (AA)</th>
+                            <th scope="col" class="px-6 py-4 font-semibold">Status / Tgl Selesai (AA)</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200" id="tableBody">
@@ -70,13 +70,14 @@
             </div>
             <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 text-xs text-slate-500 flex justify-between items-center">
                 <span>Total Data: <strong id="totalRecords" class="text-slate-700">0</strong> baris ditemukan</span>
-                <span>PBC Internal Dev Team</span>
+                <span>Power by: PBC Internal Dev Team</span>
             </div>
         </div>
     </main>
 
     <script>
-        // URL Publikasi dalam format CSV khusus untuk sheet "SR"
+        // Masukkan URL CSV hasil langkah 1 di sini (Harus yang memiliki parameter &gid=...)
+        // Jika Anda belum mendapatkan gid, tempel dulu url Anda sementara di bawah ini untuk tes awal:
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vScnbvhwMQ-Ba56JEyetsYAQWXk4LFOKe8yM-gBBQueazPaL-6u5d3V6m_e9cO4sHxOIglIqxSjeAVl/pub?output=csv";
 
         async function fetchCSVData() {
@@ -87,11 +88,10 @@
                 const response = await fetch(CSV_URL);
                 const csvText = await response.text();
                 
-                // Parsing CSV sederhana (menangani pemisah koma)
                 const rows = parseCSV(csvText);
                 tableBody.innerHTML = '';
 
-                // Indeks kolom berbasis 0: X=23, Y=24, Z=25, AA=26
+                // Kolom X, Y, Z, AA (Indeks berbasis 0: X=23, Y=24, Z=25, AA=26)
                 const colX = 23;
                 const colY = 24;
                 const colZ = 25;
@@ -99,37 +99,40 @@
 
                 let validRowCount = 0;
 
-                // Mulai dari i = 1 untuk melewati baris header CSV
+                // Mulai dari indeks 1 untuk melewati baris header
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
                     
-                    // Lewati baris jika data tidak lengkap atau kolom X, Y, Z kosong semua
                     if (!row || row.length <= colX) continue;
-                    if (!row[colX] && !row[colY] && !row[colZ]) continue;
+                    
+                    // Ambil data dan trim space kosong
+                    const valX = (row[colX] || '').trim();
+                    const valY = (row[colY] || '').trim();
+                    const valZ = (row[colZ] || '').trim();
+                    const valAA = (row[colAA] || '').trim();
+
+                    // Lewati jika kolom kritis kosong semua
+                    if (!valX && !valY && !valZ) continue;
 
                     validRowCount++;
-                    const valX = row[colX] || '-';
-                    const valY = row[colY] || '-';
-                    const valZ = row[colZ] || '-';
-                    const valAA = row[colAA] || '-';
 
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-slate-50/80 transition duration-150 odd:bg-white even:bg-slate-50/40";
                     
-                    // Badge styling dynamic berdasarkan teks kolom AA
-                    let statusBadge = `<span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md font-medium text-xs border border-slate-200">${valAA}</span>`;
+                    // Badge status otomatis
+                    let statusBadge = `<span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md font-medium text-xs border border-slate-200">${valAA || '-'}</span>`;
                     const statusTxt = valAA.toLowerCase();
                     if (statusTxt.includes('selesai') || statusTxt.includes('done') || statusTxt.includes('success')) {
                         statusBadge = `<span class="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-md font-medium text-xs border border-emerald-200">${valAA}</span>`;
-                    } else if (statusTxt.includes('proses') || statusTxt.includes('pending') || statusTxt.includes('progress')) {
+                    } else if (statusTxt.includes('proses') || statusTxt.includes('pending') || statusTxt.includes('progress') || statusTxt.includes('jalan')) {
                         statusBadge = `<span class="bg-amber-50 text-amber-700 px-2.5 py-1 rounded-md font-medium text-xs border border-amber-200">${valAA}</span>`;
                     }
 
                     tr.innerHTML = `
                         <td class="px-6 py-4 whitespace-nowrap text-slate-400 font-medium">${validRowCount}</td>
-                        <td class="px-6 py-4 font-medium text-slate-900">${valX}</td>
-                        <td class="px-6 py-4 text-slate-600 max-w-xs break-words">${valY}</td>
-                        <td class="px-6 py-4 text-slate-700 font-medium">${valZ}</td>
+                        <td class="px-6 py-4 font-medium text-slate-900">${valX || '-'}</td>
+                        <td class="px-6 py-4 text-slate-600 max-w-xs break-words">${valY || '-'}</td>
+                        <td class="px-6 py-4 text-slate-700 font-medium">${valZ || '-'}</td>
                         <td class="px-6 py-4 whitespace-nowrap">${statusBadge}</td>
                     `;
                     tableBody.appendChild(tr);
@@ -138,16 +141,16 @@
                 totalRecords.innerText = validRowCount;
 
                 if (validRowCount === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">Tidak ada data ditemukan pada kolom X, Y, Z, AA</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-slate-400">Data pada sheet "SR" kolom X, Y, Z, AA tidak ditemukan. Pastikan parameter URL CSV sudah menyertakan GID sheet yang benar.</td></tr>`;
                 }
 
             } catch (error) {
-                console.error("Error loading CSV:", error);
-                tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-red-500 font-medium">Gagal memuat data. Pastikan opsi "Publish to Web" pada spreadsheet Anda masih aktif.</td></tr>`;
+                console.error("Error:", error);
+                tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-12 text-center text-red-500 font-medium">Gagal memproses data CSV. Terjadi kendala koneksi atau struktur data.</td></tr>`;
             }
         }
 
-        // Fungsi khusus untuk membaca struktur CSV dengan benar (aman dari tanda koma di dalam teks)
+        // Robust CSV Parser Standard RFC 4180
         function parseCSV(text) {
             let p = '', r = [];
             let q = false;
@@ -173,7 +176,7 @@
             return r;
         }
 
-        // Fungsi Filter Pencarian Sederhana
+        // Live Filter Search
         function filterTable() {
             const input = document.getElementById("searchInput");
             const filter = input.value.toUpperCase();
