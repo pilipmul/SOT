@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOT - Dokumentasi Perbaikan (SR)</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">SOT (Sistem Operasional Terintegrasi)</h1>
+                    <p class="text-xs text-slate-400">Dokumentasi Perbaikan & Perawatan (Sheet SR)</p>
+                </div>
+            </div>
+            <div class="text-sm text-right hidden sm:block">
+                <span class="bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full font-medium border border-emerald-500/30">Live Data Sync</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        
+        <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-200 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="relative w-full md:w-96">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </span>
+                <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Cari data perbaikan..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+            <div class="flex items-center gap-2 self-end md:self-auto text-xs text-slate-500">
+                <button onclick="fetchData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-xs transition flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.253 8H18"></path></svg>
+                    Refresh Data
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 text-left text-sm" id="reportTable">
+                    <thead class="bg-slate-900 text-white uppercase text-xs tracking-wider">
+                        <tr>
+                            <th scope="col" class="px-6 py-4 font-semibold">No</th>
+                            <th scope="col" class="px-6 py-4 font-semibold">Nama Item / Kerusakan (X)</th>
+                            <th scope="col" class="px-6 py-4 font-semibold">Tindakan Perbaikan (Y)</th>
+                            <th scope="col" class="px-6 py-4 font-semibold">Teknisi / PIC (Z)</th>
+                            <th scope="col" class="px-6 py-4 font-semibold">Status / Tanggal Selesai (AA)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200" id="tableBody">
+                        <tr id="loadingRow">
+                            <td colspan="5" class="px-6 py-12 text-center text-slate-500">
+                                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-300 border-t-blue-600 mb-2"></div>
+                                <p class="font-medium">Sedang memuat data dari database SOT...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 text-xs text-slate-500 flex justify-between items-center" id="tableFooter">
+                <span>Total Data: <strong id="totalRecords" class="text-slate-700">0</strong> baris ditemukan</span>
+                <span>PBC Internal Dev Team</span>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // MASUKKAN URL DEPLOYMENT GOOGLE APPS SCRIPT WEB APP ANDA DI SINI
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwn1hxg-L_8_9OcoBqN8iyvDWuc7FWCmOdocmLdu7rPV7Ule7nwugPpM0z_69ehSGOL2Q/exec";
+
+        async function fetchData() {
+            const tableBody = document.getElementById('tableBody');
+            const loadingRow = document.getElementById('loadingRow');
+            const totalRecords = document.getElementById('totalRecords');
+            
+            if (!loadingRow) {
+                tableBody.innerHTML = `<tr id="loadingRow"><td colspan="5" class="px-6 py-12 text-center text-slate-500"><p>Memuat ulang data...</p></td></tr>`;
+            }
+
+            try {
+                const response = await fetch(GAS_WEB_APP_URL);
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    const data = result.data;
+                    tableBody.innerHTML = '';
+                    
+                    if (data.length === 0) {
+                        tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">Tidak ada data ditemukan pada kolom X, Y, Z, AA</td></tr>`;
+                        totalRecords.innerText = '0';
+                        return;
+                    }
+
+                    data.forEach((row, index) => {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-slate-50/80 transition duration-150 odd:bg-white even:bg-slate-50/40";
+                        
+                        // Badge styling dynamic berdasarkan teks kolom AA (Status)
+                        let statusBadge = `<span class="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md font-medium text-xs border border-slate-200">${row.aa || '-'}</span>`;
+                        const statusTxt = String(row.aa).toLowerCase();
+                        if (statusTxt.includes('selesai') || statusTxt.includes('done') || statusTxt.includes('success')) {
+                            statusBadge = `<span class="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-md font-medium text-xs border border-emerald-200">${row.aa}</span>`;
+                        } else if (statusTxt.includes('proses') || statusTxt.includes('pending')) {
+                            statusBadge = `<span class="bg-amber-50 text-amber-700 px-2.5 py-1 rounded-md font-medium text-xs border border-amber-200">${row.aa}</span>`;
+                        }
+
+                        tr.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap text-slate-400 font-medium">${index + 1}</td>
+                            <td class="px-6 py-4 font-medium text-slate-900">${row.x || '-'}</td>
+                            <td class="px-6 py-4 text-slate-600 max-w-xs break-words">${row.y || '-'}</td>
+                            <td class="px-6 py-4 text-slate-700 font-medium">${row.z || '-'}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">${statusBadge}</td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+                    
+                    totalRecords.innerText = data.length;
+                } else {
+                    tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-red-500 font-medium">Gagal mengambil data: ${result.message}</td></tr>`;
+                }
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                tableBody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-red-500 font-medium">Koneksi Error. Pastikan URL Web App GAS Anda benar dan sudah di-Deploy secara Publik.</td></tr>`;
+            }
+        }
+
+        // Fungsi Filter Pencarian Sederhana
+        function filterTable() {
+            const input = document.getElementById("searchInput");
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById("reportTable");
+            const tr = table.getElementsByTagName("tr");
+            let visibleCount = 0;
+
+            for (let i = 1; i < tr.length; i++) {
+                if (tr[i].id === 'loadingRow') continue;
+                let match = false;
+                const tds = tr[i].getElementsByTagName("td");
+                for (let j = 1; j < tds.length; j++) {
+                    if (tds[j]) {
+                        if (tds[j].textContent.toUpperCase().indexOf(filter) > -1) {
+                            match = true;
+                            break;
+                        }
+                    }
+                }
+                if (match) {
+                    tr[i].style.display = "";
+                    visibleCount++;
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+            document.getElementById("totalRecords").innerText = visibleCount;
+        }
+
+        // Jalankan fetch saat halaman selesai dimuat
+        window.onload = fetchData;
+    </script>
+</body>
+</html>
