@@ -1,121 +1,169 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Database Eskalasi - PBC SyncFlow</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script>
-    (function() {
-      const session = localStorage.getItem("user");
-      const userData = session ? JSON.parse(session) : null;
-      if (!userData || !userData.akses || userData.akses.eskalasi !== "Y") {
-        window.location.replace("login.html");
-        document.documentElement.style.display = "none";
-      }
-    })();
-  </script>
-  <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f7f9; margin: 0; padding: 15px; }
-    .container { max-width: 1100px; margin: auto; }
-    .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; text-decoration: none; font-size: 14px; transition: 0.2s; }
-    .btn-primary { background: #007bff; color: white; }
-    .btn:hover { opacity: 0.8; }
-    .table-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
-    th { background: #e8f0fe; color: #333; font-weight: bold; padding: 12px; border: 1px solid #dee2e6; text-align: left; cursor: pointer; position: relative; }
-    th:hover { background: #d0e0fb; }
-    th::after { content: ' ↕'; font-size: 10px; color: #aaa; }
-    td { padding: 12px; border: 1px solid #dee2e6; color: #444; font-size: 14px; }
-    tr:hover { background-color: #f9f9f9; }
-    .text-center { text-align: center; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Database Eskalasi - PBC SyncFlow</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function() {
+            const session = localStorage.getItem("user");
+            const userData = session ? JSON.parse(session) : null;
+            if (!userData || !userData.akses || userData.akses.eskalasi !== "Y") {
+                window.location.replace("login.html");
+                document.documentElement.style.display = "none";
+            }
+        })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Simbol indikator sort di th agar tetap fungsional */
+        th::after { content: ' ↕'; font-size: 10px; color: #cbd5e1; }
+        th:hover::after { color: #3b82f6; }
+    </style>
 </head>
-<body>
-<div class="container">
-  <div class="header-actions">
-    <a href="dashboard.html" style="text-decoration: none; font-weight: bold; color: #007bff;">← Dashboard</a>
-    <a href="eskin.html" class="btn btn-primary">+ Eskalasi Baru</a>
-  </div>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
 
-  <div class="table-container">
-    <h3 style="margin-top:0;">Database Eskalasi</h3>
-    <div id="loading" style="text-align: center; padding: 20px;">Menghubungkan ke database SOT...</div>
-    <table id="eskalasiTable" style="display:none;">
-      <thead>
-        <tr>
-          <th class="text-center" onclick="sortTable(0)" style="width: 50px;">No</th>
-          <th onclick="sortTable(1)">Kode Eskalasi</th>
-          <th onclick="sortTable(2)">Subject</th>
-          <th onclick="sortTable(3)">Tanggal</th>
-          <th onclick="sortTable(4)">Nilai</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
-  </div>
-</div>
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">SOT (Sistem Operasional Terintegrasi)</h1>
+                    <p class="text-xs text-slate-400">Modul Administrasi Budget & Eskalasi</p>
+                </div>
+            </div>
+            <div class="text-sm text-right hidden sm:block">
+                <span class="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full font-medium border border-blue-500/30">Database Center</span>
+            </div>
+        </div>
+    </header>
 
-<script>
-  // Gunakan API URL yang sama untuk mengambil data
-  const API_URL = "https://script.google.com/macros/s/AKfycbzq9eOM9xHp0vJg2tFKhCLn-OLmz_brHdeVqqAgkTMe0NiGVFvyqbVv4RoiF9AxZ8r4/exec"; 
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        
+        <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-200 mb-6 flex justify-between items-center gap-4">
+            <a href="dashboard.html" class="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Kembali ke Dashboard
+            </a>
+            
+            <a href="eskin.html" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2.5 rounded-lg font-medium shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Eskalasi Baru
+            </a>
+        </div>
 
-  function parseDateMmmYYYY(str) {
-    const months = {"jan":0,"feb":1,"mar":2,"apr":3,"may":4,"jun":5,"jul":6,"aug":7,"sep":8,"oct":9,"nov":10,"dec":11};
-    const parts = str.toLowerCase().split(' ');
-    if (parts.length === 2) {
-      const m = months[parts[0].substring(0, 3)];
-      const y = parseInt(parts[1]);
-      return new Date(y, m, 1);
-    }
-    return new Date(0);
-  }
+        <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden">
+            <div class="p-5 border-b border-slate-100 bg-slate-50/50">
+                <h3 class="text-base font-bold text-slate-900 tracking-tight">Database Data Eskalasi</h3>
+                <p class="text-xs text-slate-500">Klik pada nama kolom di bawah untuk mengurutkan data</p>
+            </div>
 
-  function sortTable(n) {
-    let table = document.getElementById("eskalasiTable");
-    let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-    switching = true; dir = "asc"; 
-    while (switching) {
-      switching = false; rows = table.rows;
-      for (i = 1; i < (rows.length - 1); i++) {
-        shouldSwitch = false;
-        x = rows[i].getElementsByTagName("TD")[n];
-        y = rows[i + 1].getElementsByTagName("TD")[n];
-        let valX = x.innerText; let valY = y.innerText;
-        let compX, compY;
-        if (n === 0 || n === 4) {
-          compX = parseFloat(valX.replace(/[^\d.-]/g, '')) || 0;
-          compY = parseFloat(valY.replace(/[^\d.-]/g, '')) || 0;
-        } else if (n === 3) {
-          compX = parseDateMmmYYYY(valX).getTime();
-          compY = parseDateMmmYYYY(valY).getTime();
-        } else {
-          compX = valX.toLowerCase(); compY = valY.toLowerCase();
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 text-left text-sm" id="eskalasiTable" style="display:none;">
+                    <thead class="bg-slate-900 text-white uppercase text-xs tracking-wider">
+                        <tr>
+                            <th scope="col" class="px-6 py-4 font-semibold text-center w-16 cursor-pointer hover:bg-slate-800 transition" onclick="sortTable(0)">No</th>
+                            <th scope="col" class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-800 transition" onclick="sortTable(1)">Kode Eskalasi</th>
+                            <th scope="col" class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-800 transition" onclick="sortTable(2)">Subject</th>
+                            <th scope="col" class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-800 transition" onclick="sortTable(3)">Tanggal</th>
+                            <th scope="col" class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-800 transition" onclick="sortTable(4)">Nilai</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200" id="tableBody"></tbody>
+                </table>
+
+                <div id="loading" class="px-6 py-12 text-center text-slate-500">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-300 border-t-blue-600 mb-2"></div>
+                    <p class="font-medium">Menghubungkan ke database SOT...</p>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 text-xs text-slate-500 flex justify-between items-center">
+                <span>Data tersinkronisasi otomatis via Apps Script</span>
+                <span>Power by: PBC Internal Dev Team</span>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbzq9eOM9xHp0vJg2tFKhCLn-OLmz_brHdeVqqAgkTMe0NiGVFvyqbVv4RoiF9AxZ8r4/exec"; 
+
+        function parseDateMmmYYYY(str) {
+            const months = {"jan":0,"feb":1,"mar":2,"apr":3,"may":4,"jun":5,"jul":6,"aug":7,"sep":8,"oct":9,"nov":10,"dec":11};
+            const parts = str.toLowerCase().split(' ');
+            if (parts.length === 2) {
+                const m = months[parts[0].substring(0, 3)];
+                const y = parseInt(parts[1]);
+                return new Date(y, m, 1);
+            }
+            return new Date(0);
         }
-        if (dir == "asc") { if (compX > compY) { shouldSwitch = true; break; }
-        } else { if (compX < compY) { shouldSwitch = true; break; } }
-      }
-      if (shouldSwitch) { rows[i].parentNode.insertBefore(rows[i + 1], rows[i]); switching = true; switchcount ++;
-      } else { if (switchcount == 0 && dir == "asc") { dir = "desc"; switching = true; } }
-    }
-  }
 
-  async function loadData() {
-    try {
-      const res = await fetch(API_URL + "?action=getEskalasi", { method: "POST" });
-      const data = await res.json();
-      const tbody = document.getElementById("tableBody");
-      tbody.innerHTML = "";
-      data.forEach(item => {
-        tbody.innerHTML += `<tr><td class="text-center">${item.no}</td><td>${item.kode}</td><td>${item.subject}</td><td>${item.tanggal}</td><td>${item.nilai ? 'Rp ' + Number(item.nilai).toLocaleString('id-ID') : '-'}</td></tr>`;
-      });
-      document.getElementById("loading").style.display = "none";
-      document.getElementById("eskalasiTable").style.display = "table";
-    } catch (e) {
-      document.getElementById("loading").innerHTML = "Gagal memuat data.";
-    }
-  }
-  window.onload = loadData;
-</script>
+        function sortTable(n) {
+            let table = document.getElementById("eskalasiTable");
+            let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            switching = true; dir = "asc"; 
+            while (switching) {
+                switching = false; rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[n];
+                    y = rows[i + 1].getElementsByTagName("TD")[n];
+                    let valX = x.innerText; let valY = y.innerText;
+                    let compX, compY;
+                    if (n === 0 || n === 4) {
+                        compX = parseFloat(valX.replace(/[^\d.-]/g, '')) || 0;
+                        compY = parseFloat(valY.replace(/[^\d.-]/g, '')) || 0;
+                    } else if (n === 3) {
+                        compX = parseDateMmmYYYY(valX).getTime();
+                        compY = parseDateMmmYYYY(valY).getTime();
+                    } else {
+                        compX = valX.toLowerCase(); compY = valY.toLowerCase();
+                    }
+                    if (dir == "asc") { 
+                        if (compX > compY) { shouldSwitch = true; break; }
+                    } else { 
+                        if (compX < compY) { shouldSwitch = true; break; } 
+                    }
+                }
+                if (shouldSwitch) { 
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]); switching = true; switchcount ++;
+                } else { 
+                    if (switchcount == 0 && dir == "asc") { dir = "desc"; switching = true; } 
+                }
+            }
+        }
+
+        async function loadData() {
+            try {
+                const res = await fetch(API_URL + "?action=getEskalasi", { method: "POST" });
+                const data = await res.json();
+                const tbody = document.getElementById("tableBody");
+                tbody.innerHTML = "";
+                data.forEach(item => {
+                    // Kelas disesuaikan agar styling layout per baris konsisten dan rapi
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50/80 transition duration-150 odd:bg-white even:bg-slate-50/40">
+                            <td class="px-6 py-4 text-center whitespace-nowrap text-slate-400 font-medium">${item.no}</td>
+                            <td class="px-6 py-4 font-semibold text-slate-900 whitespace-nowrap">${item.kode}</td>
+                            <td class="px-6 py-4 text-slate-700">${item.subject}</td>
+                            <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${item.tanggal}</td>
+                            <td class="px-6 py-4 text-slate-900 font-medium whitespace-nowrap">${item.nilai ? 'Rp ' + Number(item.nilai).toLocaleString('id-ID') : '-'}</td>
+                        </tr>
+                    `;
+                });
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("eskalasiTable").style.display = "table";
+            } catch (e) {
+                document.getElementById("loading").innerHTML = "<p class='text-red-500 font-medium'>Gagal memproses data. Terjadi kendala koneksi backend.</p>";
+            }
+        }
+        window.onload = loadData;
+    </script>
 </body>
 </html>
