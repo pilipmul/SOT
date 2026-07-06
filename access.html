@@ -1,123 +1,161 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<script>
-  (function() {
-    // 1. Ambil data login
-    const session = localStorage.getItem("user");
-    const userData = session ? JSON.parse(session) : null;
+    <meta charset="UTF-8">
+    <title>Access Control - SOT Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        (function() {
+            // 1. Ambil data login
+            const session = localStorage.getItem("user");
+            const userData = session ? JSON.parse(session) : null;
 
-    // 2. Cek apakah user ada DAN punya akses 'Y' di kolom Access Control
-    // Perhatikan: Sesuaikan "accesControl" dengan nama property di GAS kamu
-    if (!userData || !userData.akses || userData.akses.accesControl !== "Y") {
-      
-      // Paksa pindah ke login
-      window.location.replace("login.html"); 
-      
-      // Hapus konten body secara instan agar tidak sempat terlihat
-      document.documentElement.style.display = "none";
-      throw new Error("Akses ditolak"); // Menghentikan eksekusi script selanjutnya
-    }
-  })();
-</script>
-
-  <style>
-    body { font-family: sans-serif; background: #f4f6f9; padding: 20px; margin: 0; }
-    .container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow-x: auto; }
-    h2 { color: #333; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
-    th { background: #007bff; color: white; }
-    tr:nth-child(even) { background: #f9f9f9; }
-    .status-msg { margin-bottom: 10px; font-weight: bold; }
-    .back-btn { display: inline-block; margin-bottom: 15px; text-decoration: none; color: #007bff; font-weight: bold; }
-  </style>
+            // 2. Cek apakah user ada DAN punya akses 'Y' di kolom Access Control
+            if (!userData || !userData.akses || userData.akses.accesControl !== "Y") {
+                // Paksa pindah ke login
+                window.location.replace("login.html"); 
+                
+                // Hapus konten body secara instan agar tidak sempat terlihat
+                document.documentElement.style.display = "none";
+                throw new Error("Akses ditolak"); // Menghentikan eksekusi script selanjutnya
+            }
+        })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
 
-<div class="container">
-  <a href="dashboard.html" class="back-btn">← Kembali ke Dashboard</a>
-  <h2>Pengaturan Akses Pengguna</h2>
-  <div id="status" class="status-msg"></div>
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-2 rounded-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">SOT (Sistem Operasional Terintegrasi)</h1>
+                    <p class="text-xs text-slate-400">Modul Keamanan & Manajemen Hak Akses</p>
+                </div>
+            </div>
+            <div class="text-sm text-right hidden sm:block">
+                <span class="bg-red-500/10 text-red-400 px-3 py-1 rounded-full font-medium border border-red-500/20">Administrator Area</span>
+            </div>
+        </div>
+    </header>
 
-  <table id="userTable">
-    <thead>
-      <tr>
-        <th>Nama</th>
-        <th>Eskalasi</th>
-        <th>Teguran</th>
-        <th>Perbaikan</th>
-        <th>Schedule</th>
-        <th>Syncflow</th>
-        <th>Access</th>
-      </tr>
-    </thead>
-    <tbody id="userBody">
-      </tbody>
-  </table>
-</div>
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        
+        <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-200 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <a href="dashboard.html" class="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Kembali ke Dashboard
+            </a>
+            
+            <div id="status" class="text-sm font-medium transition duration-200"></div>
+        </div>
 
-<script>
-  // URL Web App GAS Anda
-  const API_URL = "https://script.google.com/macros/s/AKfycbz8R3zOYKJFGry12tqkeJqn4AgFTOaFKs1xhJ5yp_UPbNbIPmL_ox3nuQkXb4ghngu6xw/exec";
+        <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden">
+            <div class="p-5 border-b border-slate-100 bg-slate-50/50">
+                <h3 class="text-base font-bold text-slate-900 tracking-tight">Pengaturan Akses Pengguna</h3>
+                <p class="text-xs text-slate-500">Perubahan pada checkbox di bawah akan langsung tersimpan ke server database</p>
+            </div>
 
-  async function loadUsers() {
-    const status = document.getElementById("status");
-    status.style.color = "blue";
-    status.innerHTML = "Memuat data...";
-    
-    try {
-      const res = await fetch(API_URL + "?action=getUsers", { method: "POST" });
-      const users = await res.json();
-      
-      const tbody = document.getElementById("userBody");
-      tbody.innerHTML = "";
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 text-sm text-center" id="userTable">
+                    <thead class="bg-slate-900 text-white uppercase text-xs tracking-wider">
+                        <tr>
+                            <th scope="col" class="px-6 py-4 font-semibold text-left">Nama</th>
+                            <th scope="col" class="px-6 py-4 font-semibold">Eskalasi</th>
+                            <th scope="col" class="px-6 py-4 font-semibold">Teguran</th>
+                            <th scope="col" class="px-6 py-4 font-semibold">Perbaikan</th>
+                            <th scope="col" class="px-6 py-4 font-semibold">Schedule</th>
+                            <th scope="col" class="px-6 py-4 font-semibold">Syncflow</th>
+                            <th scope="col" class="px-6 py-4 font-semibold">Access</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200" id="userBody">
+                        </tbody>
+                </table>
+            </div>
 
-      users.forEach(user => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td style="text-align:left">${user.nama}</td>
-          <td>${createCheckbox(user.row, 4, user.eskalasi)}</td>
-          <td>${createCheckbox(user.row, 5, user.suratTeguran)}</td>
-          <td>${createCheckbox(user.row, 6, user.dokPerbaikan)}</td>
-          <td>${createCheckbox(user.row, 7, user.schedulePD)}</td>
-          <td>${createCheckbox(user.row, 8, user.syncflow)}</td>
-          <td>${createCheckbox(user.row, 9, user.accesControl)}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-      status.innerHTML = "";
-    } catch (e) {
-      status.style.color = "red";
-      status.innerHTML = "Gagal memuat data server";
-    }
-  }
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 text-xs text-slate-500 flex justify-between items-center">
+                <span>Data Manajemen Hak Akses Internal</span>
+                <span>Power by: PBC Internal Dev Team</span>
+            </div>
+        </div>
+    </main>
 
-  function createCheckbox(row, col, value) {
-    const checked = value === "Y" ? "checked" : "";
-    return `<input type="checkbox" ${checked} onchange="updateAkses(${row}, ${col}, this)">`;
-  }
+    <script>
+        // URL Web App GAS Anda
+        const API_URL = "https://script.google.com/macros/s/AKfycbz8R3zOYKJFGry12tqkeJqn4AgFTOaFKs1xhJ5yp_UPbNbIPmL_ox3nuQkXb4ghngu6xw/exec";
 
-  async function updateAkses(row, col, el) {
-    const val = el.checked ? "Y" : "";
-    const status = document.getElementById("status");
-    status.style.color = "orange";
-    status.innerHTML = "Menyimpan...";
+        async function loadUsers() {
+            const status = document.getElementById("status");
+            status.className = "text-sm font-medium text-blue-600 flex items-center gap-2";
+            status.innerHTML = `<div class="animate-spin h-4 w-4 border-2 border-slate-300 border-t-blue-600 rounded-full"></div> Memuat data pengguna...`;
+            
+            try {
+                const res = await fetch(API_URL + "?action=getUsers", { method: "POST" });
+                const users = await res.json();
+                
+                const tbody = document.getElementById("userBody");
+                tbody.innerHTML = "";
 
-    try {
-      await fetch(`${API_URL}?action=updateAkses&row=${row}&col=${col}&value=${val}`, { method: "POST" });
-      status.style.color = "green";
-      status.innerHTML = "Tersimpan!";
-      setTimeout(() => status.innerHTML = "", 1500);
-    } catch (e) {
-      status.style.color = "red";
-      status.innerHTML = "Gagal simpan!";
-    }
-  }
+                users.forEach(user => {
+                    const tr = document.createElement("tr");
+                    tr.className = "hover:bg-slate-50/80 transition duration-150 odd:bg-white even:bg-slate-50/40";
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 text-left font-semibold text-slate-900 whitespace-nowrap">${user.nama}</td>
+                        <td class="px-6 py-4">${createCheckbox(user.row, 4, user.eskalasi)}</td>
+                        <td class="px-6 py-4">${createCheckbox(user.row, 5, user.suratTeguran)}</td>
+                        <td class="px-6 py-4">${createCheckbox(user.row, 6, user.dokPerbaikan)}</td>
+                        <td class="px-6 py-4">${createCheckbox(user.row, 7, user.schedulePD)}</td>
+                        <td class="px-6 py-4">${createCheckbox(user.row, 8, user.syncflow)}</td>
+                        <td class="px-6 py-4">${createCheckbox(user.row, 9, user.accesControl)}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                status.innerHTML = "";
+            } catch (e) {
+                status.className = "text-sm font-medium text-rose-600";
+                status.innerHTML = "🗙 Gagal memuat data dari server SOT";
+            }
+        }
 
-  // Jalankan load data hanya setelah dipastikan lolos proteksi head
-  window.onload = loadUsers;
-</script>
+        function createCheckbox(row, col, value) {
+            const checked = value === "Y" ? "checked" : "";
+            // Menggunakan kelas Tailwind v4 custom checkbox agar UI/UX saklar hak akses terlihat premium
+            return `
+                <div class="flex justify-center items-center">
+                    <input type="checkbox" ${checked} onchange="updateAkses(${row}, ${col}, this)" 
+                        class="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded-md focus:ring-blue-500 focus:ring-2 cursor-pointer transition">
+                </div>
+            `;
+        }
+
+        async function updateAkses(row, col, el) {
+            const val = el.checked ? "Y" : "";
+            const status = document.getElementById("status");
+            status.className = "text-sm font-medium text-amber-600 flex items-center gap-2";
+            status.innerHTML = `<div class="animate-spin h-3 w-3 border-2 border-amber-300 border-t-amber-600 rounded-full"></div> Menyimpan perubahan...`;
+
+            try {
+                await fetch(`${API_URL}?action=updateAkses&row=${row}&col=${col}&value=${val}`, { method: "POST" });
+                status.className = "text-sm font-medium text-emerald-600";
+                status.innerHTML = "✓ Hak akses berhasil diperbarui!";
+                setTimeout(() => status.innerHTML = "", 1500);
+            } catch (e) {
+                status.className = "text-sm font-medium text-rose-600";
+                status.innerHTML = "🗙 Gagal menyimpan konfigurasi!";
+            }
+        }
+
+        // Jalankan load data hanya setelah dipastikan lolos proteksi head
+        window.onload = loadUsers;
+    </script>
 
 </body>
 </html>
