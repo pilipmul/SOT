@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <title>Input Eskalasi Baru</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <script>
+  
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+
+  <script>
     (function() {
       const session = localStorage.getItem("user");
       const userData = session ? JSON.parse(session) : null;
@@ -14,60 +17,68 @@
       }
     })();
   </script>
-  <style>
-    body { font-family: 'Segoe UI', sans-serif; background: #f4f7f9; margin: 0; padding: 20px; display: flex; justify-content: center; }
-    .form-box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 100%; max-width: 750px; }
-    .status-badge { font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: bold; margin-bottom: 10px; display: inline-block; }
-    .online { background: #d4edda; color: #155724; }
-    .offline { background: #f8d7da; color: #721c24; }
-    label { display: block; margin-top: 15px; font-weight: 600; color: #555; }
-    input, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-    .input-group { position: relative; }
-    table { width: 100%; margin-top: 20px; border-collapse: collapse; font-size: 13px; }
-    table th { background: #eee; padding: 10px; text-align: left; }
-    table td { padding: 5px; border-bottom: 1px solid #eee; position: relative; }
-    .autocomplete-list {
-      position: absolute; border: 1px solid #ddd; border-top: none; z-index: 99;
-      top: 100%; left: 0; right: 0; background: #fff; max-height: 150px;
-      overflow-y: auto; border-radius: 0 0 5px 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .autocomplete-list div { padding: 8px 10px; cursor: pointer; border-bottom: 1px solid #f1f1f1; }
-    .autocomplete-list div:hover { background-color: #e9e9e9; }
-    .btn { padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; }
-    .btn-success { background: #28a745; color: white; }
-    .btn-add { background: #007bff; color: white; width: auto; padding: 8px 15px; font-size: 12px; margin-top: 10px; }
-  </style>
 </head>
-<body>
+<body class="bg-[#f4f7f9] m-0 p-5 flex justify-center font-sans">
 
-<div class="form-box">
-  <div id="koneksiStatus" class="status-badge offline">Mengecek Koneksi...</div>
-  <h3>Input Eskalasi Baru</h3>
+<div class="bg-white p-6 rounded-lg shadow-[0_5px_15px_rgba(0,0,0,0.1)] w-full max-w-[750px]">
+  <div id="koneksiStatus" class="status-badge text-[11px] px-2 py-1 rounded font-bold mb-2.5 inline-block bg-red-100 text-red-800">
+    Mengecek Koneksi...
+  </div>
   
-  <form id="formEskin" autocomplete="off">
-    <label>Nomor Eskalasi</label>
-    <input type="text" id="displayKode" value="Memuat..." disabled style="background: #eee;">
-    
-    <label>Subject / Keperluan</label>
-    <textarea id="subject" rows="2" placeholder="Judul keperluan..." required></textarea>
-
-    <div class="input-group">
-      <label>Diajukan Oleh</label>
-      <input type="text" id="diajukan" class="user-search" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
-      <div class="autocomplete-list"></div>
+  <h3 class="text-xl font-bold text-gray-800 mb-4">Input Eskalasi Baru</h3>
+  
+  <form id="formEskin" autocomplete="off" class="space-y-4">
+    <div>
+      <label class="block font-semibold text-gray-600 mb-1">Nomor Eskalasi</label>
+      <input type="text" id="displayKode" value="Memuat..." disabled class="w-full p-2.5 border border-gray-300 rounded bg-gray-100 box-border text-gray-500">
     </div>
-    <div class="input-group"><label>Diketahui Oleh</label><input type="text" id="diketahui" class="user-search" placeholder="Cari nama..." oninput="showUserSuggestions(this)"><div class="autocomplete-list"></div></div>
-    <div class="input-group"><label>Disetujui Oleh</label><input type="text" id="disetujui" class="user-search" placeholder="Cari nama..." oninput="showUserSuggestions(this)"><div class="autocomplete-list"></div></div>
+    
+    <div>
+      <label class="block font-semibold text-gray-600 mb-1">Subject / Keperluan</label>
+      <textarea id="subject" rows="2" placeholder="Judul keperluan..." required class="w-full p-2.5 border border-gray-300 rounded box-border focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+    </div>
 
-    <label>Daftar Item (Maks 10)</label>
-    <table>
-      <thead><tr><th style="width: 55%;">Nama Item</th><th style="width: 15%;">Qty</th><th>Biaya (Rp)</th></tr></thead>
-      <tbody id="itemRows"></tbody>
-    </table>
-    <button type="button" id="btnAddRow" class="btn btn-add" onclick="tambahBaris()">+ Tambah Baris</button>
-    <label>Total Nilai Budget</label>
-    <input type="number" id="nilai" readonly style="background: #f9f9f9; font-weight: bold; color: #28a745;">
-    <button type="submit" class="btn btn-success" id="btnSubmit" disabled>Kirim & Download PDF</button>
+    <div class="relative">
+      <label class="block font-semibold text-gray-600 mb-1">Diajukan Oleh</label>
+      <input type="text" id="diajukan" class="user-search w-full p-2.5 border border-gray-300 rounded box-border focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
+      <div class="autocomplete-list absolute border border-gray-200 border-t-0 z-50 top-full left-0 right-0 bg-white max-h-[150px] overflow-y-auto rounded-b shadow-md [&>div]:p-2 [&>div]:cursor-pointer [&>div]:border-b [&>div]:border-gray-100 hover:[&>div]:bg-gray-100"></div>
+    </div>
+
+    <div class="relative">
+      <label class="block font-semibold text-gray-600 mb-1">Diketahui Oleh</label>
+      <input type="text" id="diketahui" class="user-search w-full p-2.5 border border-gray-300 rounded box-border focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
+      <div class="autocomplete-list absolute border border-gray-200 border-t-0 z-50 top-full left-0 right-0 bg-white max-h-[150px] overflow-y-auto rounded-b shadow-md [&>div]:p-2 [&>div]:cursor-pointer [&>div]:border-b [&>div]:border-gray-100 hover:[&>div]:bg-gray-100"></div>
+    </div>
+
+    <div class="relative">
+      <label class="block font-semibold text-gray-600 mb-1">Disetujui Oleh</label>
+      <input type="text" id="disetujui" class="user-search w-full p-2.5 border border-gray-300 rounded box-border focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
+      <div class="autocomplete-list absolute border border-gray-200 border-t-0 z-50 top-full left-0 right-0 bg-white max-h-[150px] overflow-y-auto rounded-b shadow-md [&>div]:p-2 [&>div]:cursor-pointer [&>div]:border-b [&>div]:border-gray-100 hover:[&>div]:bg-gray-100"></div>
+    </div>
+
+    <div>
+      <label class="block font-semibold text-gray-600 mb-1">Daftar Item (Maks 10)</label>
+      <div class="overflow-x-auto">
+        <table class="w-full mt-2 border-collapse text-xs md:text-sm">
+          <thead>
+            <tr class="bg-gray-100 border-b border-gray-200">
+              <th class="p-2 text-left font-semibold text-gray-700" style="width: 55%;">Nama Item</th>
+              <th class="p-2 text-left font-semibold text-gray-700" style="width: 15%;">Qty</th>
+              <th class="p-2 text-left font-semibold text-gray-700">Biaya (Rp)</th>
+            </tr>
+          </thead>
+          <tbody id="itemRows" class="divide-y divide-gray-100"></tbody>
+        </table>
+      </div>
+      <button type="button" id="btnAddRow" class="mt-3 px-4 py-1.5 bg-blue-600 text-white font-semibold text-xs rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" onclick="tambahBaris()">+ Tambah Baris</button>
+    </div>
+
+    <div>
+      <label class="block font-semibold text-gray-600 mb-1">Total Nilai Budget</label>
+      <input type="number" id="nilai" readonly class="w-full p-2.5 border border-gray-300 rounded box-border font-bold text-green-600 bg-gray-50 focus:outline-none">
+    </div>
+
+    <button type="submit" class="w-full p-3 bg-green-600 text-white font-bold rounded mt-5 cursor-pointer hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" id="btnSubmit" disabled>Kirim & Download PDF</button>
   </form>
 </div>
 
@@ -77,7 +88,6 @@
   const userList = ["Dede H.", "Edo S.", "Sutriono", "(....................)"];
   let rowCount = 0;
 
-  // Fungsi tambahan untuk memproses autofill otomatis
   function cekAutofill() {
     const diajukanVal = document.getElementById("diajukan").value.trim();
     if (diajukanVal === "Dede H.") {
@@ -100,7 +110,6 @@
       div.onclick = () => { 
         input.value = name; 
         listContainer.innerHTML = ""; 
-        // Jalankan autofill jika yang diubah adalah kolom "diajukan"
         if (input.id === "diajukan") {
           cekAutofill();
         }
@@ -108,7 +117,6 @@
       listContainer.appendChild(div);
     });
 
-    // Jalankan autofill juga saat user mengetik manual di kolom "diajukan" tanpa klik list
     if (input.id === "diajukan") {
       cekAutofill();
     }
@@ -133,7 +141,20 @@
     rowCount++;
     const tbody = document.getElementById("itemRows");
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td><input type="text" class="item-name" placeholder="Ketik nama item..." oninput="showItemSuggestions(this)"><div class="autocomplete-list"></div></td><td><input type="number" class="item-qty" placeholder="0" oninput="hitungTotal()"></td><td><input type="number" class="item-cost" placeholder="0" oninput="hitungTotal()"></td>`;
+    
+    // Penyesuaian class Tailwind v4 untuk baris dinamis baru
+    tr.innerHTML = `
+      <td class="p-1 relative">
+        <input type="text" class="item-name w-full p-2 border border-gray-300 rounded box-border text-sm" placeholder="Ketik nama item..." oninput="showItemSuggestions(this)">
+        <div class="autocomplete-list absolute border border-gray-200 border-t-0 z-50 top-full left-0 right-0 bg-white max-h-[150px] overflow-y-auto rounded-b shadow-md [&>div]:p-2 [&>div]:cursor-pointer [&>div]:border-b [&>div]:border-gray-100 hover:[&>div]:bg-gray-100"></div>
+      </td>
+      <td class="p-1">
+        <input type="number" class="item-qty w-full p-2 border border-gray-300 rounded box-border text-sm" placeholder="0" oninput="hitungTotal()">
+      </td>
+      <td class="p-1">
+        <input type="number" class="item-cost w-full p-2 border border-gray-300 rounded box-border text-sm" placeholder="0" oninput="hitungTotal()">
+      </td>
+    `;
     tbody.appendChild(tr);
     if (rowCount >= 10) document.getElementById("btnAddRow").disabled = true;
   }
@@ -160,10 +181,16 @@
       const resItem = await fetch(ESKIN_API + "?action=getItems", { method: "POST" });
       const dataItem = await resItem.json();
       if(dataItem.success) { itemOptions = dataItem.items; tambahBaris(); }
-      document.getElementById("koneksiStatus").innerText = "● Terhubung";
-      document.getElementById("koneksiStatus").className = "status-badge online";
+      
+      // Update status koneksi menggunakan Tailwind utility class pengganti .online
+      const statusBox = document.getElementById("koneksiStatus");
+      statusBox.innerText = "● Terhubung";
+      statusBox.className = "status-badge text-[11px] px-2 py-1 rounded font-bold mb-2.5 inline-block bg-green-100 text-green-800";
+      
       document.getElementById("btnSubmit").disabled = false;
-    } catch (e) { document.getElementById("koneksiStatus").innerText = "● Gagal Koneksi"; }
+    } catch (e) { 
+      document.getElementById("koneksiStatus").innerText = "● Gagal Koneksi"; 
+    }
   }
 
   document.getElementById("formEskin").onsubmit = async (e) => {
