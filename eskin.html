@@ -77,6 +77,18 @@
   const userList = ["Dede H.", "Edo S.", "Sutriono", "(....................)"];
   let rowCount = 0;
 
+  // Fungsi tambahan untuk memproses autofill otomatis
+  function cekAutofill() {
+    const diajukanVal = document.getElementById("diajukan").value.trim();
+    if (diajukanVal === "Dede H.") {
+      document.getElementById("diketahui").value = "Edo S.";
+      document.getElementById("disetujui").value = "Sutriono";
+    } else if (diajukanVal === "Edo S.") {
+      document.getElementById("diketahui").value = "Sutriono";
+      document.getElementById("disetujui").value = "(....................)";
+    }
+  }
+
   function showUserSuggestions(input) {
     const listContainer = input.nextElementSibling;
     const val = input.value.toLowerCase();
@@ -85,9 +97,21 @@
     filtered.forEach(name => {
       const div = document.createElement("div");
       div.innerHTML = name;
-      div.onclick = () => { input.value = name; listContainer.innerHTML = ""; };
+      div.onclick = () => { 
+        input.value = name; 
+        listContainer.innerHTML = ""; 
+        // Jalankan autofill jika yang diubah adalah kolom "diajukan"
+        if (input.id === "diajukan") {
+          cekAutofill();
+        }
+      };
       listContainer.appendChild(div);
     });
+
+    // Jalankan autofill juga saat user mengetik manual di kolom "diajukan" tanpa klik list
+    if (input.id === "diajukan") {
+      cekAutofill();
+    }
   }
 
   function showItemSuggestions(input) {
