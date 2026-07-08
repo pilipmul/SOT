@@ -18,26 +18,34 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        
-        /* --- TOMBOL SORT SEBELUMNYA (th::after) SUDAH DIHAPUS --- */
 
-        /* --- CSS FILTER DARI A1 --- */
-        th { position: relative; padding-right: 24px !important; }
-        .filter-icon {
-            position: absolute; right: 6px; top: 50%;
+        /* --- CSS FILTER & ICON --- */
+        th { position: relative; padding-right: 32px !important; }
+        
+        .filter-icon-btn {
+            position: absolute; right: 4px; top: 50%;
             transform: translateY(-50%);
-            width: 12px; height: 12px; fill: currentColor;
-            display: inline-block;
-            opacity: 0.7;
+            width: 24px; height: 24px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 4px; cursor: pointer; transition: all 0.15s;
+            color: #cbd5e1;
         }
-        th:hover .filter-icon { opacity: 1; }
-        .filter-active .filter-icon { opacity: 0; }
-        .filter-active::after {
-            content: ""; position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
-            width: 14px; height: 14px; background-color: #ffeb3b;
+        .filter-icon-btn:hover {
+            background-color: #1e293b; /* Warna abu gelap slate-800 saat hover ikon saja */
+            color: #3b82f6; /* Berubah biru saat hover */
+        }
+        .filter-icon {
+            width: 12px; height: 12px; fill: currentColor;
+        }
+        
+        .filter-active .filter-icon-btn { color: #ffeb3b !important; }
+        .filter-active .filter-icon { display: none; }
+        .filter-active .filter-icon-btn::after {
+            content: ""; width: 14px; height: 14px; background-color: #ffeb3b;
             -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z'/%3E%3C/svg%3E") no-repeat center;
             mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z'/%3E%3C/svg%3E") no-repeat center;
         }
+        
         .filter-menu {
             position: absolute; background: white; color: black;
             border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
@@ -89,18 +97,43 @@
         <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden">
             <div class="p-5 border-b border-slate-100 bg-slate-50/50">
                 <h3 class="text-base font-bold text-slate-900 tracking-tight">Database Data Eskalasi</h3>
-                <p class="text-xs text-slate-500">Klik ikon panah pada nama kolom di bawah untuk mengurutkan atau memfilter data</p>
+                <p class="text-xs text-slate-500">Klik ikon panah kecil segitiga di sisi kanan kolom untuk mengurutkan atau memfilter data</p>
             </div>
 
             <div id="tableWrapper" class="overflow-x-auto" style="position: relative;">
                 <table class="min-w-full divide-y divide-slate-200 text-left text-sm" id="eskalasiTable" style="display:none;">
                     <thead class="bg-slate-900 text-white uppercase text-xs tracking-wider">
                         <tr>
-                            <th scope="col" data-col="0" class="px-6 py-4 font-semibold text-center w-16 cursor-pointer hover:bg-slate-800 transition">No <svg class="filter-icon" viewBox="0 0 20 20"><path d="M5 8l5 5 5-5H5z"/></svg></th>
-                            <th scope="col" data-col="1" class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-800 transition">Kode Eskalasi <svg class="filter-icon" viewBox="0 0 20 20"><path d="M5 8l5 5 5-5H5z"/></svg></th>
-                            <th scope="col" data-col="2" class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-800 transition">Subject <svg class="filter-icon" viewBox="0 0 20 20"><path d="M5 8l5 5 5-5H5z"/></svg></th>
-                            <th scope="col" data-col="3" class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-800 transition">Tanggal <svg class="filter-icon" viewBox="0 0 20 20"><path d="M5 8l5 5 5-5H5z"/></svg></th>
-                            <th scope="col" data-col="4" class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-800 transition">Nilai <svg class="filter-icon" viewBox="0 0 20 20"><path d="M5 8l5 5 5-5H5z"/></svg></th>
+                            <th scope="col" class="px-6 py-4 font-semibold text-center w-16">
+                                No 
+                                <div class="filter-icon-btn" data-col="0" onclick="toggleFilterMenu(event, this)">
+                                    <svg class="filter-icon" viewBox="0 0 20 20"><path d="M5 8l5 5 5-5H5z"/></svg>
+                                </div>
+                            </th>
+                            <th scope="col" class="px-6 py-4 font-semibold">
+                                Kode Eskalasi 
+                                <div class="filter-icon-btn" data-col="1" onclick="toggleFilterMenu(event, this)">
+                                    <svg class="filter-icon" viewBox="0 0 20 20"><path d="M5 8l5 5 5-5H5z"/></svg>
+                                </div>
+                            </th>
+                            <th scope="col" class="px-6 py-4 font-semibold">
+                                Subject 
+                                <div class="filter-icon-btn" data-col="2" onclick="toggleFilterMenu(event, this)">
+                                    <svg class="filter-icon" viewBox="0 0 20 20"><path d="M5 8l5 5 5-5H5z"/></svg>
+                                </div>
+                            </th>
+                            <th scope="col" class="px-6 py-4 font-semibold">
+                                Tanggal 
+                                <div class="filter-icon-btn" data-col="3" onclick="toggleFilterMenu(event, this)">
+                                    <svg class="filter-icon" viewBox="0 0 20 20"><path d="M5 8l5 5 5-5H5z"/></svg>
+                                </div>
+                            </th>
+                            <th scope="col" class="px-6 py-4 font-semibold">
+                                Nilai 
+                                <div class="filter-icon-btn" data-col="4" onclick="toggleFilterMenu(event, this)">
+                                    <svg class="filter-icon" viewBox="0 0 20 20"><path d="M5 8l5 5 5-5H5z"/></svg>
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200" id="tableBody"></tbody>
@@ -176,7 +209,6 @@
                 document.getElementById("eskalasiTable").style.display = "table";
                 
                 renderTable(filteredData);
-                initFilterSystem();
             } catch (e) {
                 document.getElementById("loading").innerHTML = "<p class='text-red-500 font-medium'>Gagal memproses data. Terjadi kendala koneksi backend.</p>";
             }
@@ -203,43 +235,39 @@
         const masterCheckbox = document.getElementById('masterCheckbox');
         const tableWrapper = document.getElementById('tableWrapper');
 
-        function initFilterSystem() {
-            document.querySelectorAll('th[data-col]').forEach(th => {
-                th.onclick = (e) => {
-                    activeColIndex = parseInt(th.getAttribute('data-col'));
-                    
-                    // Mengubah perhitungan posisi agar relatif terhadap kontainer pembungkus tabel
-                    const wrapperRect = tableWrapper.getBoundingClientRect();
-                    const thRect = th.getBoundingClientRect();
-                    
-                    menu.style.display = 'block';
-                    // Mengatur top & left tepat di bawah ujung elemen th/tombol segitiga secara presisi
-                    menu.style.top = (thRect.bottom - wrapperRect.top + tableWrapper.scrollTop) + 'px';
-                    menu.style.left = (thRect.left - wrapperRect.left + tableWrapper.scrollLeft) + 'px';
-                    
-                    searchBox.value = '';
-                    
-                    const dataFilteredByOthers = fullData.filter(r => {
-                        for (let colIdx in currentAppliedFilters) {
-                            if (parseInt(colIdx) === activeColIndex) continue; 
-                            if (!currentAppliedFilters[colIdx].includes(String(r[colIdx]))) return false;
-                        }
-                        return true;
-                    });
-
-                    const availableVals = [...new Set(dataFilteredByOthers.map(r => String(r[activeColIndex])))].sort();
-                    const currentlyChecked = currentAppliedFilters[activeColIndex] || availableVals;
-
-                    const list = document.getElementById('checkboxList');
-                    list.innerHTML = '';
-                    availableVals.forEach(v => {
-                        const isChecked = currentlyChecked.includes(v);
-                        list.innerHTML += `<div class="checkbox-item"><input type="checkbox" ${isChecked ? 'checked' : ''} value="${v}" onclick="updateMasterCheckbox()"> <span>${v}</span></div>`;
-                    });
-                    updateMasterCheckbox();
-                    e.stopPropagation();
-                };
+        // Fungsi baru untuk menangani klik HANYA pada tombol segitiga kecil
+        function toggleFilterMenu(e, element) {
+            activeColIndex = parseInt(element.getAttribute('data-col'));
+            
+            const wrapperRect = tableWrapper.getBoundingClientRect();
+            const btnRect = element.getBoundingClientRect();
+            
+            menu.style.display = 'block';
+            // Posisikan tepat di bawah ujung tombol kotak segitiga kecil secara presisi
+            menu.style.top = (btnRect.bottom - wrapperRect.top + tableWrapper.scrollTop) + 'px';
+            menu.style.left = (btnRect.left - wrapperRect.left + tableWrapper.scrollLeft) + 'px';
+            
+            searchBox.value = '';
+            
+            const dataFilteredByOthers = fullData.filter(r => {
+                for (let colIdx in currentAppliedFilters) {
+                    if (parseInt(colIdx) === activeColIndex) continue; 
+                    if (!currentAppliedFilters[colIdx].includes(String(r[colIdx]))) return false;
+                }
+                return true;
             });
+
+            const availableVals = [...new Set(dataFilteredByOthers.map(r => String(r[activeColIndex])))].sort();
+            const currentlyChecked = currentAppliedFilters[activeColIndex] || availableVals;
+
+            const list = document.getElementById('checkboxList');
+            list.innerHTML = '';
+            availableVals.forEach(v => {
+                const isChecked = currentlyChecked.includes(v);
+                list.innerHTML += `<div class="checkbox-item"><input type="checkbox" ${isChecked ? 'checked' : ''} value="${v}" onclick="updateMasterCheckbox()"> <span>${v}</span></div>`;
+            });
+            updateMasterCheckbox();
+            e.stopPropagation(); // Mencegah penutupan otomatis dari document.onclick
         }
 
         function searchInMenu() {
@@ -281,7 +309,8 @@
             const cbs = Array.from(document.querySelectorAll('#checkboxList input[type="checkbox"]'));
             const checkedVals = cbs.filter(i => i.checked).map(i => i.value);
             const isAllChecked = cbs.every(cb => cb.checked);
-            const targetTh = document.querySelector(`th[data-col="${activeColIndex}"]`);
+            // Mencari th parent dari tombol filter aktif
+            const targetTh = document.querySelector(`.filter-icon-btn[data-col="${activeColIndex}"]`).closest('th');
             
             if (!isAllChecked) {
                 targetTh.classList.add('filter-active');
