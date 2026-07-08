@@ -213,11 +213,12 @@
             rowCount++;
             const tbody = document.getElementById("itemRows");
             const tr = document.createElement("tr");
-            tr.className = "relative";
             tr.innerHTML = `
-                <td class="p-2 relative">
-                    <input type="text" class="item-name w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 transition" placeholder="Ketik nama item..." oninput="showItemSuggestions(this)">
-                    <div class="autocomplete-list absolute left-2 right-2 mt-1 bg-white border border-slate-200 rounded-xl max-h-40 overflow-y-auto z-50 shadow-lg hidden divide-y divide-slate-100"></div>
+                <td class="p-2">
+                    <div class="relative w-full">
+                        <input type="text" class="item-name w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 transition" placeholder="Ketik nama item..." oninput="showItemSuggestions(this)">
+                        <div class="autocomplete-list absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl max-h-40 overflow-y-auto z-50 shadow-lg hidden divide-y divide-slate-100"></div>
+                    </div>
                 </td>
                 <td class="p-2">
                     <input type="number" class="item-qty w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm text-center focus:outline-none focus:border-blue-500 transition" placeholder="0" oninput="hitungTotal()">
