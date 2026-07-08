@@ -20,8 +20,41 @@
         body { font-family: 'Inter', sans-serif; }
         
         /* Simbol indikator sort di th agar tetap fungsional */
-        th::after { content: ' ↕'; font-size: 10px; color: #cbd5e1; }
+        th::after { 
+            content: ' ↕';
+            font-size: 10px; 
+            color: #cbd5e1; 
+        }
         th:hover::after { color: #3b82f6; }
+
+        /* --- CSS FILTER DARI A1 --- */
+        th { position: relative; }
+        .filter-icon {
+            position: absolute; right: 5px; top: 50%;
+            transform: translateY(-50%);
+            width: 14px; height: 14px; fill: white;
+            display: inline-block;
+        }
+        .filter-active .filter-icon { opacity: 0; }
+        .filter-active::after {
+            content: ""; position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
+            width: 16px; height: 16px; background-color: #ffeb3b;
+            -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z'/%3E%3C/svg%3E") no-repeat center;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z'/%3E%3C/svg%3E") no-repeat center;
+        }
+        .filter-menu {
+            position: absolute; background: white; color: black;
+            border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 1000; display: none; width: 220px; padding: 10px; border-radius: 4px;
+            text-transform: none; font-weight: normal; font-size: 13px;
+        }
+        .filter-menu h4 { margin: 0 0 10px 0; font-size: 12px; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: bold; }
+        .filter-menu button { display: block; width: 100%; text-align: left; background: none; border: none; padding: 8px; cursor: pointer; font-size: 13px; }
+        .filter-menu button:hover { background: #f0f2f5; }
+        .filter-search-box { width: 100%; padding: 6px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 12px; }
+        .master-checkbox-container { display: flex; align-items: center; gap: 5px; font-size: 12px; padding: 5px 0; border-bottom: 1px dotted #eee; font-weight: bold; }
+        .checkbox-list { max-height: 150px; overflow-y: auto; margin-top: 5px; border: 1px solid #eee; padding: 5px; }
+        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 12px; margin-bottom: 4px; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen">
@@ -30,7 +63,7 @@
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
                 <div class="bg-blue-600 p-2 rounded-lg">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </div>
                 <div>
                     <h1 class="text-xl font-bold tracking-wide">SOT (Sistem Operasional Terintegrasi)</h1>
@@ -60,22 +93,37 @@
         <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden">
             <div class="p-5 border-b border-slate-100 bg-slate-50/50">
                 <h3 class="text-base font-bold text-slate-900 tracking-tight">Database Data Eskalasi</h3>
-                <p class="text-xs text-slate-500">Klik pada nama kolom di bawah untuk mengurutkan data</p>
+                <p class="text-xs text-slate-500">Klik ikon panah/filter pada nama kolom di bawah untuk mengurutkan atau memfilter data</p>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto" style="position: relative;">
                 <table class="min-w-full divide-y divide-slate-200 text-left text-sm" id="eskalasiTable" style="display:none;">
                     <thead class="bg-slate-900 text-white uppercase text-xs tracking-wider">
                         <tr>
-                            <th scope="col" class="px-6 py-4 font-semibold text-center w-16 cursor-pointer hover:bg-slate-800 transition" onclick="sortTable(0)">No</th>
-                            <th scope="col" class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-800 transition" onclick="sortTable(1)">Kode Eskalasi</th>
-                            <th scope="col" class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-800 transition" onclick="sortTable(2)">Subject</th>
-                            <th scope="col" class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-800 transition" onclick="sortTable(3)">Tanggal</th>
-                            <th scope="col" class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-800 transition" onclick="sortTable(4)">Nilai</th>
+                            <th scope="col" data-col="0" class="px-6 py-4 font-semibold text-center w-16 cursor-pointer hover:bg-slate-800 transition">No <svg class="filter-icon" viewBox="0 0 20 20"><path d="M5 8l5 5 5-5H5z"/></svg></th>
+                            <th scope="col" data-col="1" class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-800 transition">Kode Eskalasi <svg class="filter-icon" viewBox="0 0 20 20"><path d="M5 8l5 5 5-5H5z"/></svg></th>
+                            <th scope="col" data-col="2" class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-800 transition">Subject <svg class="filter-icon" viewBox="0 0 20 20"><path d="M5 8l5 5 5-5H5z"/></svg></th>
+                            <th scope="col" data-col="3" class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-800 transition">Tanggal <svg class="filter-icon" viewBox="0 0 20 20"><path d="M5 8l5 5 5-5H5z"/></svg></th>
+                            <th scope="col" data-col="4" class="px-6 py-4 font-semibold cursor-pointer hover:bg-slate-800 transition">Nilai <svg class="filter-icon" viewBox="0 0 20 20"><path d="M5 8l5 5 5-5H5z"/></svg></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200" id="tableBody"></tbody>
                 </table>
+
+                <div id="filterMenu" class="filter-menu">
+                    <h4 id="menuTitle">Opsi Kolom</h4>
+                    <button onclick="execSort('asc')">↑ Sort A to Z / Terkecil</button>
+                    <button onclick="execSort('desc')">↓ Sort Z to A / Terbesar</button>
+                    <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+                    <input type="text" id="menuSearch" class="filter-search-box" placeholder="Cari nilai..." onkeyup="searchInMenu()">
+                    
+                    <div class="master-checkbox-container">
+                        <input type="checkbox" id="masterCheckbox" checked onclick="toggleAllCheckboxes(this.checked)"> <span>Pilih Semua</span>
+                    </div>
+
+                    <div class="checkbox-list" id="checkboxList"></div>
+                    <button onclick="applyCheckboxFilter()" style="background:#1877f2; color:white; margin-top:10px; text-align:center; border-radius:4px; width:100%; padding:8px; border:none; cursor:pointer; font-weight:bold;">Terapkan Filter</button>
+                </div>
 
                 <div id="loading" class="px-6 py-12 text-center text-slate-500">
                     <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-300 border-t-blue-600 mb-2"></div>
@@ -93,6 +141,12 @@
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbzq9eOM9xHp0vJg2tFKhCLn-OLmz_brHdeVqqAgkTMe0NiGVFvyqbVv4RoiF9AxZ8r4/exec"; 
 
+        // Array penyimpanan data untuk filter global
+        let fullData = []; 
+        let filteredData = []; 
+        let activeColIndex = -1;
+        let currentAppliedFilters = {};
+
         function parseDateMmmYYYY(str) {
             const months = {"jan":0,"feb":1,"mar":2,"apr":3,"may":4,"jun":5,"jul":6,"aug":7,"sep":8,"oct":9,"nov":10,"dec":11};
             const parts = str.toLowerCase().split(' ');
@@ -104,65 +158,159 @@
             return new Date(0);
         }
 
-        function sortTable(n) {
-            let table = document.getElementById("eskalasiTable");
-            let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-            switching = true; dir = "asc"; 
-            while (switching) {
-                switching = false; rows = table.rows;
-                for (i = 1; i < (rows.length - 1); i++) {
-                    shouldSwitch = false;
-                    x = rows[i].getElementsByTagName("TD")[n];
-                    y = rows[i + 1].getElementsByTagName("TD")[n];
-                    let valX = x.innerText; let valY = y.innerText;
-                    let compX, compY;
-                    if (n === 0 || n === 4) {
-                        compX = parseFloat(valX.replace(/[^\d.-]/g, '')) || 0;
-                        compY = parseFloat(valY.replace(/[^\d.-]/g, '')) || 0;
-                    } else if (n === 3) {
-                        compX = parseDateMmmYYYY(valX).getTime();
-                        compY = parseDateMmmYYYY(valY).getTime();
-                    } else {
-                        compX = valX.toLowerCase(); compY = valY.toLowerCase();
-                    }
-                    if (dir == "asc") { 
-                        if (compX > compY) { shouldSwitch = true; break; }
-                    } else { 
-                        if (compX < compY) { shouldSwitch = true; break; } 
-                    }
-                }
-                if (shouldSwitch) { 
-                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]); switching = true; switchcount ++;
-                } else { 
-                    if (switchcount == 0 && dir == "asc") { dir = "desc"; switching = true; } 
-                }
-            }
+        // Fungsi bantu memproses angka Rupiah/String agar bisa disortir dengan benar
+        function parseCleanNumber(valX) {
+            return parseFloat(valX.replace(/[^\d.-]/g, '')) || 0;
         }
 
         async function loadData() {
             try {
                 const res = await fetch(API_URL + "?action=getEskalasi", { method: "POST" });
                 const data = await res.json();
-                const tbody = document.getElementById("tableBody");
-                tbody.innerHTML = "";
-                data.forEach(item => {
-                    // Kelas disesuaikan agar styling layout per baris konsisten dan rapi
-                    tbody.innerHTML += `
-                        <tr class="hover:bg-slate-50/80 transition duration-150 odd:bg-white even:bg-slate-50/40">
-                            <td class="px-6 py-4 text-center whitespace-nowrap text-slate-400 font-medium">${item.no}</td>
-                            <td class="px-6 py-4 font-semibold text-slate-900 whitespace-nowrap">${item.kode}</td>
-                            <td class="px-6 py-4 text-slate-700">${item.subject}</td>
-                            <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${item.tanggal}</td>
-                            <td class="px-6 py-4 text-slate-900 font-medium whitespace-nowrap">${item.nilai ? 'Rp ' + Number(item.nilai).toLocaleString('id-ID') : '-'}</td>
-                        </tr>
-                    `;
-                });
+                
+                // Mapping data dari backend ke dalam struktur array 2 dimensi supaya cocok dengan sistem filter A1
+                fullData = data.map(item => [
+                    String(item.no),
+                    String(item.kode),
+                    String(item.subject),
+                    String(item.tanggal),
+                    item.nilai ? 'Rp ' + Number(item.nilai).toLocaleString('id-ID') : '-'
+                ]);
+
+                filteredData = [...fullData];
+                
                 document.getElementById("loading").style.display = "none";
                 document.getElementById("eskalasiTable").style.display = "table";
+                
+                renderTable(filteredData);
+                initFilterSystem(); // Inisialisasi event listener filter setelah table dimuat
             } catch (e) {
                 document.getElementById("loading").innerHTML = "<p class='text-red-500 font-medium'>Gagal memproses data. Terjadi kendala koneksi backend.</p>";
             }
         }
+
+        function renderTable(data) {
+            const tbody = document.getElementById("tableBody");
+            tbody.innerHTML = "";
+            data.forEach(row => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50/80 transition duration-150 odd:bg-white even:bg-slate-50/40">
+                        <td class="px-6 py-4 text-center whitespace-nowrap text-slate-400 font-medium">${row[0]}</td>
+                        <td class="px-6 py-4 font-semibold text-slate-900 whitespace-nowrap">${row[1]}</td>
+                        <td class="px-6 py-4 text-slate-700">${row[2]}</td>
+                        <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${row[3]}</td>
+                        <td class="px-6 py-4 text-slate-900 font-medium whitespace-nowrap">${row[4]}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // --- LOGIKA UTAMA FILTER SISTEM DIADAPTASI DARI A1 ---
+        const menu = document.getElementById('filterMenu');
+        const searchBox = document.getElementById('menuSearch');
+        const masterCheckbox = document.getElementById('masterCheckbox');
+
+        function initFilterSystem() {
+            document.querySelectorAll('th[data-col]').forEach(th => {
+                th.onclick = (e) => {
+                    activeColIndex = parseInt(th.getAttribute('data-col'));
+                    const rect = th.getBoundingClientRect();
+                    menu.style.display = 'block';
+                    menu.style.top = (rect.bottom + window.scrollY) + 'px';
+                    menu.style.left = (rect.left + window.scrollX) + 'px';
+                    searchBox.value = '';
+                    
+                    // 1. Dapatkan data yang difilter oleh kolom LAIN (kecuali kolom ini sendiri)
+                    const dataFilteredByOthers = fullData.filter(r => {
+                        for (let colIdx in currentAppliedFilters) {
+                            if (parseInt(colIdx) === activeColIndex) continue; 
+                            if (!currentAppliedFilters[colIdx].includes(String(r[colIdx]))) return false;
+                        }
+                        return true;
+                    });
+
+                    // 2. Ambil nilai unik dari hasil filter kolom lain tersebut
+                    const availableVals = [...new Set(dataFilteredByOthers.map(r => String(r[activeColIndex])))].sort();
+                    
+                    // 3. Tentukan mana yang sedang ter-cek
+                    const currentlyChecked = currentAppliedFilters[activeColIndex] || availableVals;
+
+                    const list = document.getElementById('checkboxList');
+                    list.innerHTML = '';
+                    availableVals.forEach(v => {
+                        const isChecked = currentlyChecked.includes(v);
+                        list.innerHTML += `<div class="checkbox-item"><input type="checkbox" ${isChecked ? 'checked' : ''} value="${v}" onclick="updateMasterCheckbox()"> <span>${v}</span></div>`;
+                    });
+                    updateMasterCheckbox();
+                    e.stopPropagation();
+                };
+            });
+        }
+
+        function searchInMenu() {
+            const filter = searchBox.value.toLowerCase();
+            document.querySelectorAll('.checkbox-item').forEach(item => {
+                item.style.display = item.innerText.toLowerCase().includes(filter) ? "flex" : "none";
+            });
+        }
+
+        function toggleAllCheckboxes(state) {
+            document.querySelectorAll('#checkboxList input[type="checkbox"]').forEach(cb => {
+                if (cb.parentElement.style.display !== 'none') cb.checked = state;
+            });
+        }
+
+        function updateMasterCheckbox() {
+            const cbs = Array.from(document.querySelectorAll('#checkboxList input[type="checkbox"]'));
+            masterCheckbox.checked = cbs.length > 0 && cbs.every(cb => cb.checked);
+        }
+
+        function execSort(dir) {
+            filteredData.sort((a, b) => {
+                let valA = a[activeColIndex], valB = b[activeColIndex];
+                // Jika kolom No (0) atau Nilai (4)
+                if(activeColIndex === 0 || activeColIndex === 4) { 
+                    valA = parseCleanNumber(valA); 
+                    valB = parseCleanNumber(valB); 
+                }
+                // Jika kolom Tanggal (3)
+                if(activeColIndex === 3) {
+                    valA = parseDateMmmYYYY(valA).getTime();
+                    valB = parseDateMmmYYYY(valB).getTime();
+                }
+                return dir === 'asc' ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+            });
+            renderTable(filteredData);
+            menu.style.display = 'none';
+        }
+
+        function applyCheckboxFilter() {
+            const cbs = Array.from(document.querySelectorAll('#checkboxList input[type="checkbox"]'));
+            const checkedVals = cbs.filter(i => i.checked).map(i => i.value);
+            const isAllChecked = cbs.every(cb => cb.checked);
+            const targetTh = document.querySelector(`th[data-col="${activeColIndex}"]`);
+            
+            if (!isAllChecked) {
+                targetTh.classList.add('filter-active');
+                currentAppliedFilters[activeColIndex] = checkedVals;
+            } else {
+                targetTh.classList.remove('filter-active');
+                delete currentAppliedFilters[activeColIndex];
+            }
+
+            filteredData = fullData.filter(r => {
+                for (let colIdx in currentAppliedFilters) {
+                    if (!currentAppliedFilters[colIdx].includes(String(r[colIdx]))) return false;
+                }
+                return true;
+            });
+            renderTable(filteredData);
+            menu.style.display = 'none';
+        }
+
+        document.onclick = () => menu.style.display = 'none';
+        menu.onclick = (e) => e.stopPropagation();
+
         window.onload = loadData;
     </script>
 </body>
