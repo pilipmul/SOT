@@ -19,26 +19,22 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
         
-        /* Simbol indikator sort di th agar tetap fungsional */
-        th::after { 
-            content: ' ↕';
-            font-size: 10px; 
-            color: #cbd5e1; 
-        }
-        th:hover::after { color: #3b82f6; }
+        /* --- TOMBOL SORT SEBELUMNYA (th::after) SUDAH DIHAPUS --- */
 
         /* --- CSS FILTER DARI A1 --- */
-        th { position: relative; }
+        th { position: relative; padding-right: 24px !important; }
         .filter-icon {
-            position: absolute; right: 5px; top: 50%;
+            position: absolute; right: 6px; top: 50%;
             transform: translateY(-50%);
-            width: 14px; height: 14px; fill: white;
+            width: 12px; height: 12px; fill: currentColor;
             display: inline-block;
+            opacity: 0.7;
         }
+        th:hover .filter-icon { opacity: 1; }
         .filter-active .filter-icon { opacity: 0; }
         .filter-active::after {
-            content: ""; position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
-            width: 16px; height: 16px; background-color: #ffeb3b;
+            content: ""; position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+            width: 14px; height: 14px; background-color: #ffeb3b;
             -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z'/%3E%3C/svg%3E") no-repeat center;
             mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z'/%3E%3C/svg%3E") no-repeat center;
         }
@@ -93,10 +89,10 @@
         <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden">
             <div class="p-5 border-b border-slate-100 bg-slate-50/50">
                 <h3 class="text-base font-bold text-slate-900 tracking-tight">Database Data Eskalasi</h3>
-                <p class="text-xs text-slate-500">Klik ikon panah/filter pada nama kolom di bawah untuk mengurutkan atau memfilter data</p>
+                <p class="text-xs text-slate-500">Klik ikon panah pada nama kolom di bawah untuk mengurutkan atau memfilter data</p>
             </div>
 
-            <div class="overflow-x-auto" style="position: relative;">
+            <div id="tableWrapper" class="overflow-x-auto" style="position: relative;">
                 <table class="min-w-full divide-y divide-slate-200 text-left text-sm" id="eskalasiTable" style="display:none;">
                     <thead class="bg-slate-900 text-white uppercase text-xs tracking-wider">
                         <tr>
@@ -141,7 +137,6 @@
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbzq9eOM9xHp0vJg2tFKhCLn-OLmz_brHdeVqqAgkTMe0NiGVFvyqbVv4RoiF9AxZ8r4/exec"; 
 
-        // Array penyimpanan data untuk filter global
         let fullData = []; 
         let filteredData = []; 
         let activeColIndex = -1;
@@ -158,7 +153,6 @@
             return new Date(0);
         }
 
-        // Fungsi bantu memproses angka Rupiah/String agar bisa disortir dengan benar
         function parseCleanNumber(valX) {
             return parseFloat(valX.replace(/[^\d.-]/g, '')) || 0;
         }
@@ -168,7 +162,6 @@
                 const res = await fetch(API_URL + "?action=getEskalasi", { method: "POST" });
                 const data = await res.json();
                 
-                // Mapping data dari backend ke dalam struktur array 2 dimensi supaya cocok dengan sistem filter A1
                 fullData = data.map(item => [
                     String(item.no),
                     String(item.kode),
@@ -183,7 +176,7 @@
                 document.getElementById("eskalasiTable").style.display = "table";
                 
                 renderTable(filteredData);
-                initFilterSystem(); // Inisialisasi event listener filter setelah table dimuat
+                initFilterSystem();
             } catch (e) {
                 document.getElementById("loading").innerHTML = "<p class='text-red-500 font-medium'>Gagal memproses data. Terjadi kendala koneksi backend.</p>";
             }
@@ -205,22 +198,27 @@
             });
         }
 
-        // --- LOGIKA UTAMA FILTER SISTEM DIADAPTASI DARI A1 ---
         const menu = document.getElementById('filterMenu');
         const searchBox = document.getElementById('menuSearch');
         const masterCheckbox = document.getElementById('masterCheckbox');
+        const tableWrapper = document.getElementById('tableWrapper');
 
         function initFilterSystem() {
             document.querySelectorAll('th[data-col]').forEach(th => {
                 th.onclick = (e) => {
                     activeColIndex = parseInt(th.getAttribute('data-col'));
-                    const rect = th.getBoundingClientRect();
+                    
+                    // Mengubah perhitungan posisi agar relatif terhadap kontainer pembungkus tabel
+                    const wrapperRect = tableWrapper.getBoundingClientRect();
+                    const thRect = th.getBoundingClientRect();
+                    
                     menu.style.display = 'block';
-                    menu.style.top = (rect.bottom + window.scrollY) + 'px';
-                    menu.style.left = (rect.left + window.scrollX) + 'px';
+                    // Mengatur top & left tepat di bawah ujung elemen th/tombol segitiga secara presisi
+                    menu.style.top = (thRect.bottom - wrapperRect.top + tableWrapper.scrollTop) + 'px';
+                    menu.style.left = (thRect.left - wrapperRect.left + tableWrapper.scrollLeft) + 'px';
+                    
                     searchBox.value = '';
                     
-                    // 1. Dapatkan data yang difilter oleh kolom LAIN (kecuali kolom ini sendiri)
                     const dataFilteredByOthers = fullData.filter(r => {
                         for (let colIdx in currentAppliedFilters) {
                             if (parseInt(colIdx) === activeColIndex) continue; 
@@ -229,10 +227,7 @@
                         return true;
                     });
 
-                    // 2. Ambil nilai unik dari hasil filter kolom lain tersebut
                     const availableVals = [...new Set(dataFilteredByOthers.map(r => String(r[activeColIndex])))].sort();
-                    
-                    // 3. Tentukan mana yang sedang ter-cek
                     const currentlyChecked = currentAppliedFilters[activeColIndex] || availableVals;
 
                     const list = document.getElementById('checkboxList');
@@ -268,12 +263,10 @@
         function execSort(dir) {
             filteredData.sort((a, b) => {
                 let valA = a[activeColIndex], valB = b[activeColIndex];
-                // Jika kolom No (0) atau Nilai (4)
                 if(activeColIndex === 0 || activeColIndex === 4) { 
                     valA = parseCleanNumber(valA); 
                     valB = parseCleanNumber(valB); 
                 }
-                // Jika kolom Tanggal (3)
                 if(activeColIndex === 3) {
                     valA = parseDateMmmYYYY(valA).getTime();
                     valB = parseDateMmmYYYY(valB).getTime();
