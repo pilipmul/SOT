@@ -69,7 +69,7 @@
                         <tr>
                             <th scope="col" class="px-6 py-4 font-semibold text-left">Nama</th>
                             <th scope="col" class="px-6 py-4 font-semibold">Eskalasi</th>
-                            <th scope="col" class="px-6 py-4 font-semibold">Teguran</th>
+                            <th scope="col" class="px-6 py-4 font-semibold">To Do</th>
                             <th scope="col" class="px-6 py-4 font-semibold">Perbaikan</th>
                             <th scope="col" class="px-6 py-4 font-semibold">Schedule</th>
                             <th scope="col" class="px-6 py-4 font-semibold">Syncflow</th>
@@ -110,7 +110,7 @@
                     tr.innerHTML = `
                         <td class="px-6 py-4 text-left font-semibold text-slate-900 whitespace-nowrap">${user.nama}</td>
                         <td class="px-6 py-4">${createCheckbox(user.row, 4, user.eskalasi)}</td>
-                        <td class="px-6 py-4">${createCheckbox(user.row, 5, user.suratTeguran)}</td>
+                        <td class="px-6 py-4">${createCheckbox(user.row, 5, user.todo)}</td>
                         <td class="px-6 py-4">${createCheckbox(user.row, 6, user.dokPerbaikan)}</td>
                         <td class="px-6 py-4">${createCheckbox(user.row, 7, user.schedulePD)}</td>
                         <td class="px-6 py-4">${createCheckbox(user.row, 8, user.syncflow)}</td>
