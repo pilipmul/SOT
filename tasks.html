@@ -438,7 +438,7 @@
             
             // Format request disesuaikan dengan skema doPost SOT Anda
             const formData = new FormData();
-            formData.append('action', 'getItems'); // Sesuaikan routing action di backend GAS Anda
+            formData.append('action', 'getTaskItems'); // Sesuaikan routing action di backend GAS Anda
             
             // Karena doPost SOT membutuhkan parameter, kita kirimkan data melalui Fetch API
             fetch(GAS_WEB_APP_URL, {
