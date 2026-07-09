@@ -4,6 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SOT Tasks - Microsoft To-Do Style</title>
+    
+    <!-- PROTEKSI AKSES MASUK DIRECT LINK -->
+    <script>
+        (function() {
+            // 1. Ambil data login dari localStorage
+            const session = localStorage.getItem("user");
+            const userData = session ? JSON.parse(session) : null;
+
+            // 2. Cek apakah user valid DAN memiliki otorisasi 'Y' untuk modul tasks
+            if (!userData || !userData.akses || userData.akses.tasks !== "Y") {
+                // Paksa tendang balik ke halaman login jika akses tidak sah
+                window.location.replace("login.html"); 
+                
+                // Menyembunyikan tampilan halaman secara instan agar kode HTML tidak bocor di layar
+                document.documentElement.style.display = "none";
+                throw new Error("Akses ditolak"); 
+            }
+        })();
+    </script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- ... sisa CSS link dan Style tag di bawahnya tetap sama ... -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOT Tasks - Microsoft To-Do Style</title>
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -353,6 +378,12 @@
         
         <div class="sidebar-cell">
             <div class="sidebar-title">SOT Tasks</div>
+            
+            <!-- TOMBOL NAVIGASI KEMBALI KE DASHBOARD SOT -->
+            <a href="https://pilipmul.github.io/SOT/dashboard.html" class="nav-item" style="color: #2564cf; border-bottom: 1px solid var(--border-color); margin-bottom: 10px;">
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
+            </a>
+        
             <a href="#" class="nav-item active" onclick="switchFilter('all', this)">
                 <i class="fa-solid fa-house"></i> Semua Tugas
             </a>
