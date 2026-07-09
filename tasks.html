@@ -560,8 +560,8 @@
             renderTasks();
             
             // Kirim ke backend SOT
-            syncToBackend('submitEskalasi', newTask); // Gunakan routing action penampung Anda di GAS
-
+            syncToBackend('submitTask', newTask); 
+            
             // Reset Form
             titleInput.value = '';
             dueInput.value = '';
@@ -593,7 +593,7 @@
                     };
                     
                     localTasks.push(regeneratedTask);
-                    syncToBackend('submitEskalasi', regeneratedTask);
+                    syncToBackend('submitTask', regeneratedTask);
                     alert(`Tugas Otomatis Berulang Diperbarui untuk jadwal berikutnya: ${nextDue || 'Segera'}`);
                 } else {
                     // Tugas Biasa Selesai balik (Toggle)
@@ -601,7 +601,7 @@
                 }
                 
                 renderTasks();
-                syncToBackend('submitEskalasi', task);
+                syncToBackend('submitTask', task);
             }
         }
 
@@ -626,7 +626,7 @@
             if (task) {
                 task.important = !task.important;
                 renderTasks();
-                syncToBackend('submitEskalasi', task);
+                syncToBackend('submitTask', task);
             }
         }
 
@@ -634,7 +634,7 @@
             if(confirm("Hapus tugas ini secara permanen dari database SOT?")) {
                 localTasks = localTasks.filter(t => t.id !== id);
                 renderTasks();
-                syncToBackend('submitEskalasi', { id: id, actionType: 'DELETE' });
+                syncToBackend('submitTask', { id: id, actionType: 'DELETE' });
             }
         }
 
