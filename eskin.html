@@ -61,37 +61,37 @@
             <form id="formEskin" autocomplete="off" class="p-6 space-y-5">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Nomor Surat/Eskalasi</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 text-center">Nomor Surat/Eskalasi</label>
                         <input type="text" id="displayKode" value="Memuat..." disabled 
-                            class="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-500 font-mono font-semibold text-sm focus:outline-none">
+                            class="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-500 font-mono font-semibold text-sm focus:outline-none text-center">
                     </div>
                     <div class="md:col-span-2">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Subject</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 text-center">Subject</label>
                         <textarea id="subject" rows="1" placeholder="Judul keperluan pengajuan..." required
-                            class="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition resize-none"></textarea>
+                            class="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition resize-none text-center"></textarea>
                     </div>
                 </div>
-
+            
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-100 pt-4">
                     <div class="relative">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Diajukan</label>
-                        <input type="text" id="diajukan" class="user-search w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 text-center">Diajukan Oleh</label>
+                        <input type="text" id="diajukan" class="user-search w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-center" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
                         <div class="autocomplete-list absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl max-h-40 overflow-y-auto z-50 shadow-lg hidden divide-y divide-slate-100"></div>
                     </div>
                     <div class="relative">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Diketahui</label>
-                        <input type="text" id="diketahui" class="user-search w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 text-center">Diketahui Oleh</label>
+                        <input type="text" id="diketahui" class="user-search w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-center" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
                         <div class="autocomplete-list absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl max-h-40 overflow-y-auto z-50 shadow-lg hidden divide-y divide-slate-100"></div>
                     </div>
                     <div class="relative">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Disetujui</label>
-                        <input type="text" id="disetujui" class="user-search w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 text-center">Disetujui Oleh</label>
+                        <input type="text" id="disetujui" class="user-search w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-center" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
                         <div class="autocomplete-list absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl max-h-40 overflow-y-auto z-50 shadow-lg hidden divide-y divide-slate-100"></div>
                     </div>
                 </div>
-
+            
                 <div class="border-t border-slate-100 pt-4">
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Daftar Item Pengajuan (Maksimal 10 Baris)</label>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2 text-center">Daftar Item Pengajuan (Maksimal 10 Baris)</label>
                     <div class="overflow-visible border border-slate-200 rounded-xl shadow-inner bg-slate-50/30">
                         <table class="min-w-full text-sm">
                             <thead class="bg-slate-900 text-white uppercase text-xs tracking-wider rounded-t-xl">
