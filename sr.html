@@ -95,21 +95,6 @@
             </a>
         </div>
 
-        <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-200 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="relative w-full md:w-96">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </span>
-                <input type="text" id="searchInput" onkeyup="globalSearch()" placeholder="Cari objek atau tanggal..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-            </div>
-            <div class="flex items-center gap-2 self-end md:self-auto text-xs text-slate-500">
-                <button onclick="fetchCSVData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-xs transition flex items-center gap-2 cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.253 8H18"></path></svg>
-                    Refresh Data
-                </button>
-            </div>
-        </div>
-
         <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden" id="tableWrapper" style="position: relative;">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-slate-200 text-left text-sm" id="reportTable">
@@ -193,7 +178,6 @@
         let activeColIndex = -1;
         let currentAppliedFilters = {};
 
-        // Parser Tanggal untuk Format Kolom SR (jika berbasis "Mmm YYYY" atau text biasa)
         function parseDateMmmYYYY(str) {
             const months = {"jan":0,"feb":1,"mar":2,"apr":3,"may":4,"jun":5,"jul":6,"aug":7,"sep":8,"oct":9,"nov":10,"dec":11};
             const parts = str.toLowerCase().split(' ');
@@ -235,7 +219,6 @@
                     if (!valX && !valY) continue;
 
                     validRowCount++;
-                    // Struktur array internal disamakan: [no_urut, objek, tanggal, foto_before, foto_after]
                     fullData.push([
                         String(validRowCount),
                         valX,
@@ -383,7 +366,7 @@
         function execSort(dir) {
             filteredData.sort((a, b) => {
                 let valA = a[activeColIndex], valB = b[activeColIndex];
-                if(activeColIndex === 2) { // Sortir untuk kolom tanggal
+                if(activeColIndex === 2) { 
                     valA = parseDateMmmYYYY(valA).getTime();
                     valB = parseDateMmmYYYY(valB).getTime();
                 }
@@ -415,22 +398,6 @@
             });
             renderTable(filteredData);
             menu.style.display = 'none';
-        }
-
-        // Fungsi Pencarian Input Global
-        function globalSearch() {
-            const input = document.getElementById("searchInput");
-            const filter = input.value.toUpperCase();
-            
-            // Filter data array utama berdasarkan input teks global
-            const searchResult = fullData.filter(row => {
-                const matchObjek = row[1].toUpperCase().indexOf(filter) > -1;
-                const matchTanggal = row[2].toUpperCase().indexOf(filter) > -1;
-                return matchObjek || matchTanggal;
-            });
-
-            // Sinkronkan data terfilter global ke rendering tabel
-            renderTable(searchResult);
         }
 
         function openPhotoModal(beforeUrl, afterUrl, objectName) {
