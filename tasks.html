@@ -752,10 +752,10 @@
             const dueInput = document.getElementById('task-due-input');
             const repeatInput = document.getElementById('task-repeat-input');
             
-            // Cek apakah sedang membuka filter bawaan atau sedang membuka List Custom
+            // Deteksi otomatis nama list jika user sedang berada di filter list custom tertentu
             let assignedList = "";
             if (!['all', 'important', 'recurring', 'completed'].includes(currentFilter)) {
-                assignedList = currentFilter; // Otomatis mengisi nama list custom saat ini
+                assignedList = currentFilter;
             }
         
             const newTask = {
@@ -766,16 +766,17 @@
                 repeat: repeatInput.value,
                 important: currentFilter === 'important',
                 completed: false,
-                listName: assignedList // Nama list dioper ke sini
+                list: assignedList // Menggunakan properti "list" agar sinkron dengan Backend
             };
         
             localTasks.push(newTask);
             renderSidebarLists();
             renderTasks();
             
-            // Kirim ke Google Sheets, kolom G otomatis terisi nama list sesuai baris tugas ini
+            // Kirim data ke Google Sheets
             syncToBackend('submitTask', newTask);
             
+            // Reset form input
             titleInput.value = '';
             dueInput.value = '';
             repeatInput.value = 'none';
@@ -832,9 +833,9 @@
                 localTasks[taskIndex].title = document.getElementById('edit-task-title').value.trim();
                 localTasks[taskIndex].due = document.getElementById('edit-task-due').value;
                 localTasks[taskIndex].repeat = document.getElementById('edit-task-repeat').value;
-                localTasks[taskIndex].listName = document.getElementById('edit-task-listname').value;
+                localTasks[taskIndex].list = document.getElementById('edit-task-listname').value; // Menggunakan .list
                 localTasks[taskIndex].note = document.getElementById('edit-task-note').value.trim();
-
+        
                 renderSidebarLists();
                 renderTasks();
                 syncToBackend('submitTask', localTasks[taskIndex]);
