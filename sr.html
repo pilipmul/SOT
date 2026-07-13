@@ -143,8 +143,17 @@
                 <button onclick="applyCheckboxFilter()" style="background:#1877f2; color:white; margin-top:10px; text-align:center; border-radius:4px; width:100%; padding:8px; border:none; cursor:pointer; font-weight:bold;">Terapkan Filter</button>
             </div>
 
-            <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 text-xs text-slate-500 flex justify-between items-center">
-                <span>Total Laporan: <strong id="totalRecords" class="text-slate-700">0</strong> baris ditemukan</span>
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 text-xs text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div>
+                    <span>Menampilkan <strong id="showingRecords" class="text-slate-700">0 - 0</strong> dari <strong id="totalRecords" class="text-slate-700">0</strong> baris ditemukan</span>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button id="btnPrevPage" onclick="prevPage()" class="px-3 py-1.5 bg-white border border-slate-300 rounded text-slate-700 hover:bg-slate-50 transition cursor-pointer font-medium disabled:opacity-40 disabled:cursor-not-allowed">Sebelumnya</button>
+                    <span class="text-slate-600 font-medium">Halaman <span id="currentPageNum">1</span> / <span id="totalPageNum">1</span></span>
+                    <button id="btnNextPage" onclick="nextPage()" class="px-3 py-1.5 bg-white border border-slate-300 rounded text-slate-700 hover:bg-slate-50 transition cursor-pointer font-medium disabled:opacity-40 disabled:cursor-not-allowed">Selanjutnya</button>
+                </div>
+                
                 <span>Power by: PBC Internal Dev Team</span>
             </div>
         </div>
@@ -174,6 +183,10 @@
         let filteredData = []; 
         let currentPhotos = { before: "", after: "", objectName: "" };
         
+        // State Paginasi Halaman
+        let currentPage = 1;
+        const rowsPerPage = 100;
+
         // State Filter Kolom
         let activeColIndex = -1;
         let currentAppliedFilters = {};
@@ -191,8 +204,6 @@
 
         async function fetchCSVData() {
             const tableBody = document.getElementById('tableBody');
-            const totalRecords = document.getElementById('totalRecords');
-
             try {
                 const response = await fetch(CSV_URL);
                 const csvText = await response.text();
@@ -229,7 +240,8 @@
                 }
 
                 filteredData = [...fullData];
-                renderTable(filteredData);
+                currentPage = 1; // Reset ke halaman pertama saat data masuk
+                renderTable();
 
             } catch (error) {
                 console.error("Error:", error);
@@ -237,23 +249,45 @@
             }
         }
 
-        function renderTable(data) {
+        function renderTable() {
             const tableBody = document.getElementById('tableBody');
             const totalRecords = document.getElementById('totalRecords');
+            const showingRecords = document.getElementById('showingRecords');
+            const currentPageNum = document.getElementById('currentPageNum');
+            const totalPageNum = document.getElementById('totalPageNum');
+            
             tableBody.innerHTML = '';
 
-            if (data.length === 0) {
+            const totalRows = filteredData.length;
+            const totalPages = Math.ceil(totalRows / rowsPerPage) || 1;
+            
+            // Validasi jangkauan halaman aktif
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = Math.min(startIndex + rowsPerPage, totalRows);
+
+            if (totalRows === 0) {
                 tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400">Data laporan tidak ditemukan.</td></tr>`;
                 totalRecords.innerText = 0;
+                showingRecords.innerText = "0 - 0";
+                currentPageNum.innerText = 1;
+                totalPageNum.innerText = 1;
+                document.getElementById('btnPrevPage').disabled = true;
+                document.getElementById('btnNextPage').disabled = true;
                 return;
             }
 
-            data.forEach((row, index) => {
+            // Iris data sesuai halaman aktif saat ini (Maksimal 100 baris)
+            const pageData = filteredData.slice(startIndex, endIndex);
+
+            pageData.forEach((row, index) => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/80 transition duration-150 odd:bg-white even:bg-slate-50/40";
                 
                 tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-slate-400 font-medium text-center">${index + 1}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-slate-400 font-medium text-center">${startIndex + index + 1}</td>
                     <td class="px-6 py-4 font-semibold text-slate-900">${row[1] || '-'}</td>
                     <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${row[2] || '-'}</td>
                     <td class="px-6 py-4 text-center whitespace-nowrap">${renderDocumentationCell(row[3], row[4], row[1])}</td>
@@ -261,7 +295,29 @@
                 tableBody.appendChild(tr);
             });
 
-            totalRecords.innerText = data.length;
+            // Perbarui Elemen Kontrol Paginasi Informasi Halaman
+            totalRecords.innerText = totalRows;
+            showingRecords.innerText = `${startIndex + 1} - ${endIndex}`;
+            currentPageNum.innerText = currentPage;
+            totalPageNum.innerText = totalPages;
+
+            document.getElementById('btnPrevPage').disabled = (currentPage === 1);
+            document.getElementById('btnNextPage').disabled = (currentPage === totalPages);
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+            }
         }
 
         const renderDocumentationCell = (beforeUrl, afterUrl, objectName) => {
@@ -372,7 +428,8 @@
                 }
                 return dir === 'asc' ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
             });
-            renderTable(filteredData);
+            currentPage = 1; // Reset ke halaman pertama saat disortir
+            renderTable();
             menu.style.display = 'none';
         }
 
@@ -396,7 +453,8 @@
                 }
                 return true;
             });
-            renderTable(filteredData);
+            currentPage = 1; // Reset ke halaman pertama saat filter diterapkan
+            renderTable();
             menu.style.display = 'none';
         }
 
