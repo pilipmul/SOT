@@ -18,6 +18,53 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
+
+        /* --- CSS FILTER & ICON (INTEGRASI ESKALASI) --- */
+        th { position: relative; padding-right: 32px !important; }
+        th.no-filter { padding-right: 24px !important; }
+        
+        .filter-icon-btn {
+            position: absolute;
+            right: 4px; top: 50%;
+            transform: translateY(-50%);
+            width: 24px; height: 24px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 4px; cursor: pointer;
+            transition: all 0.15s;
+            color: #cbd5e1;
+        }
+        .filter-icon-btn:hover {
+            background-color: #1e293b;
+            color: #3b82f6;
+        }
+        .filter-icon {
+            width: 12px; height: 12px; fill: currentColor;
+        }
+        
+        .filter-active .filter-icon-btn { color: #ffeb3b !important; }
+        .filter-active .filter-icon { display: none; }
+        .filter-active .filter-icon-btn::after {
+            content: "";
+            width: 14px; height: 14px; background-color: #ffeb3b;
+            -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z'/%3E%3C/svg%3E") no-repeat center;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z'/%3E%3C/svg%3E") no-repeat center;
+        }
+        
+        .filter-menu {
+            position: absolute;
+            background: white; color: black;
+            border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 1000; display: none; width: 220px;
+            padding: 10px; border-radius: 4px;
+            text-transform: none; font-weight: normal; font-size: 13px;
+        }
+        .filter-menu h4 { margin: 0 0 10px 0; font-size: 12px; border-bottom: 1px solid #eee; padding-bottom: 5px; font-weight: bold; }
+        .filter-menu button { display: block; width: 100%; text-align: left; background: none; border: none; padding: 8px; cursor: pointer; font-size: 13px; }
+        .filter-menu button:hover { background: #f0f2f5; }
+        .filter-search-box { width: 100%; padding: 6px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 12px; }
+        .master-checkbox-container { display: flex; align-items: center; gap: 5px; font-size: 12px; padding: 5px 0; border-bottom: 1px dotted #eee; font-weight: bold; }
+        .checkbox-list { max-height: 150px; overflow-y: auto; margin-top: 5px; border: 1px solid #eee; padding: 5px; }
+        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 12px; margin-bottom: 4px; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen">
@@ -26,7 +73,7 @@
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
                 <div class="bg-blue-600 p-2 rounded-lg">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                 </div>
                 <div>
                     <h1 class="text-xl font-bold tracking-wide">SOT (Sistem Operasional Terintegrasi)</h1>
@@ -41,12 +88,19 @@
 
     <main class="max-w-7xl mx-auto px-4 py-8">
         
+        <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-200 mb-6 flex justify-between items-center gap-4">
+            <a href="dashboard.html" class="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Kembali ke Dashboard
+            </a>
+        </div>
+
         <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-200 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="relative w-full md:w-96">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </span>
-                <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Cari objek atau tanggal..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                <input type="text" id="searchInput" onkeyup="globalSearch()" placeholder="Cari objek atau tanggal..." class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
             </div>
             <div class="flex items-center gap-2 self-end md:self-auto text-xs text-slate-500">
                 <button onclick="fetchCSVData()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-xs transition flex items-center gap-2 cursor-pointer">
@@ -56,15 +110,25 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden">
+        <div class="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden" id="tableWrapper" style="position: relative;">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-slate-200 text-left text-sm" id="reportTable">
                     <thead class="bg-slate-900 text-white uppercase text-xs tracking-wider">
                         <tr>
-                            <th scope="col" class="px-6 py-4 font-semibold w-16">No</th>
-                            <th scope="col" class="px-6 py-4 font-semibold">Objek</th>
-                            <th scope="col" class="px-6 py-4 font-semibold">Tanggal</th>
-                            <th scope="col" class="px-6 py-4 font-semibold text-center">Dokumentasi</th>
+                            <th scope="col" class="px-6 py-4 font-semibold w-16 no-filter text-center">No</th>
+                            <th scope="col" class="px-6 py-4 font-semibold">
+                                Objek
+                                <div class="filter-icon-btn" data-col="1" onclick="toggleFilterMenu(event, this)">
+                                    <svg class="filter-icon" viewBox="0 0 20 20"><path d="M5 8l5 5 5-5H5z"/></svg>
+                                </div>
+                            </th>
+                            <th scope="col" class="px-6 py-4 font-semibold">
+                                Tanggal
+                                <div class="filter-icon-btn" data-col="2" onclick="toggleFilterMenu(event, this)">
+                                    <svg class="filter-icon" viewBox="0 0 20 20"><path d="M5 8l5 5 5-5H5z"/></svg>
+                                </div>
+                            </th>
+                            <th scope="col" class="px-6 py-4 font-semibold text-center no-filter">Dokumentasi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200" id="tableBody">
@@ -77,6 +141,23 @@
                     </tbody>
                 </table>
             </div>
+
+            <div id="filterMenu" class="filter-menu">
+                <h4 id="menuTitle">Opsi Kolom</h4>
+                <button onclick="execSort('asc')">↑ Sort A to Z / Terkecil</button>
+                <button onclick="execSort('desc')">↓ Sort Z to A / Terbesar</button>
+                <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+                <input type="text" id="menuSearch" class="filter-search-box" placeholder="Cari nilai..." onkeyup="searchInMenu()">
+                
+                <div class="master-checkbox-container">
+                    <input type="checkbox" id="masterCheckbox" checked onclick="toggleAllCheckboxes(this.checked)"> 
+                    <span>Pilih Semua</span>
+                </div>
+
+                <div class="checkbox-list" id="checkboxList"></div>
+                <button onclick="applyCheckboxFilter()" style="background:#1877f2; color:white; margin-top:10px; text-align:center; border-radius:4px; width:100%; padding:8px; border:none; cursor:pointer; font-weight:bold;">Terapkan Filter</button>
+            </div>
+
             <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 text-xs text-slate-500 flex justify-between items-center">
                 <span>Total Laporan: <strong id="totalRecords" class="text-slate-700">0</strong> baris ditemukan</span>
                 <span>Power by: PBC Internal Dev Team</span>
@@ -95,9 +176,7 @@
             </div>
             <div class="p-2 relative flex justify-center items-center bg-slate-100 min-h-[40vh] max-h-[75vh]">
                 <button id="prevBtn" onclick="changeSlide('before')" class="absolute left-4 z-10 bg-black/50 hover:bg-black/80 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed">&lt;</button>
-                
                 <img id="modalImage" src="" alt="Dokumentasi Perbaikan" class="max-w-full max-h-[70vh] object-contain rounded">
-                
                 <button id="nextBtn" onclick="changeSlide('after')" class="absolute right-4 z-10 bg-black/50 hover:bg-black/80 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed">&gt;</button>
             </div>
         </div>
@@ -106,8 +185,25 @@
     <script>
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vScnbvhwMQ-Ba56JEyetsYAQWXk4LFOKe8yM-gBBQueazPaL-6u5d3V6m_e9cO4sHxOIglIqxSjeAVl/pub?output=csv";
         
-        // State global untuk mengontrol slide foto modal yang sedang aktif
+        let fullData = []; 
+        let filteredData = []; 
         let currentPhotos = { before: "", after: "", objectName: "" };
+        
+        // State Filter Kolom
+        let activeColIndex = -1;
+        let currentAppliedFilters = {};
+
+        // Parser Tanggal untuk Format Kolom SR (jika berbasis "Mmm YYYY" atau text biasa)
+        function parseDateMmmYYYY(str) {
+            const months = {"jan":0,"feb":1,"mar":2,"apr":3,"may":4,"jun":5,"jul":6,"aug":7,"sep":8,"oct":9,"nov":10,"dec":11};
+            const parts = str.toLowerCase().split(' ');
+            if (parts.length === 2) {
+                const m = months[parts[0].substring(0, 3)];
+                const y = parseInt(parts[1]);
+                return new Date(y, m, 1);
+            }
+            return new Date(0);
+        }
 
         async function fetchCSVData() {
             const tableBody = document.getElementById('tableBody');
@@ -118,13 +214,13 @@
                 const csvText = await response.text();
                 
                 const rows = parseCSV(csvText);
-                tableBody.innerHTML = '';
+                
+                const colX = 23; // Index kolom Objek
+                const colY = 24; // Index kolom Tanggal
+                const colZ = 25; // Link Foto Before
+                const colAA = 26; // Link Foto After
 
-                const colX = 23;
-                const colY = 24;
-                const colZ = 25;
-                const colAA = 26;
-
+                fullData = [];
                 let validRowCount = 0;
 
                 for (let i = 1; i < rows.length; i++) {
@@ -139,51 +235,70 @@
                     if (!valX && !valY) continue;
 
                     validRowCount++;
-
-                    // Render tombol tunggal "Lihat Foto" jika salah satu atau kedua link foto tersedia
-                    const renderDocumentationCell = (beforeUrl, afterUrl, objectName) => {
-                        const hasBefore = beforeUrl && (beforeUrl.startsWith('http://') || beforeUrl.startsWith('https://'));
-                        const hasAfter = afterUrl && (afterUrl.startsWith('http://') || afterUrl.startsWith('https://'));
-
-                        if (!hasBefore && !hasAfter) {
-                            return `<span class="text-slate-400 italic text-xs">Tidak ada foto</span>`;
-                        }
-
-                        const escapedName = objectName.replace(/'/g, "\\'");
-                        const cleanBefore = hasBefore ? beforeUrl : "";
-                        const cleanAfter = hasAfter ? afterUrl : "";
-
-                        return `
-                            <button onclick="openPhotoModal('${cleanBefore}', '${cleanAfter}', '${escapedName}')" class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 px-3 py-1.5 rounded-lg font-medium text-xs border border-slate-200 hover:border-blue-200 transition cursor-pointer">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                                Lihat Foto
-                            </button>
-                        `;
-                    };
-
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50/80 transition duration-150 odd:bg-white even:bg-slate-50/40";
-                    
-                    tr.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap text-slate-400 font-medium">${validRowCount}</td>
-                        <td class="px-6 py-4 font-semibold text-slate-900">${valX || '-'}</td>
-                        <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${valY || '-'}</td>
-                        <td class="px-6 py-4 text-center whitespace-nowrap">${renderDocumentationCell(valZ, valAA, valX)}</td>
-                    `;
-                    tableBody.appendChild(tr);
+                    // Struktur array internal disamakan: [no_urut, objek, tanggal, foto_before, foto_after]
+                    fullData.push([
+                        String(validRowCount),
+                        valX,
+                        valY,
+                        valZ,
+                        valAA
+                    ]);
                 }
 
-                totalRecords.innerText = validRowCount;
-
-                if (validRowCount === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400">Data laporan tidak ditemukan. Pastikan settingan Publish to Web sudah mengarah ke sheet "SR".</td></tr>`;
-                }
+                filteredData = [...fullData];
+                renderTable(filteredData);
 
             } catch (error) {
                 console.error("Error:", error);
                 tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-red-500 font-medium">Gagal memproses data CSV. Terjadi kendala koneksi atau struktur data.</td></tr>`;
             }
         }
+
+        function renderTable(data) {
+            const tableBody = document.getElementById('tableBody');
+            const totalRecords = document.getElementById('totalRecords');
+            tableBody.innerHTML = '';
+
+            if (data.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-slate-400">Data laporan tidak ditemukan.</td></tr>`;
+                totalRecords.innerText = 0;
+                return;
+            }
+
+            data.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition duration-150 odd:bg-white even:bg-slate-50/40";
+                
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-slate-400 font-medium text-center">${index + 1}</td>
+                    <td class="px-6 py-4 font-semibold text-slate-900">${row[1] || '-'}</td>
+                    <td class="px-6 py-4 text-slate-600 whitespace-nowrap">${row[2] || '-'}</td>
+                    <td class="px-6 py-4 text-center whitespace-nowrap">${renderDocumentationCell(row[3], row[4], row[1])}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            totalRecords.innerText = data.length;
+        }
+
+        const renderDocumentationCell = (beforeUrl, afterUrl, objectName) => {
+            const hasBefore = beforeUrl && (beforeUrl.startsWith('http://') || beforeUrl.startsWith('https://'));
+            const hasAfter = afterUrl && (afterUrl.startsWith('http://') || afterUrl.startsWith('https://'));
+
+            if (!hasBefore && !hasAfter) {
+                return `<span class="text-slate-400 italic text-xs">Tidak ada foto</span>`;
+            }
+
+            const escapedName = objectName.replace(/'/g, "\\'");
+            const cleanBefore = hasBefore ? beforeUrl : "";
+            const cleanAfter = hasAfter ? afterUrl : "";
+            return `
+                <button onclick="openPhotoModal('${cleanBefore}', '${cleanAfter}', '${escapedName}')" class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-600 px-3 py-1.5 rounded-lg font-medium text-xs border border-slate-200 hover:border-blue-200 transition cursor-pointer">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    Lihat Foto
+                </button>
+            `;
+        };
 
         function parseCSV(text) {
             let p = '', r = [];
@@ -210,75 +325,144 @@
             return r;
         }
 
-        function filterTable() {
-            const input = document.getElementById("searchInput");
-            const filter = input.value.toUpperCase();
-            const table = document.getElementById("reportTable");
-            const tr = table.getElementsByTagName("tr");
-            let visibleCount = 0;
+        /* --- FUNGSI INTEGRASI FILTER POP-UP --- */
+        const menu = document.getElementById('filterMenu');
+        const searchBox = document.getElementById('menuSearch');
+        const masterCheckbox = document.getElementById('masterCheckbox');
+        const tableWrapper = document.getElementById('tableWrapper');
 
-            for (let i = 1; i < tr.length; i++) {
-                if (tr[i].id === 'loadingRow') continue;
-                let match = false;
-                const tds = tr[i].getElementsByTagName("td");
-                
-                for (let j = 1; j <= 2; j++) {
-                    if (tds[j]) {
-                        if (tds[j].textContent.toUpperCase().indexOf(filter) > -1) {
-                            match = true;
-                            break;
-                        }
-                    }
+        function toggleFilterMenu(e, element) {
+            activeColIndex = parseInt(element.getAttribute('data-col'));
+            const wrapperRect = tableWrapper.getBoundingClientRect();
+            const btnRect = element.getBoundingClientRect();
+            
+            menu.style.display = 'block';
+            menu.style.top = (btnRect.bottom - wrapperRect.top) + 'px';
+            menu.style.left = (btnRect.left - wrapperRect.left) + 'px';
+            
+            searchBox.value = '';
+            const dataFilteredByOthers = fullData.filter(r => {
+                for (let colIdx in currentAppliedFilters) {
+                    if (parseInt(colIdx) === activeColIndex) continue; 
+                    if (!currentAppliedFilters[colIdx].includes(String(r[colIdx]))) return false;
                 }
-                if (match) {
-                    tr[i].style.display = "";
-                    visibleCount++;
-                } else {
-                    tr[i].style.display = "none";
-                }
-            }
-            document.getElementById("totalRecords").innerText = visibleCount;
+                return true;
+            });
+
+            const availableVals = [...new Set(dataFilteredByOthers.map(r => String(r[activeColIndex])))].sort();
+            const currentlyChecked = currentAppliedFilters[activeColIndex] || availableVals;
+
+            const list = document.getElementById('checkboxList');
+            list.innerHTML = '';
+            availableVals.forEach(v => {
+                const isChecked = currentlyChecked.includes(v);
+                list.innerHTML += `<div class="checkbox-item"><input type="checkbox" ${isChecked ? 'checked' : ''} value="${v}" onclick="updateMasterCheckbox()"> <span>${v ? v : '-'}</span></div>`;
+            });
+            updateMasterCheckbox();
+            e.stopPropagation();
         }
 
-        // Fungsi inisiasi modal menampung data Before dan After sekaligus
+        function searchInMenu() {
+            const filter = searchBox.value.toLowerCase();
+            document.querySelectorAll('.checkbox-item').forEach(item => {
+                item.style.display = item.innerText.toLowerCase().includes(filter) ? "flex" : "none";
+            });
+        }
+
+        function toggleAllCheckboxes(state) {
+            document.querySelectorAll('#checkboxList input[type="checkbox"]').forEach(cb => {
+                if (cb.parentElement.style.display !== 'none') cb.checked = state;
+            });
+        }
+
+        function updateMasterCheckbox() {
+            const cbs = Array.from(document.querySelectorAll('#checkboxList input[type="checkbox"]'));
+            masterCheckbox.checked = cbs.length > 0 && cbs.every(cb => cb.checked);
+        }
+
+        function execSort(dir) {
+            filteredData.sort((a, b) => {
+                let valA = a[activeColIndex], valB = b[activeColIndex];
+                if(activeColIndex === 2) { // Sortir untuk kolom tanggal
+                    valA = parseDateMmmYYYY(valA).getTime();
+                    valB = parseDateMmmYYYY(valB).getTime();
+                }
+                return dir === 'asc' ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+            });
+            renderTable(filteredData);
+            menu.style.display = 'none';
+        }
+
+        function applyCheckboxFilter() {
+            const cbs = Array.from(document.querySelectorAll('#checkboxList input[type="checkbox"]'));
+            const checkedVals = cbs.filter(i => i.checked).map(i => i.value);
+            const isAllChecked = cbs.every(cb => cb.checked);
+            const targetTh = document.querySelector(`.filter-icon-btn[data-col="${activeColIndex}"]`).closest('th');
+            
+            if (!isAllChecked) {
+                targetTh.classList.add('filter-active');
+                currentAppliedFilters[activeColIndex] = checkedVals;
+            } else {
+                targetTh.classList.remove('filter-active');
+                delete currentAppliedFilters[activeColIndex];
+            }
+
+            filteredData = fullData.filter(r => {
+                for (let colIdx in currentAppliedFilters) {
+                    if (!currentAppliedFilters[colIdx].includes(String(r[colIdx]))) return false;
+                }
+                return true;
+            });
+            renderTable(filteredData);
+            menu.style.display = 'none';
+        }
+
+        // Fungsi Pencarian Input Global
+        function globalSearch() {
+            const input = document.getElementById("searchInput");
+            const filter = input.value.toUpperCase();
+            
+            // Filter data array utama berdasarkan input teks global
+            const searchResult = fullData.filter(row => {
+                const matchObjek = row[1].toUpperCase().indexOf(filter) > -1;
+                const matchTanggal = row[2].toUpperCase().indexOf(filter) > -1;
+                return matchObjek || matchTanggal;
+            });
+
+            // Sinkronkan data terfilter global ke rendering tabel
+            renderTable(searchResult);
+        }
+
         function openPhotoModal(beforeUrl, afterUrl, objectName) {
             currentPhotos = { before: beforeUrl, after: afterUrl, objectName: objectName };
-            
-            // Tampilkan state Before terlebih dahulu sebagai default utama
             if (beforeUrl) {
                 changeSlide('before');
             } else if (afterUrl) {
                 changeSlide('after');
             }
-            
             document.getElementById('imageModal').classList.remove('hidden');
         }
 
-        // Handler untuk mengubah view slide foto dan teks penanda di dalam modal
         function changeSlide(type) {
             const modalImage = document.getElementById('modalImage');
             const modalTitle = document.getElementById('modalTitle');
             const badge = document.getElementById('modalStatusBadge');
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
-
+            
             if (type === 'before') {
                 modalImage.src = currentPhotos.before;
                 modalTitle.innerText = `Before - ${currentPhotos.objectName}`;
                 badge.innerText = "BEFORE";
                 badge.className = "mt-1 inline-block bg-amber-600 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded tracking-wider";
-                
-                // Atur visibilitas tombol navigasi
                 prevBtn.disabled = true;
-                nextBtn.disabled = !currentPhotos.after; // Aktif jika foto after tersedia
+                nextBtn.disabled = !currentPhotos.after;
             } else if (type === 'after') {
                 modalImage.src = currentPhotos.after;
                 modalTitle.innerText = `After - ${currentPhotos.objectName}`;
                 badge.innerText = "AFTER";
                 badge.className = "mt-1 inline-block bg-green-600 text-white text-[10px] font-bold uppercase px-2 py-0.5 rounded tracking-wider";
-                
-                // Atur visibilitas tombol navigasi
-                prevBtn.disabled = !currentPhotos.before; // Aktif jika foto before tersedia
+                prevBtn.disabled = !currentPhotos.before;
                 nextBtn.disabled = true;
             }
         }
@@ -293,6 +477,9 @@
             if (e.target === this) closeModal();
         });
 
+        document.onclick = () => menu.style.display = 'none';
+        menu.onclick = (e) => e.stopPropagation();
+        
         window.onload = fetchCSVData;
     </script>
 </body>
