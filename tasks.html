@@ -617,9 +617,8 @@
 
         function loadMockData() {
             localTasks = [
-                { id: "1", title: "Cek Flowmeter Deepwell Plaza Baru Ciledug", note: "Lakukan koordinasi dengan tim mekanikal teknik", due: "2026-07-10", repeat: "weekly", important: true, completed: false, listName: "Operasional PBC" },
-                { id: "2", title: "Pemeriksaan KWH Meter 3 Phase bersama PT Cardo Lestari", note: "Bawa berkas berita acara instalasi", due: "2026-07-12", repeat: "none", important: false, completed: false, listName: "Teknis Listrik" },
-                { id: "3", title: "Rapat Mingguan Tim Teknis PBC", note: "", due: "", repeat: "daily", important: false, completed: true, listName: "" }
+                { id: "1", title: "Cek Flowmeter Deepwell Plaza Baru Ciledug", note: "Lakukan koordinasi dengan tim mekanikal teknik", due: "2026-07-10", repeat: "weekly", important: true, completed: false, list: "Operasional PBC" },
+                { id: "2", title: "Pemeriksaan KWH Meter 3 Phase bersama PT Cardo Lestari", note: "Bawa berkas berita acara instalasi", due: "2026-07-12", repeat: "none", important: false, completed: false, list: "Teknis Listrik" }
             ];
             renderSidebarLists();
             renderTasks();
@@ -630,11 +629,10 @@
             const container = document.getElementById('custom-lists-container');
             container.innerHTML = '';
             
-            // Ekstrak nama list unik yang ada di database
             let listNames = [];
             localTasks.forEach(t => {
-                if (t.listName && !listNames.includes(t.listName)) {
-                    listNames.push(t.listName);
+                if (t.list && !listNames.includes(t.list)) {
+                    listNames.push(t.list);
                 }
             });
 
@@ -664,8 +662,7 @@
             } else if (currentFilter === 'all') {
                 filtered = localTasks.filter(t => !t.completed);
             } else {
-                // Filter berdasarkan Nama List Custom
-                filtered = localTasks.filter(t => t.listName === currentFilter && !t.completed);
+                filtered = localTasks.filter(t => t.list === currentFilter && !t.completed);
             }
 
             filtered.sort((a,b) => b.important - a.important);
@@ -688,8 +685,8 @@
                     const labelUlang = { daily: 'Harian', weekly: 'Mingguan', monthly: 'Bulanan' }[task.repeat];
                     metaHTML += `<span class="badge-repeat"><i class="fa-solid fa-arrows-rotate"></i> Berulang: ${labelUlang}</span>`;
                 }
-                if (task.listName) {
-                    metaHTML += `<span class="badge-list"><i class="fa-solid fa-folder-open"></i> ${task.listName}</span>`;
+                if (task.list) {
+                    metaHTML += `<span class="badge-list"><i class="fa-solid fa-folder-open"></i> ${task.list}</span>`;
                 }
 
                 let notePreviewHTML = task.note ? `<div class="task-note-preview">${task.note}</div>` : '';
@@ -732,15 +729,27 @@
             .finally(() => showLoading(false));
         }
 
-        // BUAT GRUP LIST BARU VIA PROMPT
         function createNewListPrompt() {
             const listName = prompt("Masukkan Nama List / Grup Baru:");
             if (listName && listName.trim() !== "") {
-                // Berpindah filter ke list baru yang kosong tersebut
-                currentFilter = listName.trim();
-                document.getElementById('current-list-title').innerText = currentFilter;
-                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                const cleanedListName = listName.trim();
                 
+                const initTask = {
+                    id: 'ID-' + Date.now(),
+                    title: `List "${cleanedListName}" berhasil dibuat`,
+                    note: "Ini adalah tugas otomatis inisiasi agar grup terdaftar. Anda bisa mengedit atau menghapusnya.",
+                    due: "",
+                    repeat: "none",
+                    important: false,
+                    completed: false,
+                    list: cleanedListName
+                };
+
+                localTasks.push(initTask);
+                currentFilter = cleanedListName;
+                document.getElementById('current-list-title').innerText = currentFilter;
+                
+                syncToBackend('submitTask', initTask);
                 renderSidebarLists();
                 renderTasks();
             }
@@ -752,12 +761,11 @@
             const dueInput = document.getElementById('task-due-input');
             const repeatInput = document.getElementById('task-repeat-input');
             
-            // Deteksi otomatis nama list jika user sedang berada di filter list custom tertentu
             let assignedList = "";
             if (!['all', 'important', 'recurring', 'completed'].includes(currentFilter)) {
                 assignedList = currentFilter;
             }
-        
+
             const newTask = {
                 id: 'ID-' + Date.now(),
                 title: titleInput.value.trim(),
@@ -766,23 +774,20 @@
                 repeat: repeatInput.value,
                 important: currentFilter === 'important',
                 completed: false,
-                list: assignedList // Menggunakan properti "list" agar sinkron dengan Backend
+                list: assignedList
             };
-        
+
             localTasks.push(newTask);
             renderSidebarLists();
             renderTasks();
             
-            // Kirim data ke Google Sheets
             syncToBackend('submitTask', newTask);
             
-            // Reset form input
             titleInput.value = '';
             dueInput.value = '';
             repeatInput.value = 'none';
         }
 
-        // JENDELA DIALOG MODAL EDIT DETAIL TUGAS
         function openEditModal(id) {
             const task = localTasks.find(t => t.id === id);
             if (!task) return;
@@ -793,38 +798,28 @@
             document.getElementById('edit-task-repeat').value = task.repeat || "none";
             document.getElementById('edit-task-note').value = task.note || "";
 
-            // Isi Opsi List Pindahan di Modal Dropdown
             const listSelect = document.getElementById('edit-task-listname');
             listSelect.innerHTML = `<option value="">Berdiri Sendiri (Tanpa List)</option>`;
             
             let listNames = [];
             localTasks.forEach(t => {
-                if (t.listName && !listNames.includes(t.listName)) {
-                    listNames.push(t.listName);
+                if (t.list && !listNames.includes(t.list)) {
+                    listNames.push(t.list);
                 }
             });
-            // Jika filter saat ini merupakan list baru yang belum ada tasknya, tambahkan ke dropdown
-            if (assignedListCurrent() && !listNames.includes(currentFilter)) {
-                listNames.push(currentFilter);
-            }
 
             listNames.forEach(name => {
                 listSelect.innerHTML += `<option value="${name}">${name}</option>`;
             });
-            listSelect.value = task.listName || "";
+            listSelect.value = task.list || "";
 
             document.getElementById('editModal').style.display = "block";
-        }
-
-        function assignedListCurrent() {
-            return !['all', 'important', 'recurring', 'completed'].includes(currentFilter);
         }
 
         function closeEditModal() {
             document.getElementById('editModal').style.display = "none";
         }
 
-        // SIMPAN PERUBAHAN EDIT TUGAS KEMBALI
         function saveTaskEdits() {
             const id = document.getElementById('edit-task-id').value;
             const taskIndex = localTasks.findIndex(t => t.id === id);
@@ -833,9 +828,9 @@
                 localTasks[taskIndex].title = document.getElementById('edit-task-title').value.trim();
                 localTasks[taskIndex].due = document.getElementById('edit-task-due').value;
                 localTasks[taskIndex].repeat = document.getElementById('edit-task-repeat').value;
-                localTasks[taskIndex].list = document.getElementById('edit-task-listname').value; // Menggunakan .list
+                localTasks[taskIndex].list = document.getElementById('edit-task-listname').value;
                 localTasks[taskIndex].note = document.getElementById('edit-task-note').value.trim();
-        
+
                 renderSidebarLists();
                 renderTasks();
                 syncToBackend('submitTask', localTasks[taskIndex]);
@@ -861,11 +856,10 @@
                         repeat: oldRepeat,
                         important: task.important,
                         completed: false,
-                        listName: task.listName
+                        list: task.list
                     };
                     localTasks.push(regeneratedTask);
                     syncToBackend('submitTask', regeneratedTask);
-                    alert(`Tugas Otomatis Berulang Diperbarui untuk jadwal berikutnya: ${nextDue || 'Segera'}`);
                 } else {
                     task.completed = !task.completed;
                 }
@@ -888,24 +882,6 @@
             return baseDate.toISOString().split('T')[0];
         }
 
-        function toggleImportant(id) {
-            const task = localTasks.find(t => t.id === id);
-            if (task) {
-                task.important = !task.important;
-                renderTasks();
-                syncToBackend('submitTask', task);
-            }
-        }
-
-        function deleteTask(id) {
-            if(confirm("Hapus tugas ini secara permanen dari database SOT?")) {
-                localTasks = localTasks.filter(t => t.id !== id);
-                renderSidebarLists();
-                renderTasks();
-                syncToBackend('submitTask', { id: id, actionType: 'DELETE' });
-            }
-        }
-
         function switchFilter(filterType, element) {
             currentFilter = filterType;
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -916,7 +892,6 @@
 
             renderTasks();
         }
-
         // Menutup modal secara otomatis jika area luar modal diklik
         window.onclick = function(event) {
             const modal = document.getElementById('editModal');
