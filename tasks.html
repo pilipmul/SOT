@@ -736,11 +736,29 @@
         function createNewListPrompt() {
             const listName = prompt("Masukkan Nama List / Grup Baru:");
             if (listName && listName.trim() !== "") {
-                // Berpindah filter ke list baru yang kosong tersebut
-                currentFilter = listName.trim();
-                document.getElementById('current-list-title').innerText = currentFilter;
-                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                const cleanedListName = listName.trim();
                 
+                // Buat satu tugas inisiasi agar nama list langsung masuk ke database kolom G
+                const initTask = {
+                    id: 'ID-' + Date.now(),
+                    title: `List "${cleanedListName}" berhasil dibuat`,
+                    note: "Ini adalah tugas otomatis saat membuat list baru. Anda bisa mengedit atau menghapusnya.",
+                    due: "",
+                    repeat: "none",
+                    important: false,
+                    completed: false,
+                    listName: cleanedListName
+                };
+        
+                // Simpan ke lokal dan kirim ke backend
+                localTasks.push(initTask);
+                currentFilter = cleanedListName;
+                document.getElementById('current-list-title').innerText = currentFilter;
+                
+                // Sinkronisasi ke Google Sheets (Kolom G & H langsung terisi)
+                syncToBackend('submitTask', initTask);
+                
+                // Refresh Tampilan
                 renderSidebarLists();
                 renderTasks();
             }
@@ -752,12 +770,12 @@
             const dueInput = document.getElementById('task-due-input');
             const repeatInput = document.getElementById('task-repeat-input');
             
-            // Masukkan otomatis ke list jika user sedang berada di filter list tertentu
+            // Cek apakah sedang membuka filter bawaan atau sedang membuka List Custom
             let assignedList = "";
             if (!['all', 'important', 'recurring', 'completed'].includes(currentFilter)) {
-                assignedList = currentFilter;
+                assignedList = currentFilter; // Otomatis mengisi nama list custom saat ini
             }
-
+        
             const newTask = {
                 id: 'ID-' + Date.now(),
                 title: titleInput.value.trim(),
@@ -766,13 +784,14 @@
                 repeat: repeatInput.value,
                 important: currentFilter === 'important',
                 completed: false,
-                listName: assignedList
+                listName: assignedList // Nama list dioper ke sini
             };
-
+        
             localTasks.push(newTask);
             renderSidebarLists();
             renderTasks();
             
+            // Kirim ke Google Sheets, kolom G otomatis terisi nama list sesuai baris tugas ini
             syncToBackend('submitTask', newTask);
             
             titleInput.value = '';
