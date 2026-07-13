@@ -74,17 +74,17 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-100 pt-4">
                     <div class="relative">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Diajukan Oleh</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Diajukan</label>
                         <input type="text" id="diajukan" class="user-search w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
                         <div class="autocomplete-list absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl max-h-40 overflow-y-auto z-50 shadow-lg hidden divide-y divide-slate-100"></div>
                     </div>
                     <div class="relative">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Diketahui Oleh</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Diketahui</label>
                         <input type="text" id="diketahui" class="user-search w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
                         <div class="autocomplete-list absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl max-h-40 overflow-y-auto z-50 shadow-lg hidden divide-y divide-slate-100"></div>
                     </div>
                     <div class="relative">
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Disetujui Oleh</label>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Disetujui</label>
                         <input type="text" id="disetujui" class="user-search w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition" placeholder="Cari nama..." oninput="showUserSuggestions(this)">
                         <div class="autocomplete-list absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl max-h-40 overflow-y-auto z-50 shadow-lg hidden divide-y divide-slate-100"></div>
                     </div>
@@ -324,7 +324,7 @@
                 alert("Gagal kirim data.");
             } finally { 
                 btn.disabled = false;
-                btn.innerText = "Kirim & Download PDF";
+                btn.innerText = "Submit";
             }
         };
 
