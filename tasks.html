@@ -736,29 +736,11 @@
         function createNewListPrompt() {
             const listName = prompt("Masukkan Nama List / Grup Baru:");
             if (listName && listName.trim() !== "") {
-                const cleanedListName = listName.trim();
-                
-                // Buat satu tugas inisiasi agar nama list langsung masuk ke database kolom G
-                const initTask = {
-                    id: 'ID-' + Date.now(),
-                    title: `List "${cleanedListName}" berhasil dibuat`,
-                    note: "Ini adalah tugas otomatis saat membuat list baru. Anda bisa mengedit atau menghapusnya.",
-                    due: "",
-                    repeat: "none",
-                    important: false,
-                    completed: false,
-                    listName: cleanedListName
-                };
-        
-                // Simpan ke lokal dan kirim ke backend
-                localTasks.push(initTask);
-                currentFilter = cleanedListName;
+                // Berpindah filter ke list baru yang kosong tersebut
+                currentFilter = listName.trim();
                 document.getElementById('current-list-title').innerText = currentFilter;
+                document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
                 
-                // Sinkronisasi ke Google Sheets (Kolom G & H langsung terisi)
-                syncToBackend('submitTask', initTask);
-                
-                // Refresh Tampilan
                 renderSidebarLists();
                 renderTasks();
             }
