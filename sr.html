@@ -239,28 +239,8 @@
                     ]);
                 }
 
-                // --- SORTIR DEFAULT DESCENDING YANG AMAN ---
-                fullData.sort((a, b) => {
-                    try {
-                        const dateA = parseDateMmmYYYY(a[2]);
-                        const dateB = parseDateMmmYYYY(b[2]);
-                        
-                        const timeA = dateA ? dateA.getTime() : 0;
-                        const timeB = dateB ? dateB.getTime() : 0;
-                        
-                        return timeB - timeA;
-                    } catch (e) {
-                        return 0; // Jika error, biarkan posisi tidak berubah
-                    }
-                });
-
-                // Tata ulang nomor urut (No) agar tetap rapi dari 1, 2, 3...
-                fullData.forEach((row, idx) => {
-                    row[0] = String(idx + 1);
-                });
-
                 filteredData = [...fullData];
-                currentPage = 1; 
+                currentPage = 1; // Reset ke halaman pertama saat data masuk
                 renderTable();
 
             } catch (error) {
