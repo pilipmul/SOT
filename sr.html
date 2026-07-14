@@ -203,49 +203,61 @@
         }
 
         async function fetchCSVData() {
-            const tableBody = document.getElementById('tableBody');
+            const tableBody = document.getElementById('tableBody'); [cite: 58]
             try {
-                const response = await fetch(CSV_URL);
-                const csvText = await response.text();
+                const response = await fetch(CSV_URL); [cite: 59]
+                const csvText = await response.text(); [cite: 60]
                 
-                const rows = parseCSV(csvText);
+                const rows = parseCSV(csvText); [cite: 60]
                 
-                const colX = 23; // Index kolom Objek
-                const colY = 24; // Index kolom Tanggal
-                const colZ = 25; // Link Foto Before
-                const colAA = 26; // Link Foto After
+                const colX = 23; // Index kolom Objek [cite: 60, 61]
+                const colY = 24; // Index kolom Tanggal [cite: 62]
+                const colZ = 25; // Link Foto Before [cite: 62, 63]
+                const colAA = 26; // Link Foto After [cite: 63, 64]
 
-                fullData = [];
-                let validRowCount = 0;
+                fullData = []; [cite: 64]
+                let validRowCount = 0; [cite: 65]
 
                 for (let i = 1; i < rows.length; i++) {
-                    const row = rows[i];
-                    if (!row || row.length <= colX) continue;
+                    const row = rows[i]; [cite: 65]
+                    if (!row || row.length <= colX) continue; [cite: 66]
                     
-                    const valX = (row[colX] || '').trim();
-                    const valY = (row[colY] || '').trim();
-                    const valZ = (row[colZ] || '').trim();
-                    const valAA = (row[colAA] || '').trim();
+                    const valX = (row[colX] || '').trim(); [cite: 66]
+                    const valY = (row[colY] || '').trim(); [cite: 67]
+                    const valZ = (row[colZ] || '').trim(); [cite: 67]
+                    const valAA = (row[colAA] || '').trim(); [cite: 67]
 
-                    if (!valX && !valY) continue;
+                    if (!valX && !valY) continue; [cite: 67]
 
-                    validRowCount++;
+                    validRowCount++; [cite: 67]
                     fullData.push([
                         String(validRowCount),
                         valX,
                         valY,
                         valZ,
                         valAA
-                    ]);
+                    ]); [cite: 68, 69]
                 }
 
-                filteredData = [...fullData];
-                currentPage = 1; // Reset ke halaman pertama saat data masuk
-                renderTable();
+                // --- PROSES SORTIR DEFAULT DESCENDING (TANGGAL TERBARU) ---
+                // Kolom Tanggal berada pada indeks ke-2 di dalam array fullData [cite: 68]
+                fullData.sort((a, b) => {
+                    const timeA = parseDateMmmYYYY(a[2]).getTime();
+                    const timeB = parseDateMmmYYYY(b[2]).getTime();
+                    return timeB - timeA; // timeB - timeA menghasilkan urutan besar ke kecil (descending)
+                });
 
+                // Perbarui juga nomor urut (No) pada kolom pertama agar tetap rapi dari 1, 2, 3... setelah disortir
+                fullData.forEach((row, idx) => {
+                    row[0] = String(idx + 1);
+                });
+
+                filteredData = [...fullData]; [cite: 70]
+                currentPage = 1; // Reset ke halaman pertama saat data masuk 
+                renderTable(); [cite: 71]
             } catch (error) {
-                console.error("Error:", error);
-                tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-red-500 font-medium">Gagal memproses data CSV. Terjadi kendala koneksi atau struktur data.</td></tr>`;
+                console.error("Error:", error); [cite: 72]
+                tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-12 text-center text-red-500 font-medium">Gagal memproses data CSV. Terjadi kendala koneksi atau struktur data.</td></tr>`; [cite: 73]
             }
         }
 
