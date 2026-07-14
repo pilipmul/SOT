@@ -235,6 +235,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            flex-shrink: 0;
         }
 
         .task-item.completed .task-checkbox {
@@ -254,11 +255,15 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            min-width: 0; /* Mencegah flexbox overflow */
         }
 
         .task-title {
             font-size: 15px;
             color: var(--text-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .task-item.completed .task-title {
@@ -289,12 +294,25 @@
             color: #323130;
         }
 
+        /* TEXT NOTE AREA (TENGAH) */
+        .task-inline-note {
+            flex: 1;
+            margin: 0 20px;
+            font-size: 13px;
+            color: #797775;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
+        }
+
         .star-icon {
             color: #605e5c;
             font-size: 18px;
             cursor: pointer;
             padding: 5px;
             margin-left: 10px;
+            flex-shrink: 0;
         }
 
         .star-icon.active {
@@ -307,18 +325,19 @@
             cursor: pointer;
             padding: 5px;
             margin-left: 5px;
+            flex-shrink: 0;
         }
 
         .trash-icon:hover {
             color: #a80000;
         }
 
-        /* DETAIL SIDE PANEL STYLES (SISI KANAN RUANG KOSONG) */
+        /* DETAIL SIDE PANEL STYLES */
         .detail-panel {
             width: 360px;
             background-color: #faf9f8;
             border-left: 1px solid var(--border-color);
-            display: none; /* Tersembunyi default, muncul saat klik item */
+            display: none;
             flex-direction: column;
             flex-shrink: 0;
             animation: slideIn 0.2s ease-out;
@@ -922,12 +941,17 @@
                 if (t.due) metaHtml.push(`<span><i class="far fa-calendar-alt"></i> ${t.due}</span>`);
                 if (t.repeat && t.repeat !== 'none') metaHtml.push(`<span><i class="fas fa-sync-alt"></i> Berulang</span>`);
 
+                // Mengambil nilai catatan jika ada, potong spasinya
+                const cleanNote = t.note ? t.note.trim() : '';
+
                 item.innerHTML = `
                     <div class="task-checkbox" onclick="toggleComplete('${t.id}')"></div>
                     <div class="task-info">
                         <div class="task-title">${t.title}</div>
                         ${metaHtml.length > 0 ? `<div class="task-meta">${metaHtml.join('')}</div>` : ''}
                     </div>
+                    <!-- CATATAN TENGAH (MUNCUL DI SINI DENGAN UKURAN LEBIH KECIL) -->
+                    <div class="task-inline-note">${cleanNote}</div>
                     <i class="${t.important ? 'fas' : 'far'} fa-star star-icon ${t.important ? 'active' : ''}" onclick="toggleImportant('${t.id}')"></i>
                     <i class="far fa-trash-alt trash-icon" onclick="deleteTask('${t.id}')"></i>
                 `;
@@ -1001,7 +1025,6 @@
             });
             listSelect.value = task.list || '';
 
-            // Tampilkan panel detail dan render ulang agar item yang aktif memiliki background terpilih (highlighted)
             document.getElementById('detailPanel').style.display = 'flex';
             renderTasks();
         }
