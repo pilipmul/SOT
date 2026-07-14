@@ -899,6 +899,25 @@
                 closeEditModal();
             }
         }
+        function deleteTask(id) {
+            if (confirm("Apakah Anda yakin ingin menghapus tugas ini?")) {
+                const taskIndex = localTasks.findIndex(t => t.id === id);
+                if (taskIndex > -1) {
+                // Ambil data tugas yang akan dihapus
+                const taskToDelete = { ...localTasks[taskIndex], actionType: "DELETE" };
+                
+                // Hapus dari data lokal terlebih dahulu
+                localTasks.splice(taskIndex, 1);
+                
+                // Render ulang tampilan
+                renderSidebarLists();
+                renderTasks();
+                
+                // Kirim instruksi DELETE ke Google Sheets (Kolom A-H)
+                syncToBackend('submitTask', taskToDelete);
+                }
+            }
+        }
     </script>
 </body>
 </html>
