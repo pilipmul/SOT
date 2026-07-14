@@ -731,27 +731,90 @@
 
         function createNewListPrompt() {
             const listName = prompt("Masukkan Nama List / Grup Baru:");
-            if (listName && listName.trim() !== "") {
-                const cleanedListName = listName.trim();
+            if (!listName || listName.trim() === "") return;
+        
+            const cleanedListName = listName.trim();
+        
+            // 1. Cari tugas-tugas yang saat ini belum memiliki list / grup (kolom G kosong)
+            const availableTasks = localTasks.filter(t => !t.list || t.list === "");
+        
+            let choice = "";
+            if (availableTasks.length > 0) {
+                // Jika ada task tanpa grup, berikan opsi untuk mengambilnya
+                let message = `List "${cleanedListName}" akan dibuat.\n\n`;
+                message += `Pilih metode pengisian tugas:\n`;
+                message += `Ketik '1' : Ambil/pindahkan dari tugas yang sudah ada (tanpa list)\n`;
+                message += `Ketik '2' : Buat tugas baru langsung di dalam list ini\n`;
+                message += `Batal    : Tekan Cancel atau ketik lainnya`;
                 
-                const initTask = {
-                    id: 'ID-' + Date.now(),
-                    title: `List "${cleanedListName}" berhasil dibuat`,
-                    note: "Ini adalah tugas otomatis inisiasi agar grup terdaftar. Anda bisa mengedit atau menghapusnya.",
-                    due: "",
-                    repeat: "none",
-                    important: false,
-                    completed: false,
-                    list: cleanedListName
-                };
-
-                localTasks.push(initTask);
-                currentFilter = cleanedListName;
-                document.getElementById('current-list-title').innerText = currentFilter;
+                choice = prompt(message);
+            } else {
+                // Jika tidak ada task kosong, wajib membuat task baru
+                const confirmNew = confirm(`Tidak ada tugas tanpa list yang tersedia.\nApakah Anda ingin langsung membuat tugas baru untuk list "${cleanedListName}" sekarang?\n(Jika 'Cancel', pembuatan list dibatalkan)`);
+                if (confirmNew) choice = "2";
+            }
+        
+            // Alur Opsi 1: Mengambil tugas yang sudah ada
+            if (choice === "1" && availableTasks.length > 0) {
+                let taskSelectionMsg = `Ketik nomor tugas yang ingin dimasukkan ke dalam list "${cleanedListName}":\n\n`;
+                availableTasks.forEach((t, index) => {
+                    taskSelectionMsg += `${index + 1}. ${t.title}\n`;
+                });
                 
-                syncToBackend('submitTask', initTask);
-                renderSidebarLists();
-                renderTasks();
+                const selectionIndex = prompt(taskSelectionMsg);
+                const selectedNum = parseInt(selectionIndex) - 1;
+        
+                if (!isNaN(selectedNum) && selectedNum >= 0 && selectedNum < availableTasks.length) {
+                    const chosenTask = availableTasks[selectedNum];
+                    
+                    // Perbarui properti list pada task terpilih
+                    chosenTask.list = cleanedListName;
+                    
+                    // Pindahkan filter view ke list baru
+                    currentFilter = cleanedListName;
+                    document.getElementById('current-list-title').innerText = currentFilter;
+                    
+                    // Sinkronisasi update ke Google Sheets (Akan mengisi Kolom G)
+                    syncToBackend('submitTask', chosenTask);
+                    renderSidebarLists();
+                    renderTasks();
+                    alert(`Tugas "${chosenTask.title}" berhasil dipindahkan ke list "${cleanedListName}".`);
+                } else {
+                    alert("Pilihan tidak valid. Pembuatan list baru dibatalkan.");
+                }
+            } 
+            
+            // Alur Opsi 2: Membuat tugas baru secara langsung
+            else if (choice === "2") {
+                const newTaskTitle = prompt(`Masukkan nama tugas baru untuk list "${cleanedListName}":`);
+                if (newTaskTitle && newTaskTitle.trim() !== "") {
+                    const newTask = {
+                        id: 'ID-' + Date.now(),
+                        title: newTaskTitle.trim(),
+                        note: "",
+                        due: "",
+                        repeat: "none",
+                        important: false,
+                        completed: false,
+                        list: cleanedListName // Mengisi properti list untuk kolom G
+                    };
+        
+                    localTasks.push(newTask);
+                    currentFilter = cleanedListName;
+                    document.getElementById('current-list-title').innerText = currentFilter;
+                    
+                    // Sinkronisasi insert ke Google Sheets
+                    syncToBackend('submitTask', newTask);
+                    renderSidebarLists();
+                    renderTasks();
+                } else {
+                    alert("Nama tugas tidak boleh kosong. Pembuatan list dibatalkan.");
+                }
+            } 
+            
+            // Alur Pembatalan Otomatis (Otomatis terhapus / gagal simpan jika tidak ada task)
+            else {
+                alert("Pembuatan list baru dibatalkan karena tidak ada tugas yang dimasukkan.");
             }
         }
 
