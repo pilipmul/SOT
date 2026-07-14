@@ -590,12 +590,17 @@
 
         function fetchTasksFromSOT() {
             showLoading(true);
-            const formData = new FormData();
-            formData.append('action', 'getTaskItems');
+            
+            // UBAH: Gunakan URLSearchParams agar terbaca oleh e.parameter di GAS
+            const params = new URLSearchParams();
+            params.append('action', 'getTaskItems');
             
             fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
-                body: formData
+                body: params, // Menggunakan params
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
             })
             .then(res => res.json())
             .then(data => {
@@ -715,16 +720,23 @@
 
         function syncToBackend(actionName, taskData) {
             showLoading(true);
-            const formData = new FormData();
-            formData.append('action', actionName);
-            formData.append('taskData', JSON.stringify(taskData));
+            
+            // UBAH: Gunakan URLSearchParams agar e.parameter.taskData tidak kosong
+            const params = new URLSearchParams();
+            params.append('action', actionName);
+            params.append('taskData', JSON.stringify(taskData));
             
             fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
-                body: formData
+                body: params, // Menggunakan params
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
             })
             .then(res => res.json())
-            .then(res => { console.log("Sync Berhasil:", res); })
+            .then(res => { 
+                console.log("Sync Berhasil:", res); 
+            })
             .catch(err => console.error("Gagal sinkronisasi data SOT:", err))
             .finally(() => showLoading(false));
         }
