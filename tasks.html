@@ -17,7 +17,8 @@
         })();
     </script>
 
-    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&display=swap" rel="stylesheet">\n    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary-color: #2564cf;
@@ -41,6 +42,7 @@
             height: 100vh;
             color: var(--text-color);
             background-color: var(--bg-main);
+            overflow: hidden;
         }
 
         /* SIDEBAR STYLES */
@@ -51,6 +53,7 @@
             display: flex;
             flex-direction: column;
             padding: 15px 0;
+            flex-shrink: 0;
         }
 
         .nav-item {
@@ -139,6 +142,7 @@
             padding: 10px 15px;
             margin-bottom: 25px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            flex-shrink: 0;
         }
 
         .input-container i {
@@ -291,7 +295,7 @@
             font-size: 18px;
         }
 
-        /* MODAL STYLES */
+        /* UI MODAL PERBAIKAN: FIXED DI LAYAR, SCROLLABLE BODY */
         .modal {
             display: none;
             position: fixed;
@@ -302,39 +306,52 @@
 
         .modal-content {
             background-color: #f3f2f1;
-            margin: 5% auto;
-            padding: 25px;
-            border: 1px solid #8a8886;
-            width: 500px;
+            margin: 2% auto;
+            width: 480px;
+            max-height: 85vh; /* Batasi tinggi modal agar tidak keluar layar */
             border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+            border: 1px solid #8a8886;
+            display: flex;
+            flex-direction: column; /* Pisahkan header, body, footer */
+            overflow: hidden;
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            padding: 18px 20px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .modal-header h2 {
-            font-size: 20px;
+            font-size: 18px;
             color: var(--primary-color);
+            font-weight: 600;
         }
 
         .close-btn {
-            font-size: 24px;
+            font-size: 22px;
             cursor: pointer;
             color: #605e5c;
         }
 
+        /* Bagian form bisa di-scroll jika isinya panjang */
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
 
         .form-group label {
             display: block;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             margin-bottom: 6px;
             color: #323130;
@@ -354,15 +371,19 @@
             border-color: var(--primary-color);
         }
 
+        /* Footer selalu terkunci di paling bawah modal */
         .modal-footer {
-            margin-top: 25px;
+            padding: 15px 20px;
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: flex-end;
             gap: 10px;
+            flex-shrink: 0;
         }
 
         .btn {
-            padding: 8px 16px;
+            padding: 8px 18px;
             border-radius: 4px;
             font-size: 14px;
             font-weight: 600;
@@ -375,9 +396,17 @@
             color: #323130;
         }
 
+        .btn-secondary:hover {
+            background-color: #d2d0ce;
+        }
+
         .btn-primary {
             background-color: var(--primary-color);
             color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #164b9c;
         }
     </style>
 </head>
@@ -425,35 +454,39 @@
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Detail & Edit Tugas</h2>
+                <h2>Detail & Edit Pengaturan</h2>
                 <span class="close-btn" onclick="closeEditModal()">&times;</span>
             </div>
-            <input type="hidden" id="edit-task-id">
-            <div class="form-group">
-                <label>Judul Tugas</label>
-                <input type="text" id="edit-task-title" class="form-control">
+            
+            <div class="modal-body">
+                <input type="hidden" id="edit-task-id">
+                <div class="form-group">
+                    <label>Judul Tugas</label>
+                    <input type="text" id="edit-task-title" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Batas Waktu (Deadline)</label>
+                    <input type="date" id="edit-task-due" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Pengulangan Otomatis</label>
+                    <select id="edit-task-repeat" class="form-control">
+                        <option value="none">Tidak Berulang</option>
+                        <option value="daily">Setiap Hari</option>
+                        <option value="weekly">Setiap Minggu</option>
+                        <option value="monthly">Setiap Bulan</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Pindahkan ke List / Grup</label>
+                    <select id="edit-task-list" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label>Catatan Tambahan</label>
+                    <textarea id="edit-task-note" class="form-control" rows="4" style="resize: vertical;"></textarea>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Batas Waktu (Due Date)</label>
-                <input type="date" id="edit-task-due" class="form-control">
-            </div>
-            <div class="form-group">
-                <label>Pengulangan Otomatis</label>
-                <select id="edit-task-repeat" class="form-control">
-                    <option value="none">Tidak Berulang</option>
-                    <option value="daily">Setiap Hari</option>
-                    <option value="weekly">Setiap Minggu</option>
-                    <option value="monthly">Setiap Bulan</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Pindahkan ke List / Grup</label>
-                <select id="edit-task-list" class="form-control"></select>
-            </div>
-            <div class="form-group">
-                <label>Catatan Tambahan</label>
-                <textarea id="edit-task-note" class="form-control" rows="4" style="resize: vertical;"></textarea>
-            </div>
+
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeEditModal()">Batal</button>
                 <button class="btn btn-primary" onclick="saveTaskDetails()">Simpan Perubahan</button>
@@ -462,7 +495,7 @@
     </div>
 
     <script>
-        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx1U9jfpMm2gg0ckGvbV3nALiD21Qjt4GBPrqFkstt8Hq1sWwtk-l0V-5B7H6E37AxuUg/exec";
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw6r3g6q9F65B79Y697xUvKPlX988UaG01l8gK9Z7NqT551FjN9lQ7SreX3wLsh8uA/exec";
 
         let localTasks = [];
         let currentFilter = 'all';
@@ -484,7 +517,6 @@
             renderTasks();
         }
 
-        // AMBIL DATA DARI BACKEND DENGAN URLSearchParams
         function fetchTasksFromSOT() {
             showLoading(true);
             const params = new URLSearchParams();
@@ -515,28 +547,25 @@
             .finally(() => showLoading(false));
         }
 
-        function syncToBackend(actionName, taskData) {
+        function syncToBackend(actionName, taskData, shouldRefresh = true) {
             showLoading(true);
             const params = new URLSearchParams();
             params.append('action', actionName);
-            params.append('taskData', JSON.stringify(taskData)); // KOREKSI: Menggunakan 'taskData' agar terbaca oleh backend GS!
-        
+            params.append('taskData', JSON.stringify(taskData));
+
             fetch(GAS_WEB_APP_URL, {
                 method: 'POST',
                 mode: 'cors',
                 body: params.toString(),
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded' // Wajib ada agar e.parameter di GAS tidak kosong
+                    'Content-Type': 'application/x-www-form-urlencoded'
                 }
             })
             .then(res => res.json())
             .then(res => {
                 console.log("Sinkronisasi SOT Berhasil:", res);
-                if (res.success) {
-                    fetchTasksFromSOT(); // Segarkan state data dari Spreadsheet setelah dipastikan sukses
-                } else {
-                    console.error("Backend menolak menyimpan:", res.message);
-                    alert("Gagal menyimpan ke Sheet: " + res.message);
+                if (shouldRefresh) {
+                    fetchTasksFromSOT();
                 }
             })
             .catch(err => {
@@ -545,7 +574,6 @@
             .finally(() => showLoading(false));
         }
 
-        // MERENDER GRUP-GRUP UNIK DI SIDEBAR (KOLOM G DI SHEET)
         function renderSidebarLists() {
             const container = document.getElementById('custom-sidebar-lists');
             container.innerHTML = '';
@@ -566,43 +594,45 @@
             });
         }
 
-        // LOGIKA PENAMBAHAN TASK DI INPUT UTAMA
+        // TAMBAH TASK SEKALIGUS AUTO-OPEN MODAL PENGATURAN DETAILNYA
         function addTask() {
             const input = document.getElementById('task-input');
             const title = input.value.trim();
             if (!title) return;
 
-            // Jika sedang memfilter grup custom, tugas baru otomatis dimasukkan ke grup tersebut (Kolom G)
             const isCustomFilter = !['all', 'important', 'recurring', 'completed'].includes(currentFilter);
             const assignedList = isCustomFilter ? currentFilter : "";
+            const generatedId = 'ID-' + Date.now();
 
             const newTask = {
-                id: 'ID-' + Date.now(),
+                id: generatedId,
                 title: title,
                 note: "",
                 due: "",
                 repeat: "none",
                 important: currentFilter === 'important',
                 completed: false,
-                list: assignedList // Mengisi Kolom G otomatis
+                list: assignedList
             };
 
             localTasks.push(newTask);
             input.value = '';
+            
             renderTasks();
             renderSidebarLists();
 
-            syncToBackend('submitTask', newTask);
+            // Kirim ke backend (tanpa refresh total dulu agar modal tidak tertutup otomatis)
+            syncToBackend('submitTask', newTask, false);
+
+            // AUTO-OPEN WINDOWS DETAIL PENGATURAN LANGSUNG
+            openEditModal(generatedId);
         }
 
-        // TAHAPAN LOGIKA MICROSOFT TO-DO UNTUK MEMBUAT LIST/GRUP BARU
         function createNewListPrompt() {
             const listName = prompt("Masukkan Nama List / Grup Baru:");
             if (!listName || listName.trim() === "") return;
 
             const cleanedListName = listName.trim();
-
-            // Tahap 1: Cari tugas yang belum masuk grup (list masih kosong)
             const availableTasks = localTasks.filter(t => !t.list || t.list === "");
 
             let choice = "";
@@ -619,7 +649,6 @@
                 if (confirmNew) choice = "2";
             }
 
-            // Opsi 1: Mengambil/memindahkan tugas yang sudah ada
             if (choice === "1" && availableTasks.length > 0) {
                 let taskSelectionMsg = `Ketik nomor tugas yang ingin dimasukkan ke dalam list "${cleanedListName}":\n\n`;
                 availableTasks.forEach((t, index) => {
@@ -631,56 +660,51 @@
 
                 if (!isNaN(selectedNum) && selectedNum >= 0 && selectedNum < availableTasks.length) {
                     const chosenTask = availableTasks[selectedNum];
+                    chosenTask.list = cleanedListName;
                     
-                    chosenTask.list = cleanedListName; // Mengeset nilai properti list (Kolom G)
-                    
-                    // Alihkan view halaman aktif ke list baru tersebut
                     currentFilter = cleanedListName;
                     document.getElementById('current-list-title').innerText = currentFilter;
                     
-                    syncToBackend('submitTask', chosenTask);
+                    syncToBackend('submitTask', chosenTask, false);
                     renderSidebarLists();
                     renderTasks();
-                    alert(`Tugas "${chosenTask.title}" berhasil dipindahkan ke list "${cleanedListName}".`);
+                    openEditModal(chosenTask.id);
                 } else {
                     alert("Pilihan tidak valid. Pembuatan list baru dibatalkan.");
                 }
             } 
-            // Opsi 2: Membuat tugas baru langsung di dalam grup tersebut
             else if (choice === "2") {
                 const newTaskTitle = prompt(`Masukkan nama tugas baru untuk list "${cleanedListName}":`);
                 if (newTaskTitle && newTaskTitle.trim() !== "") {
+                    const generatedId = 'ID-' + Date.now();
                     const newTask = {
-                        id: 'ID-' + Date.now(),
+                        id: generatedId,
                         title: newTaskTitle.trim(),
                         note: "",
                         due: "",
                         repeat: "none",
                         important: false,
                         completed: false,
-                        list: cleanedListName // Mengisi properti list
+                        list: cleanedListName
                     };
 
                     localTasks.push(newTask);
-                    
-                    // Alihkan view halaman aktif ke list baru tersebut
                     currentFilter = cleanedListName;
                     document.getElementById('current-list-title').innerText = currentFilter;
                     
-                    syncToBackend('submitTask', newTask);
+                    syncToBackend('submitTask', newTask, false);
                     renderSidebarLists();
                     renderTasks();
+                    openEditModal(generatedId);
                 } else {
                     alert("Nama tugas tidak boleh kosong. Pembuatan list dibatalkan.");
                 }
             } 
-            // Kondisi Pembatalan Otomatis (Auto-Delete / Gagal Simpan)
             else {
                 alert("Pembuatan list baru dibatalkan karena tidak ada tugas yang dimasukkan.");
             }
         }
 
-        // RENDERING DAFTAR TUGAS DI LAYAR UTAMA
         function renderTasks() {
             const container = document.getElementById('task-list-container');
             container.innerHTML = '';
@@ -702,7 +726,6 @@
                 const item = document.createElement('div');
                 item.className = `task-item ${t.completed ? 'completed' : ''}`;
                 
-                // Mencegah klik modal terbuka jika mengklik elemen kontrol aksi
                 item.onclick = function(e) {
                     if (!e.target.closest('.task-checkbox') && !e.target.closest('.star-icon') && !e.target.closest('.trash-icon')) {
                         openEditModal(t.id);
@@ -733,7 +756,6 @@
             if (task) {
                 task.completed = !task.completed;
                 if (task.completed && task.repeat && task.repeat !== 'none') {
-                    // Logika Pengulangan Otomatis
                     const nextDate = calculateNextDueDate(task.due, task.repeat);
                     const recurrentTask = { ...task, id: 'ID-' + Date.now(), completed: false, due: nextDate };
                     localTasks.push(recurrentTask);
@@ -754,7 +776,7 @@
         }
 
         function deleteTask(id) {
-            if (confirm("Apakah Anda yakin ingin menghapus tugas ini secara permanen?")) {
+            if (confirm("Apakah Anda yakin ingin menghapus tugas ini?")) {
                 const taskIndex = localTasks.findIndex(t => t.id === id);
                 if (taskIndex > -1) {
                     const taskToDelete = { ...localTasks[taskIndex], actionType: "DELETE" };
@@ -766,7 +788,6 @@
             }
         }
 
-        // MANAJEMEN MODAL EDIT DETAIL TUGAS
         function openEditModal(id) {
             const task = localTasks.find(t => t.id === id);
             if (!task) return;
@@ -811,7 +832,9 @@
                 closeEditModal();
                 renderSidebarLists();
                 renderTasks();
-                syncToBackend('submitTask', task);
+                
+                // Simpan perubahan dan refresh state data dari server
+                syncToBackend('submitTask', task, true);
             }
         }
 
