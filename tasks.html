@@ -125,11 +125,38 @@
             overflow-y: auto;
         }
 
+        /* HEADER AREA & BACK BUTTON */
+        .header-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #f3f2f1;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 18px;
+            transition: background-color 0.2s, transform 0.1s;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-back:hover {
+            background-color: var(--hover-color);
+            transform: scale(1.05);
+        }
+
         .header-title {
             font-size: 28px;
             font-weight: 600;
             color: var(--primary-color);
-            margin-bottom: 20px;
         }
 
         /* TASK INPUT STYLES */
@@ -191,6 +218,11 @@
         .task-item:hover {
             border-color: #a19f9d;
             box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        }
+
+        .task-item.selected-task {
+            border-color: var(--primary-color);
+            background-color: #f3f8ff;
         }
 
         .task-checkbox {
@@ -281,6 +313,52 @@
             color: #a80000;
         }
 
+        /* DETAIL SIDE PANEL STYLES (SISI KANAN RUANG KOSONG) */
+        .detail-panel {
+            width: 360px;
+            background-color: #faf9f8;
+            border-left: 1px solid var(--border-color);
+            display: none; /* Tersembunyi default, muncul saat klik item */
+            flex-direction: column;
+            flex-shrink: 0;
+            animation: slideIn 0.2s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: #ffffff;
+        }
+
+        .panel-header h3 {
+            font-size: 16px;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .panel-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .panel-footer {
+            padding: 15px 20px;
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
         /* LOADING DIALOG OVERLAY */
         #loading-overlay {
             position: fixed;
@@ -368,16 +446,6 @@
 
         .form-control:focus {
             border-color: var(--primary-color);
-        }
-
-        .modal-footer {
-            padding: 15px 20px;
-            background: #ffffff;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            flex-shrink: 0;
         }
 
         .btn {
@@ -477,7 +545,13 @@
 
     <!-- MAIN DASHBOARD CONTENT -->
     <div class="main-content">
-        <div class="header-title" id="current-list-title">Semua Tugas</div>
+        <!-- HEADER WITH BACK BUTTON -->
+        <div class="header-area">
+            <a href="https://pilipmul.github.io/SOT/dashboard.html" class="btn-back" title="Kembali ke Dashboard">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div class="header-title" id="current-list-title">Semua Tugas</div>
+        </div>
 
         <div class="input-container">
             <i class="fas fa-plus"></i>
@@ -488,51 +562,47 @@
         <div class="task-list" id="task-list-container"></div>
     </div>
 
-    <!-- MODAL EDIT DATA DETAIL TUGAS -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Detail & Edit Pengaturan</h2>
-                <span class="close-btn" onclick="closeEditModal()">&times;</span>
+    <!-- PANEL DETAIL & EDIT TUGAS (KANAN) -->
+    <div id="detailPanel" class="detail-panel">
+        <div class="panel-header">
+            <h3>Detail & Edit Tugas</h3>
+            <span class="close-btn" onclick="closeDetailPanel()">&times;</span>
+        </div>
+        <div class="panel-body">
+            <input type="hidden" id="edit-task-id">
+            <div class="form-group">
+                <label>Judul Tugas</label>
+                <input type="text" id="edit-task-title" class="form-control">
             </div>
-            
-            <div class="modal-body">
-                <input type="hidden" id="edit-task-id">
-                <div class="form-group">
-                    <label>Judul Tugas</label>
-                    <input type="text" id="edit-task-title" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Batas Waktu (Deadline)</label>
-                    <input type="date" id="edit-task-due" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Pengulangan Otomatis</label>
-                    <select id="edit-task-repeat" class="form-control">
-                        <option value="none">Tidak Berulang</option>
-                        <option value="daily">Setiap Hari</option>
-                        <option value="weekly">Setiap Minggu</option>
-                        <option value="monthly">Setiap Bulan</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Pindahkan ke List / Grup</label>
-                    <select id="edit-task-list" class="form-control"></select>
-                </div>
-                <div class="form-group">
-                    <label>Catatan Tambahan</label>
-                    <textarea id="edit-task-note" class="form-control" rows="4" style="resize: vertical;"></textarea>
-                </div>
+            <div class="form-group">
+                <label>Batas Waktu (Deadline)</label>
+                <input type="date" id="edit-task-due" class="form-control">
             </div>
-
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeEditModal()">Batal</button>
-                <button class="btn btn-primary" onclick="saveTaskDetails()">Simpan Perubahan</button>
+            <div class="form-group">
+                <label>Pengulangan Otomatis</label>
+                <select id="edit-task-repeat" class="form-control">
+                    <option value="none">Tidak Berulang</option>
+                    <option value="daily">Setiap Hari</option>
+                    <option value="weekly">Setiap Minggu</option>
+                    <option value="monthly">Setiap Bulan</option>
+                </select>
             </div>
+            <div class="form-group">
+                <label>Pindahkan ke List / Grup</label>
+                <select id="edit-task-list" class="form-control"></select>
+            </div>
+            <div class="form-group">
+                <label>Catatan Tambahan</label>
+                <textarea id="edit-task-note" class="form-control" rows="8" style="resize: vertical;"></textarea>
+            </div>
+        </div>
+        <div class="panel-footer">
+            <button class="btn btn-secondary" onclick="closeDetailPanel()">Batal</button>
+            <button class="btn btn-primary" onclick="saveTaskDetails()">Simpan</button>
         </div>
     </div>
 
-    <!-- MODAL BARU: BUAT GRUP / LIST CUSTOM CUSTOM -->
+    <!-- MODAL BARU: BUAT GRUP / LIST CUSTOM -->
     <div id="newListModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -590,6 +660,7 @@
 
         let localTasks = [];
         let currentFilter = 'all';
+        let selectedTaskId = null;
 
         document.addEventListener("DOMContentLoaded", function() {
             fetchTasksFromSOT();
@@ -712,7 +783,7 @@
             renderSidebarLists();
 
             syncToBackend('submitTask', newTask, false);
-            openEditModal(generatedId);
+            openDetailPanel(generatedId);
         }
 
         /* MODAL LOGIC FOR NEW GROUP LIST */
@@ -759,7 +830,6 @@
             }
         }
 
-        // AKSI EKSEKUSI PEMBUATAN GRUP DARI FORM DI WINDOW CUSTOM
         function submitNewListCustom() {
             const listName = document.getElementById('new-list-name').value.trim();
             if (!listName) {
@@ -769,7 +839,6 @@
 
             const method = document.querySelector('input[name="list-method"]:checked').value;
 
-            // Opsi 1: Pindahkan dari tugas tanpa list yang sudah ada
             if (method === "1") {
                 const selectTaskId = document.getElementById('new-list-task-select').value;
                 const chosenTask = localTasks.find(t => t.id === selectTaskId);
@@ -778,19 +847,17 @@
                     chosenTask.list = listName;
                     currentFilter = listName;
                     
-                    const titles = { all: "Semua Tugas", important: "Penting", recurring: "Tugas Berulang Otomatis", completed: "Tugas Selesai" };
                     document.getElementById('current-list-title').innerText = listName;
                     
                     closeNewListModal();
                     syncToBackend('submitTask', chosenTask, false);
                     renderSidebarLists();
                     renderTasks();
-                    openEditModal(chosenTask.id);
+                    openDetailPanel(chosenTask.id);
                 } else {
                     alert("Tugas tidak ditemukan!");
                 }
             } 
-            // Opsi 2: Membuat tugas baru langsung di dalam list ini
             else if (method === "2") {
                 const newTaskTitle = document.getElementById('new-list-task-title').value.trim();
                 if (!newTaskTitle) {
@@ -818,7 +885,7 @@
                 syncToBackend('submitTask', newTask, false);
                 renderSidebarLists();
                 renderTasks();
-                openEditModal(generatedId);
+                openDetailPanel(generatedId);
             }
         }
 
@@ -840,12 +907,13 @@
             }
 
             filtered.forEach(t => {
+                const isSelected = selectedTaskId === t.id ? 'selected-task' : '';
                 const item = document.createElement('div');
-                item.className = `task-item ${t.completed ? 'completed' : ''}`;
+                item.className = `task-item ${t.completed ? 'completed' : ''} ${isSelected}`;
                 
                 item.onclick = function(e) {
                     if (!e.target.closest('.task-checkbox') && !e.target.closest('.star-icon') && !e.target.closest('.trash-icon')) {
-                        openEditModal(t.id);
+                        openDetailPanel(t.id);
                     }
                 };
 
@@ -853,7 +921,6 @@
                 if (t.list) metaHtml.push(`<span class="badge-list">${t.list}</span>`);
                 if (t.due) metaHtml.push(`<span><i class="far fa-calendar-alt"></i> ${t.due}</span>`);
                 if (t.repeat && t.repeat !== 'none') metaHtml.push(`<span><i class="fas fa-sync-alt"></i> Berulang</span>`);
-                if (t.note) metaHtml.push(`<span><i class="far fa-comment-alt"></i> Detail</span>`);
 
                 item.innerHTML = `
                     <div class="task-checkbox" onclick="toggleComplete('${t.id}')"></div>
@@ -898,6 +965,9 @@
                 if (taskIndex > -1) {
                     const taskToDelete = { ...localTasks[taskIndex], actionType: "DELETE" };
                     localTasks.splice(taskIndex, 1);
+                    if (selectedTaskId === id) {
+                        closeDetailPanel();
+                    }
                     renderSidebarLists();
                     renderTasks();
                     syncToBackend('submitTask', taskToDelete);
@@ -905,7 +975,9 @@
             }
         }
 
-        function openEditModal(id) {
+        /* SIDE PANEL LOGIC FOR TASK DETAILS */
+        function openDetailPanel(id) {
+            selectedTaskId = id;
             const task = localTasks.find(t => t.id === id);
             if (!task) return;
 
@@ -929,11 +1001,15 @@
             });
             listSelect.value = task.list || '';
 
-            document.getElementById('editModal').style.display = 'block';
+            // Tampilkan panel detail dan render ulang agar item yang aktif memiliki background terpilih (highlighted)
+            document.getElementById('detailPanel').style.display = 'flex';
+            renderTasks();
         }
 
-        function closeEditModal() {
-            document.getElementById('editModal').style.display = 'none';
+        function closeDetailPanel() {
+            document.getElementById('detailPanel').style.display = 'none';
+            selectedTaskId = null;
+            renderTasks();
         }
 
         function saveTaskDetails() {
@@ -946,7 +1022,7 @@
                 task.list = document.getElementById('edit-task-list').value;
                 task.note = document.getElementById('edit-task-note').value.trim();
 
-                closeEditModal();
+                closeDetailPanel();
                 renderSidebarLists();
                 renderTasks();
                 
@@ -975,15 +1051,12 @@
             const titles = { all: "Semua Tugas", important: "Penting", recurring: "Tugas Berulang Otomatis", completed: "Tugas Selesai" };
             document.getElementById('current-list-title').innerText = titles[filterType] || filterType;
 
+            closeDetailPanel();
             renderTasks();
         }
 
         window.onclick = function(event) {
-            const editModal = document.getElementById('editModal');
             const newListModal = document.getElementById('newListModal');
-            if (event.target == editModal) {
-                closeEditModal();
-            }
             if (event.target == newListModal) {
                 closeNewListModal();
             }
