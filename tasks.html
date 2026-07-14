@@ -125,32 +125,38 @@
             overflow-y: auto;
         }
 
-        /* HEADER AREA & BACK BUTTON */
+        /* HEADER AREA & BACK BUTTON KANAN ATAS */
         .header-area {
             display: flex;
             align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
+            justify-content: space-between; /* Membuat judul di kiri, tombol di kanan */
+            margin-bottom: 25px;
         }
 
         .btn-back {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
             background-color: #f3f2f1;
-            color: var(--primary-color);
+            color: var(--text-color);
             text-decoration: none;
-            font-size: 18px;
-            transition: background-color 0.2s, transform 0.1s;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
             border: 1px solid var(--border-color);
         }
 
         .btn-back:hover {
             background-color: var(--hover-color);
-            transform: scale(1.05);
+            color: var(--primary-color);
+            border-color: #a19f9d;
+            transform: translateY(-1px);
+        }
+
+        .btn-back i {
+            font-size: 14px;
         }
 
         .header-title {
@@ -564,12 +570,12 @@
 
     <!-- MAIN DASHBOARD CONTENT -->
     <div class="main-content">
-        <!-- HEADER WITH BACK BUTTON -->
+        <!-- HEADER WITH BACK BUTTON IN TOP RIGHT -->
         <div class="header-area">
-            <a href="https://pilipmul.github.io/SOT/dashboard.html" class="btn-back" title="Kembali ke Dashboard">
-                <i class="fas fa-arrow-left"></i>
-            </a>
             <div class="header-title" id="current-list-title">Semua Tugas</div>
+            <a href="https://pilipmul.github.io/SOT/dashboard.html" class="btn-back" title="Kembali ke Dashboard">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
         </div>
 
         <div class="input-container">
