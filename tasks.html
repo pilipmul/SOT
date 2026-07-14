@@ -295,7 +295,7 @@
             font-size: 18px;
         }
 
-        /* UI MODAL PERBAIKAN: FIXED DI LAYAR, SCROLLABLE BODY */
+        /* MODAL COMMON STYLES */
         .modal {
             display: none;
             position: fixed;
@@ -308,12 +308,12 @@
             background-color: #f3f2f1;
             margin: 2% auto;
             width: 480px;
-            max-height: 85vh; /* Batasi tinggi modal agar tidak keluar layar */
+            max-height: 85vh;
             border-radius: 8px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.2);
             border: 1px solid #8a8886;
             display: flex;
-            flex-direction: column; /* Pisahkan header, body, footer */
+            flex-direction: column;
             overflow: hidden;
         }
 
@@ -338,7 +338,6 @@
             color: #605e5c;
         }
 
-        /* Bagian form bisa di-scroll jika isinya panjang */
         .modal-body {
             padding: 20px;
             overflow-y: auto;
@@ -371,7 +370,6 @@
             border-color: var(--primary-color);
         }
 
-        /* Footer selalu terkunci di paling bawah modal */
         .modal-footer {
             padding: 15px 20px;
             background: #ffffff;
@@ -408,6 +406,43 @@
         .btn-primary:hover {
             background-color: #164b9c;
         }
+
+        /* CUSTOM OPTION RADIO BUTTONS FOR NEW GROUP TYPE */
+        .method-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .method-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .method-card:hover {
+            border-color: var(--primary-color);
+            background: #fafdff;
+        }
+        .method-card input[type="radio"] {
+            margin-top: 3px;
+            cursor: pointer;
+        }
+        .method-details h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+            color: #242424;
+        }
+        .method-details p {
+            font-size: 12px;
+            color: #605e5c;
+        }
     </style>
 </head>
 <body>
@@ -416,6 +451,7 @@
         <i class="fas fa-spinner fa-spin" style="margin-right: 10px;"></i> Menyinkronkan Data SOT...
     </div>
 
+    <!-- SIDEBAR LEFT -->
     <div class="sidebar">
         <div class="nav-item active" id="nav-all" onclick="switchFilter('all', this)">
             <i class="fas fa-sun"></i> Semua Tugas
@@ -434,11 +470,12 @@
         <div class="list-section-title">Grup / List Custom</div>
         <div id="custom-sidebar-lists"></div>
 
-        <div class="create-list-btn" onclick="createNewListPrompt()">
+        <div class="create-list-btn" onclick="openNewListModal()">
             <i class="fas fa-plus"></i> Buat List Baru
         </div>
     </div>
 
+    <!-- MAIN DASHBOARD CONTENT -->
     <div class="main-content">
         <div class="header-title" id="current-list-title">Semua Tugas</div>
 
@@ -451,6 +488,7 @@
         <div class="task-list" id="task-list-container"></div>
     </div>
 
+    <!-- MODAL EDIT DATA DETAIL TUGAS -->
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -490,6 +528,59 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeEditModal()">Batal</button>
                 <button class="btn btn-primary" onclick="saveTaskDetails()">Simpan Perubahan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL BARU: BUAT GRUP / LIST CUSTOM CUSTOM -->
+    <div id="newListModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Buat List / Grup Baru</h2>
+                <span class="close-btn" onclick="closeNewListModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nama List / Grup Baru</label>
+                    <input type="text" id="new-list-name" class="form-control" placeholder="Contoh: Teknis Listrik, Sipil, Admin..." autocomplete="off">
+                </div>
+                
+                <div class="form-group" id="group-method-section">
+                    <label>Metode Pengisian Tugas Pertama</label>
+                    <div class="method-options">
+                        <div class="method-card" onclick="document.getElementById('method-move').checked=true; onMethodChange()">
+                            <input type="radio" name="list-method" id="method-move" value="1" checked>
+                            <div class="method-details">
+                                <h4>Pindahkan Tugas yang Sudah Ada</h4>
+                                <p>Memilih salah satu tugas mandiri saat ini untuk dimasukkan ke grup baru.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="method-card" onclick="document.getElementById('method-new').checked=true; onMethodChange()">
+                            <input type="radio" name="list-method" id="method-new" value="2">
+                            <div class="method-details">
+                                <h4>Buat Tugas Baru Langsung</h4>
+                                <p>Membuat item tugas kosong baru di dalam lingkup grup ini.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Opsi Pemilihan Dropdown Dinamis Sub-Tugas -->
+                <div class="form-group" id="sub-select-task-group" style="display:none;">
+                    <label>Pilih Tugas Mandiri Tersedia</label>
+                    <select id="new-list-task-select" class="form-control"></select>
+                </div>
+
+                <!-- Opsi Input Judul Tugas Baru -->
+                <div class="form-group" id="sub-input-task-group" style="display:none;">
+                    <label>Judul Tugas Baru di List Ini</label>
+                    <input type="text" id="new-list-task-title" class="form-control" placeholder="Ketik nama tugas...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeNewListModal()">Batal</button>
+                <button class="btn btn-primary" onclick="submitNewListCustom()">Proses Buat List</button>
             </div>
         </div>
     </div>
@@ -594,7 +685,6 @@
             });
         }
 
-        // TAMBAH TASK SEKALIGUS AUTO-OPEN MODAL PENGATURAN DETAILNYA
         function addTask() {
             const input = document.getElementById('task-input');
             const title = input.value.trim();
@@ -621,87 +711,114 @@
             renderTasks();
             renderSidebarLists();
 
-            // Kirim ke backend (tanpa refresh total dulu agar modal tidak tertutup otomatis)
             syncToBackend('submitTask', newTask, false);
-
-            // AUTO-OPEN WINDOWS DETAIL PENGATURAN LANGSUNG
             openEditModal(generatedId);
         }
 
-        function createNewListPrompt() {
-            const listName = prompt("Masukkan Nama List / Grup Baru:");
-            if (!listName || listName.trim() === "") return;
-
-            const cleanedListName = listName.trim();
+        /* MODAL LOGIC FOR NEW GROUP LIST */
+        function openNewListModal() {
+            document.getElementById('new-list-name').value = '';
+            document.getElementById('new-list-task-title').value = '';
+            
             const availableTasks = localTasks.filter(t => !t.list || t.list === "");
-
-            let choice = "";
+            const selectDropdown = document.getElementById('new-list-task-select');
+            
             if (availableTasks.length > 0) {
-                let message = `List "${cleanedListName}" akan dibuat.\n\n`;
-                message += `Pilih metode pengisian tugas:\n`;
-                message += `Ketik '1' : Pindahkan dari tugas tanpa list yang sudah ada\n`;
-                message += `Ketik '2' : Buat tugas baru langsung di dalam list ini\n`;
-                message += `Batal    : Tekan Cancel (List otomatis batal dibuat)`;
+                document.getElementById('group-method-section').style.display = 'block';
+                document.getElementById('method-move').checked = true;
                 
-                choice = prompt(message);
-            } else {
-                const confirmNew = confirm(`Tidak ada tugas tanpa list yang tersedia.\nApakah Anda ingin langsung membuat tugas baru untuk list "${cleanedListName}" sekarang?\n(Jika 'Cancel', pembuatan list otomatis batal)`);
-                if (confirmNew) choice = "2";
-            }
-
-            if (choice === "1" && availableTasks.length > 0) {
-                let taskSelectionMsg = `Ketik nomor tugas yang ingin dimasukkan ke dalam list "${cleanedListName}":\n\n`;
-                availableTasks.forEach((t, index) => {
-                    taskSelectionMsg += `${index + 1}. ${t.title}\n`;
+                selectDropdown.innerHTML = '';
+                availableTasks.forEach(t => {
+                    selectDropdown.innerHTML += `<option value="${t.id}">${t.title}</option>`;
                 });
                 
-                const selectionIndex = prompt(taskSelectionMsg);
-                const selectedNum = parseInt(selectionIndex) - 1;
+                document.getElementById('sub-select-task-group').style.display = 'block';
+                document.getElementById('sub-input-task-group').style.display = 'none';
+            } else {
+                document.getElementById('group-method-section').style.display = 'none';
+                document.getElementById('method-new').checked = true;
+                document.getElementById('sub-select-task-group').style.display = 'none';
+                document.getElementById('sub-input-task-group').style.display = 'block';
+            }
 
-                if (!isNaN(selectedNum) && selectedNum >= 0 && selectedNum < availableTasks.length) {
-                    const chosenTask = availableTasks[selectedNum];
-                    chosenTask.list = cleanedListName;
+            document.getElementById('newListModal').style.display = 'block';
+        }
+
+        function closeNewListModal() {
+            document.getElementById('newListModal').style.display = 'none';
+        }
+
+        function onMethodChange() {
+            const isMove = document.getElementById('method-move').checked;
+            if (isMove) {
+                document.getElementById('sub-select-task-group').style.display = 'block';
+                document.getElementById('sub-input-task-group').style.display = 'none';
+            } else {
+                document.getElementById('sub-select-task-group').style.display = 'none';
+                document.getElementById('sub-input-task-group').style.display = 'block';
+            }
+        }
+
+        // AKSI EKSEKUSI PEMBUATAN GRUP DARI FORM DI WINDOW CUSTOM
+        function submitNewListCustom() {
+            const listName = document.getElementById('new-list-name').value.trim();
+            if (!listName) {
+                alert("Nama List / Grup Baru wajib diisi!");
+                return;
+            }
+
+            const method = document.querySelector('input[name="list-method"]:checked').value;
+
+            // Opsi 1: Pindahkan dari tugas tanpa list yang sudah ada
+            if (method === "1") {
+                const selectTaskId = document.getElementById('new-list-task-select').value;
+                const chosenTask = localTasks.find(t => t.id === selectTaskId);
+                
+                if (chosenTask) {
+                    chosenTask.list = listName;
+                    currentFilter = listName;
                     
-                    currentFilter = cleanedListName;
-                    document.getElementById('current-list-title').innerText = currentFilter;
+                    const titles = { all: "Semua Tugas", important: "Penting", recurring: "Tugas Berulang Otomatis", completed: "Tugas Selesai" };
+                    document.getElementById('current-list-title').innerText = listName;
                     
+                    closeNewListModal();
                     syncToBackend('submitTask', chosenTask, false);
                     renderSidebarLists();
                     renderTasks();
                     openEditModal(chosenTask.id);
                 } else {
-                    alert("Pilihan tidak valid. Pembuatan list baru dibatalkan.");
+                    alert("Tugas tidak ditemukan!");
                 }
             } 
-            else if (choice === "2") {
-                const newTaskTitle = prompt(`Masukkan nama tugas baru untuk list "${cleanedListName}":`);
-                if (newTaskTitle && newTaskTitle.trim() !== "") {
-                    const generatedId = 'ID-' + Date.now();
-                    const newTask = {
-                        id: generatedId,
-                        title: newTaskTitle.trim(),
-                        note: "",
-                        due: "",
-                        repeat: "none",
-                        important: false,
-                        completed: false,
-                        list: cleanedListName
-                    };
+            // Opsi 2: Membuat tugas baru langsung di dalam list ini
+            else if (method === "2") {
+                const newTaskTitle = document.getElementById('new-list-task-title').value.trim();
+                if (!newTaskTitle) {
+                    alert("Nama tugas baru untuk list tersebut wajib diisi!");
+                    return;
+                }
 
-                    localTasks.push(newTask);
-                    currentFilter = cleanedListName;
-                    document.getElementById('current-list-title').innerText = currentFilter;
-                    
-                    syncToBackend('submitTask', newTask, false);
-                    renderSidebarLists();
-                    renderTasks();
-                    openEditModal(generatedId);
-                } else {
-                    alert("Nama tugas tidak boleh kosong. Pembuatan list dibatalkan.");
-                }
-            } 
-            else {
-                alert("Pembuatan list baru dibatalkan karena tidak ada tugas yang dimasukkan.");
+                const generatedId = 'ID-' + Date.now();
+                const newTask = {
+                    id: generatedId,
+                    title: newTaskTitle,
+                    note: "",
+                    due: "",
+                    repeat: "none",
+                    important: false,
+                    completed: false,
+                    list: listName
+                };
+
+                localTasks.push(newTask);
+                currentFilter = listName;
+                document.getElementById('current-list-title').innerText = listName;
+                
+                closeNewListModal();
+                syncToBackend('submitTask', newTask, false);
+                renderSidebarLists();
+                renderTasks();
+                openEditModal(generatedId);
             }
         }
 
@@ -833,7 +950,6 @@
                 renderSidebarLists();
                 renderTasks();
                 
-                // Simpan perubahan dan refresh state data dari server
                 syncToBackend('submitTask', task, true);
             }
         }
@@ -863,9 +979,13 @@
         }
 
         window.onclick = function(event) {
-            const modal = document.getElementById('editModal');
-            if (event.target == modal) {
+            const editModal = document.getElementById('editModal');
+            const newListModal = document.getElementById('newListModal');
+            if (event.target == editModal) {
                 closeEditModal();
+            }
+            if (event.target == newListModal) {
+                closeNewListModal();
             }
         }
     </script>
