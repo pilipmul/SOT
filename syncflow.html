@@ -214,7 +214,11 @@
 <div id="passPopup" class="popup-overlay"><div class="popup-box"><input type="password" id="adminPass" placeholder="Password" style="border:1px solid #475569; border-radius:8px; margin-bottom:15px; height:45px; padding: 0 10px;"><div class="btn-group"><button class="modal-btn" onclick="checkPassword()">OK</button><button class="modal-btn" onclick="closePassPopup()" style="background:#475569;">Batal</button></div></div></div>
 
 <script>
-    // Seluruh blok kode Javascript murni dipertahankan 100% tanpa modifikasi logika logic internal
+    const userData = JSON.parse(localStorage.getItem("user"));
+    if (!userData) {
+        window.location.href = "login.html";
+    }
+
     const scriptURL = 'https://script.google.com/macros/s/AKfycbwoz7fGFbbV5kDdKDGCvYxHsJG3Nm5_0KAk-9Nu7kYO05U_FW1MwI8DBch2amyT45pZmQ/exec';
     let nameData = [], itemData = [], itemStock = {}, lastTransactions = [], gaMode = false, activeTextarea = null, longPressTimer, passAction = "", currentMode = "", currentItems = [], currentName = "";
 
@@ -307,25 +311,28 @@
     document.getElementById("btnOut").onclick = () => handleSubmit("out");
     
     window.onload = function() {
-        fetchDataAndUpdateUI();
-        const sessionUser = localStorage.getItem("user");
-        if (sessionUser) {
+        if (userData) { // Menggunakan variabel userData yang dideklarasikan di atas tadi
             try {
-                const userData = JSON.parse(sessionUser);
+                // Mengisi otomatis kolom Nama
                 if (userData.nama) {
                     const nameInput = document.getElementById("name");
                     nameInput.value = userData.nama;
+                    
                     nameInput.dispatchEvent(new Event('input'));
                 }
+                
                 if (userData.akses && userData.akses.accesControl) {
                     const nilaiAkses = userData.akses.accesControl.toString().toUpperCase().trim();
+                    
                     if (nilaiAkses === "ACCESS CONTROL" || nilaiAkses === "YA" || nilaiAkses === "TRUE") {
-                        isGA = true;
-                        updateGAUI(true);
+                        isGA = true; 
+                        updateGAUI(true); 
                         showToast("🔓 GA Mode Aktif Otomatis (Access Control)");
                     }
                 }
-            } catch (e) { console.error("Gagal membaca session integrasi SOT:", e); }
+            } catch (e) {
+                console.error("Gagal membaca session integrasi SOT:", e);
+            }
         }
     };
 </script>
