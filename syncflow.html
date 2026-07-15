@@ -170,19 +170,30 @@
     async function executeFinalSubmit(mode, name, items) { 
         document.getElementById("loaderOverlay").style.display = "flex"; 
         const body = new URLSearchParams(); 
-        body.append('name', name); body.append('mode', mode); body.append('items', JSON.stringify(items)); 
+        body.append('name', name); 
+        body.append('mode', mode); 
+        body.append('items', JSON.stringify(items)); 
         body.append('date', new Date().toLocaleDateString('id-ID')); 
+        
         try { 
-            const resp = await fetch(scriptURL, { method: 'POST', body: body }); 
+            // TAMBAHKAN parameter ?action=submitSyncflow pada akhir URL fetch
+            const resp = await fetch(`${scriptURL}?action=submitSyncflow`, { method: 'POST', body: body }); 
             const res = await resp.json(); 
             if (res.result === "success") { 
-                showSuccessPopup(mode, items); document.getElementById("myForm").reset(); 
+                showSuccessPopup(mode, items); 
+                document.getElementById("myForm").reset(); 
                 const container = document.getElementById("itemContainer"); 
                 while(container.children.length > 1) container.removeChild(container.lastChild); 
                 document.getElementById("addRow").style.visibility = "visible"; 
                 fetchDataAndUpdateUI(); 
-            } else { showToast(res.error); } 
-        } catch (e) { showToast("❌ Connection Error"); } finally { document.getElementById("loaderOverlay").style.display = "none"; } 
+            } else { 
+                showToast(res.error); 
+            } 
+        } catch (e) { 
+            showToast("❌ Connection Error"); 
+        } finally { 
+            document.getElementById("loaderOverlay").style.display = "none"; 
+        } 
     }
 
     function checkPassword() { if (document.getElementById("adminPass").value === "azza") { document.getElementById("passPopup").style.display = "none"; document.getElementById("adminPass").value = ""; if (passAction === "in") executeFinalSubmit(currentMode, currentName, currentItems); else if (passAction === "ga") updateGAUI(true); } else showToast("❌ Salah!"); }
