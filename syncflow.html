@@ -137,7 +137,7 @@
 <div id="passPopup" class="popup-overlay"><div class="popup-box"><input type="password" id="adminPass" placeholder="Password" style="border:1px solid #1877f2; border-radius:8px; margin-bottom:15px; height:45px;"><div class="btn-group"><button class="modal-btn" onclick="checkPassword()">OK</button><button class="modal-btn" onclick="closePassPopup()" style="background:#595959;">Batal</button></div></div></div>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxJG7iH1WxBc-qBMLQQDT1dFembZsj8EHcygLAh5FDuCmKg3Apddky_Fu4fBTwkm2yC/exec';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxk8axwd6pcgUGWTB3dug-eecpHad7uE-zGoY-DiASlAvV2-hPe24bX4suxshvA0LvaaA/exec';
     let nameData = [], itemData = [], itemStock = {}, lastTransactions = [], gaMode = false, activeTextarea = null, longPressTimer, passAction = "", currentMode = "", currentItems = [], currentName = "";
 
     function clearInput(e, btn) { e.preventDefault(); const inp = btn.parentElement.querySelector('input'); inp.value = ''; const list = btn.parentElement.querySelector('.autocomplete-list'); if(list) list.style.display = 'none'; inp.focus(); }
