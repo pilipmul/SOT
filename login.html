@@ -40,7 +40,6 @@
                         <input type="text" id="nama" placeholder="Nama Pengguna" autocomplete="off" 
                             class="w-full bg-slate-900/60 border border-slate-700 rounded-xl pl-11 pr-4 py-3 text-white text-base placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition duration-200">
                     </div>
-                    
                     <div id="autocomplete-box" class="absolute left-0 right-0 mt-1 bg-slate-800 border border-slate-700/80 rounded-xl max-h-48 overflow-y-auto z-50 shadow-xl hidden divide-y divide-slate-700/40"></div>
                 </div>
 
@@ -55,7 +54,7 @@
                     </div>
                 </div>
 
-                <button onclick="login()" id="btn-submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base py-3 px-4 rounded-xl shadow-lg shadow-blue-600/10 hover:shadow-blue-600/20 transition duration-200 cursor-pointer active:scale-[0.99] mt-2">
+                <button onclick="login()" id="btn-submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base py-3 px-4 rounded-xl shadow-lg shadow-blue-600/10 hover:shadow-blue-600/20 transition duration-200 cursor-pointer active:scale-[0.99] mt-2 disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed disabled:scale-100 disabled:shadow-none">
                     Log in
                 </button>
 
@@ -72,29 +71,31 @@
     <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwoz7fGFbbV5kDdKDGCvYxHsJG3Nm5_0KAk-9Nu7kYO05U_FW1MwI8DBch2amyT45pZmQ/exec";
     let userDataNames = [];
+    let currentMatches = []; // Menyimpan daftar kecocokan nama aktif
 
     function setupAutocomplete(input, box, data) {
         input.oninput = () => {
             const val = input.value.trim().toLowerCase();
             if (!val) {
                 box.style.display = "none";
+                currentMatches = [];
                 return;
             }
 
-            const match = data
+            currentMatches = data
                 .filter(d => d.toLowerCase().includes(val))
                 .slice(0, 10);
-            
-            box.innerHTML = match.map(m =>
+
+            box.innerHTML = currentMatches.map(m =>
                 `<div class="autocomplete-item px-4 py-3 text-sm text-slate-300 hover:bg-slate-700/60 hover:text-white cursor-pointer transition duration-150">${m}</div>`
             ).join('');
-            box.style.display = match.length ? "block" : "none";
+            box.style.display = currentMatches.length ? "block" : "none";
 
             box.querySelectorAll(".autocomplete-item").forEach(div => {
                 div.onclick = () => {
                     input.value = div.textContent;
                     box.style.display = "none";
-                    // Fokus otomatis pindah ke PIN setelah memilih nama dari autocomplete
+                    currentMatches = [];
                     document.getElementById("pin").focus();
                 };
             });
@@ -115,29 +116,38 @@
             
             setupAutocomplete(document.getElementById("nama"), document.getElementById("autocomplete-box"), userDataNames);
         } catch (err) {
-            console.error(err);
+            console.error("Gagal memuat data pengguna:", err);
         }
     }
 
-    // Listener untuk membatasi input hanya angka dan memproses tombol Enter
     document.addEventListener("DOMContentLoaded", () => {
+        // Jalankan pemuatan data nama secara langsung tanpa menunggu background image
+        loadUsers();
+
         const pinInput = document.getElementById("pin");
         const namaInput = document.getElementById("nama");
+        const box = document.getElementById("autocomplete-box");
 
-        // Validasi input PIN agar hanya menerima angka
+        // Batasi input PIN agar hanya menerima angka
         pinInput.oninput = function() {
             this.value = this.value.replace(/[^0-9]/g, '');
         };
 
-        // Ketika menekan Enter di input nama, pindah ke input PIN
+        // Kontrol penekanan tombol Enter pada input nama
         namaInput.onkeydown = (e) => {
             if (e.key === "Enter") {
                 e.preventDefault();
+                // Jika menu autocomplete aktif dan ada pilihan, ambil yang pertama
+                if (box.style.display === "block" && currentMatches.length > 0) {
+                    namaInput.value = currentMatches[0];
+                    box.style.display = "none";
+                    currentMatches = [];
+                }
                 pinInput.focus();
             }
         };
 
-        // Ketika menekan Enter di input PIN, langsung eksekusi login
+        // Kontrol penekanan tombol Enter pada input PIN
         pinInput.onkeydown = (e) => {
             if (e.key === "Enter") {
                 e.preventDefault();
@@ -150,6 +160,7 @@
         const nama = document.getElementById("nama").value.trim();
         const pin = document.getElementById("pin").value.trim();
         const msg = document.getElementById("msg");
+        const btnSubmit = document.getElementById("btn-submit");
 
         if (!nama || !pin) {
             msg.innerHTML = "Isi nama dan PIN!";
@@ -163,6 +174,9 @@
             return;
         }
 
+        // Kunci tombol dan tampilkan animasi loading
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = "Memproses...";
         msg.innerHTML = "<div class='inline-block animate-spin h-4 w-4 border-2 border-slate-400 border-t-blue-500 rounded-full mr-2 vertical-middle'></div> Memvalidasi kredensial...";
         msg.className = "msg text-slate-400";
 
@@ -178,23 +192,23 @@
                 msg.innerHTML = "✓ Login berhasil! Mengalihkan...";
                 msg.className = "msg text-emerald-500 font-semibold";
                 
-                // Menyimpan data hasil login (termasuk nama dan objek akses)
                 localStorage.setItem("user", JSON.stringify(result));
-                
-                // Alihkan ke halaman operasional SyncFlow Anda
-                setTimeout(() => { window.location.href = "dashboard.html"; }, 1000); 
+                setTimeout(() => { window.location.href = "dashboard.html"; }, 1000);
             } else {
                 msg.innerHTML = result.message || "Akses ditolak. Periksa kembali PIN Anda.";
                 msg.className = "msg text-rose-500";
+                // Kembalikan status tombol jika gagal
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = "Log in";
             }
         } catch (err) {
-            msg.innerHTML = "Gagal memproses koneksi ke backend SOT.";
+            msg.innerHTML = "Gagal memproses koneksi ke backend SOT Portal.";
             msg.className = "msg text-rose-500";
+            // Kembalikan status tombol jika terjadi gangguan jaringan
+            btnSubmit.disabled = false;
+            btnSubmit.innerHTML = "Log in";
         }
     }
-
-    window.onload = loadUsers;
     </script>
-
 </body>
 </html>
