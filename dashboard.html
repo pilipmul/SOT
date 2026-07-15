@@ -8,12 +8,10 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        
-        /* Mempertahankan default sembunyi bawaan fungsi akses Anda */
         .menu-card { display: none; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
     <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
@@ -26,10 +24,10 @@
                     <p class="text-xs text-slate-400">Halo, <span id="user-name" class="text-blue-400 font-semibold">User</span></p>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <div class="text-sm text-right hidden sm:block">
-                    <span class="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full font-medium border border-blue-500/30">Dashboard Portal</span>
-                </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                <button class="bg-slate-700 hover:bg-slate-600 text-white text-xs px-4 py-2 rounded-lg font-medium shadow-xs transition cursor-pointer" onclick="openPinModal()">
+                    Ubah PIN
+                </button>
                 <button class="bg-red-600 hover:bg-red-700 text-white text-xs px-4 py-2 rounded-lg font-medium shadow-xs transition cursor-pointer" onclick="logout()">
                     Logout
                 </button>
@@ -37,43 +35,48 @@
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-8">
-        
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full">
         <div class="border-b border-slate-200 pb-3 mb-6">
             <h2 class="text-xl font-bold tracking-tight text-slate-900">Menu Utama</h2>
             <p class="text-xs text-slate-500">Pilih modul aplikasi operasional yang ingin Anda akses</p>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="menu-wrapper">
-            
-            <a href="eskalasi.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="eskalasi">
-                Eskalasi
-            </a>
-            
-            <a href="teguran.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="suratTeguran">
-                Surat Teguran
-            </a>
-            
-            <a href="sr.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="dokPerbaikan">
-                Dok. Perbaikan
-            </a>
-            
-            <a href="tasks.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="tasks">
-                Tasks
-            </a>
-            
-            <a href="syncflow.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="syncflow">
-                Syncflow
-            </a>
-            
-            <a href="access.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="accesControl">
-                Access Control
-            </a>
-
+            <a href="eskalasi.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="eskalasi">Eskalasi</a>
+            <a href="teguran.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="suratTeguran">Surat Teguran</a>
+            <a href="sr.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="dokPerbaikan">Dok. Perbaikan</a>
+            <a href="tasks.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="tasks">Tasks</a>
+            <a href="syncflow.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="syncflow">Syncflow</a>
+            <a href="access.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="accesControl">Access Control</a>
         </div>
     </main>
 
-    <footer class="max-w-7xl mx-auto px-4">
+    <div id="pinModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center p-4 z-50 backdrop-blur-xs">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl transform transition-all">
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Ubah PIN Akses</h3>
+            <p class="text-xs text-slate-500 mb-4">Demi keamanan, gunakan kombinasi angka yang kuat dan jangan bagikan PIN Anda.</p>
+            
+            <form id="pinForm" onsubmit="handleUpdatePin(event)">
+                <div class="space-y-4 mb-6">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">PIN Baru</label>
+                        <input type="password" id="newPin" required maxlength="6" pattern="\d*" inputmode="numeric" placeholder="Masukkan 6 angka" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-center tracking-widest focus:outline-hidden focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Konfirmasi PIN Baru</label>
+                        <input type="password" id="confirmPin" required maxlength="6" pattern="\d*" inputmode="numeric" placeholder="Ulangi 6 angka" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-center tracking-widest focus:outline-hidden focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    </div>
+                </div>
+                
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="closePinModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer">Batal</button>
+                    <button type="submit" id="btnSimpanPin" class="px-4 py-2 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-xs cursor-pointer">Simpan PIN</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="max-w-7xl mx-auto px-4 mt-auto mb-4 w-full">
         <div class="bg-white rounded-xl border border-slate-200 px-6 py-4 text-xs text-slate-500 flex justify-between items-center shadow-xs">
             <span>Sistem Operasional Terintegrasi Portal</span>
             <span>Power by: PBC Internal Dev Team</span>
@@ -81,16 +84,14 @@
     </footer>
 
     <script>
-        // 1. Ambil data dari localStorage
-        const userData = JSON.parse(localStorage.getItem("user"));
+        // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
+        const BACKEND_URL = "https://script.google.com/macros/s/xxxxxxxxx/exec";
 
-        // 2. Proteksi Halaman: Jika belum login, tendang ke login.html
+        const userData = JSON.parse(localStorage.getItem("user"));
         if (!userData) {
             window.location.href = "login.html";
         } else {
             document.getElementById("user-name").textContent = userData.nama;
-            
-            // 3. Logika Menampilkan Menu berdasarkan Akses
             const akses = userData.akses;
             for (let key in akses) {
                 if (akses[key] === "Y") {
@@ -102,11 +103,69 @@
             }
         }
 
+        // Fungsi Modal Pengubah PIN
+        function openPinModal() {
+            document.getElementById("pinModal").classList.remove("hidden");
+            document.getElementById("pinForm").reset();
+        }
+
+        function closePinModal() {
+            document.getElementById("pinModal").addClass("hidden");
+        }
+
+        // Eksekusi Update ke Google Apps Script
+        async function handleUpdatePin(event) {
+            event.preventDefault();
+            const newPin = document.getElementById("newPin").value;
+            const confirmPin = document.getElementById("confirmPin").value;
+            const btnSimpan = document.getElementById("btnSimpanPin");
+
+            if (newPin !== confirmPin) {
+                alert("Konfirmasi PIN tidak cocok! Silakan periksa kembali.");
+                return;
+            }
+
+            if (newPin.length < 4) { // Menyesuaikan batas minimal panjang PIN Anda
+                alert("PIN terlalu pendek!");
+                return;
+            }
+
+            btnSimpan.disabled = true;
+            btnSimpan.textContent = "Menyimpan...";
+
+            try {
+                // Mengirim request POST ke Google Apps Script
+                const response = await fetch(BACKEND_URL, {
+                    method: "POST",
+                    mode: "no-cors", // Digunakan agar tidak terblokir masalah CORS di browser
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        action: "updatePin",
+                        username: userData.username, // Menggunakan field penanda unik user Anda (misal: username/email)
+                        newPin: newPin
+                    })
+                });
+
+                // Catatan: Mode 'no-cors' tidak bisa membaca data return body JSON. 
+                // Jika request selesai tanpa error, asumsikan proses berhasil berjalan di background GAS.
+                alert("Permintaan perubahan PIN telah dikirim ke server!");
+                closePinModal();
+                
+            } catch (error) {
+                console.error("Error updating PIN:", error);
+                alert("Gagal terhubung ke server. Periksa koneksi internet Anda.");
+            } finally {
+                btnSimpan.disabled = false;
+                btnSimpan.textContent = "Simpan PIN";
+            }
+        }
+
         function logout() {
             localStorage.removeItem("user");
             window.location.href = "login.html";
         }
     </script>
-
 </body>
 </html>
