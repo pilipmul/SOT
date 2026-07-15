@@ -280,10 +280,10 @@
     document.getElementById("btnIn").onclick = () => handleSubmit("in");
     document.getElementById("btnOut").onclick = () => handleSubmit("out");
     window.onload = function() {
-    // 1. Jalankan fetch data dropdown bawaan SyncFlow
-    fetchDataAndUpdateUI();
+        // 1. Jalankan fetch data dropdown bawaan SyncFlow
+        fetchDataAndUpdateUI();
 
-    // 2. Periksa session login terintegrasi dari SOT Portal
+        // 2. Periksa session login terintegrasi dari SOT Portal
         const sessionUser = localStorage.getItem("user");
         if (sessionUser) {
             try {
@@ -305,7 +305,8 @@
                     
                     // Membuka GA Mode jika nilainya adalah 'ACCESS CONTROL', 'YA', atau 'TRUE'
                     if (nilaiAkses === "ACCESS CONTROL" || nilaiAkses === "YA" || nilaiAkses === "TRUE") {
-                        updateGAUI(true); 
+                        isGA = true; // <-- TAMBAHKAN BARIS INI: Mengaktifkan status logika internal GA Mode
+                        updateGAUI(true); // Memperbarui tampilan UI (Tombol IN aktif, warna berubah)
                         showToast("🔓 GA Mode Aktif Otomatis (Access Control)");
                     }
                 }
