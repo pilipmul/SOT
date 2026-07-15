@@ -311,22 +311,28 @@
     document.getElementById("btnOut").onclick = () => handleSubmit("out");
     
     window.onload = function() {
-        if (userData) { // Menggunakan variabel userData yang dideklarasikan di atas tadi
+        // A. Jalankan fetch data dropdown bawaan SyncFlow secara OTOMATIS
+        fetchDataAndUpdateUI();
+
+        // B. Periksa session login terintegrasi dari SOT Portal untuk auto-fill nama
+        if (userData) {
             try {
                 // Mengisi otomatis kolom Nama
                 if (userData.nama) {
                     const nameInput = document.getElementById("name");
                     nameInput.value = userData.nama;
                     
+                    // Trigger event input agar tombol clear (X) atau autocomplete sinkron
                     nameInput.dispatchEvent(new Event('input'));
                 }
                 
+                // PEMERIKSAAN HAK AKSES GA MODE
                 if (userData.akses && userData.akses.accesControl) {
                     const nilaiAkses = userData.akses.accesControl.toString().toUpperCase().trim();
-                    
+                    // Membuka GA Mode jika nilainya adalah 'ACCESS CONTROL', 'YA', atau 'TRUE'
                     if (nilaiAkses === "ACCESS CONTROL" || nilaiAkses === "YA" || nilaiAkses === "TRUE") {
-                        isGA = true; 
-                        updateGAUI(true); 
+                        isGA = true; // Mengaktifkan status logika internal GA Mode
+                        updateGAUI(true); // Memperbarui tampilan UI (Tombol IN aktif, warna berubah)
                         showToast("🔓 GA Mode Aktif Otomatis (Access Control)");
                     }
                 }
