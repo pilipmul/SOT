@@ -100,8 +100,8 @@
     </div>
     <form id="myForm">
         <div id="nameWrapper">
-            <input type="text" id="name" placeholder="Name" autocomplete="off" required>
-            <div class="clear-btn" onmousedown="clearInput(event, this)">×</div>
+            <input type="text" id="name" placeholder="Name" autocomplete="off" required readonly style="background-color: #e9ecef; color: #6c757d; cursor: not-allowed;">
+            <div class="clear-btn" style="display: none !important;" onmousedown="clearInput(event, this)">×</div>
             <div id="nameList" class="autocomplete-list"></div>
         </div>
         <div id="itemContainer">
