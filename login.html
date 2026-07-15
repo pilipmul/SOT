@@ -177,8 +177,12 @@
             if (result.success) {
                 msg.innerHTML = "✓ Login berhasil! Mengalihkan...";
                 msg.className = "msg text-emerald-500 font-semibold";
+                
+                // Menyimpan data hasil login (termasuk nama dan objek akses)
                 localStorage.setItem("user", JSON.stringify(result));
-                setTimeout(() => { window.location.href = "dashboard.html"; }, 1000);
+                
+                // Alihkan ke halaman operasional SyncFlow Anda
+                setTimeout(() => { window.location.href = "dashboard.html"; }, 1000); 
             } else {
                 msg.innerHTML = result.message || "Akses ditolak. Periksa kembali PIN Anda.";
                 msg.className = "msg text-rose-500";
