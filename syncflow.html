@@ -280,32 +280,34 @@
     document.getElementById("btnIn").onclick = () => handleSubmit("in");
     document.getElementById("btnOut").onclick = () => handleSubmit("out");
     window.onload = function() {
-    // 1. Jalankan sinkronisasi data dropdown bawaan SyncFlow
-        fetchDataAndUpdateUI();
-    
-        // 2. Periksa session login terintegrasi dari SOT
+    // 1. Jalankan fetch data dropdown bawaan SyncFlow
+    fetchDataAndUpdateUI();
+
+    // 2. Periksa session login terintegrasi dari SOT Portal
         const sessionUser = localStorage.getItem("user");
         if (sessionUser) {
             try {
                 const userData = JSON.parse(sessionUser);
                 
-                // Otomatis mengisikan kolom Nama dengan nama user yang login di SOT
+                // Mengisi otomatis kolom Nama
                 if (userData.nama) {
                     const nameInput = document.getElementById("name");
                     nameInput.value = userData.nama;
                     
-                    // Memicu event input agar autocomplete atau overlay bawaan menyesuaikan
-                    const nameList = document.getElementById("nameList");
-                    if(typeof setupAutocomplete === "function") {
-                        nameInput.dispatchEvent(new Event('input'));
-                    }
+                    // Trigger event input agar tombol clear (X) atau autocomplete sinkron
+                    nameInput.dispatchEvent(new Event('input'));
                 }
                 
-                // Cek kriteria hak akses "accesControl" dari objek akses SOT
-                if (userData.akses && (userData.akses.accesControl === "Access Control" || userData.akses.accesControl === "YA")) {
-                    // Aktifkan GA Mode secara langsung (memanggil fungsi internal SyncFlow)
-                    updateGAUI(true); 
-                    showToast("🔓 GA Mode Aktif Otomatis (Access Control)");
+                // PEMERIKSAAN HAK AKSES GA MODE
+                if (userData.akses && userData.akses.accesControl) {
+                    // Mengubah nilai hak akses menjadi huruf besar untuk validasi yang aman
+                    const nilaiAkses = userData.akses.accesControl.toString().toUpperCase().trim();
+                    
+                    // Membuka GA Mode jika nilainya adalah 'ACCESS CONTROL', 'YA', atau 'TRUE'
+                    if (nilaiAkses === "ACCESS CONTROL" || nilaiAkses === "YA" || nilaiAkses === "TRUE") {
+                        updateGAUI(true); 
+                        showToast("🔓 GA Mode Aktif Otomatis (Access Control)");
+                    }
                 }
             } catch (e) {
                 console.error("Gagal membaca session integrasi SOT:", e);
