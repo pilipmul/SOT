@@ -280,27 +280,35 @@
     document.getElementById("btnIn").onclick = () => handleSubmit("in");
     document.getElementById("btnOut").onclick = () => handleSubmit("out");
     window.onload = function() {
-    // 1. Jalankan fetch data dropdown bawaan seperti biasa
-    fetchDataAndUpdateUI();
-
-    // 2. Cek apakah ada session user dari SOT Login
-    const sessionUser = localStorage.getItem("user");
+    // 1. Jalankan sinkronisasi data dropdown bawaan SyncFlow
+        fetchDataAndUpdateUI();
+    
+        // 2. Periksa session login terintegrasi dari SOT
+        const sessionUser = localStorage.getItem("user");
         if (sessionUser) {
             try {
                 const userData = JSON.parse(sessionUser);
                 
-                // Mengisi otomatis input Nama di SyncFlow dengan nama user yang login
+                // Otomatis mengisikan kolom Nama dengan nama user yang login di SOT
                 if (userData.nama) {
-                    document.getElementById("name").value = userData.nama;
+                    const nameInput = document.getElementById("name");
+                    nameInput.value = userData.nama;
+                    
+                    // Memicu event input agar autocomplete atau overlay bawaan menyesuaikan
+                    const nameList = document.getElementById("nameList");
+                    if(typeof setupAutocomplete === "function") {
+                        nameInput.dispatchEvent(new Event('input'));
+                    }
                 }
                 
-                // JIKA user memiliki hak akses "Access Control", aktifkan GA Mode langsung
-                if (userData.hak_akses === "Access Control") {
+                // Cek kriteria hak akses "accesControl" dari objek akses SOT
+                if (userData.akses && (userData.akses.accesControl === "Access Control" || userData.akses.accesControl === "YA")) {
+                    // Aktifkan GA Mode secara langsung (memanggil fungsi internal SyncFlow)
                     updateGAUI(true); 
-                    showToast("🔓 GA Mode Aktif (Access Control)");
+                    showToast("🔓 GA Mode Aktif Otomatis (Access Control)");
                 }
             } catch (e) {
-                console.error("Gagal membaca session user SOT:", e);
+                console.error("Gagal membaca session integrasi SOT:", e);
             }
         }
     };
