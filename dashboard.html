@@ -119,43 +119,47 @@
             const newPin = document.getElementById("newPin").value;
             const confirmPin = document.getElementById("confirmPin").value;
             const btnSimpan = document.getElementById("btnSimpanPin");
-
+        
             if (newPin !== confirmPin) {
                 alert("Konfirmasi PIN tidak cocok! Silakan periksa kembali.");
                 return;
             }
-
-            if (newPin.length < 4) { // Menyesuaikan batas minimal panjang PIN Anda
-                alert("PIN terlalu pendek!");
+        
+            if (newPin.length < 4) {
+                alert("PIN minimal terdiri dari 4 digit angka!");
                 return;
             }
-
+        
             btnSimpan.disabled = true;
             btnSimpan.textContent = "Menyimpan...";
-
+        
+            // Format data agar sesuai dibaca e.parameter di Apps Script Anda
+            const formData = new URLSearchParams();
+            formData.append("action", "updatePin");
+            formData.append("nama", userData.nama); // Mengirim nama user yang aktif dari localStorage[cite: 1]
+            formData.append("pinBaru", newPin);
+        
             try {
-                // Mengirim request POST ke Google Apps Script
                 const response = await fetch(BACKEND_URL, {
                     method: "POST",
-                    mode: "no-cors", // Digunakan agar tidak terblokir masalah CORS di browser
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/x-www-form-urlencoded"
                     },
-                    body: JSON.stringify({
-                        action: "updatePin",
-                        username: userData.username, // Menggunakan field penanda unik user Anda (misal: username/email)
-                        newPin: newPin
-                    })
+                    body: formData.toString()
                 });
-
-                // Catatan: Mode 'no-cors' tidak bisa membaca data return body JSON. 
-                // Jika request selesai tanpa error, asumsikan proses berhasil berjalan di background GAS.
-                alert("Permintaan perubahan PIN telah dikirim ke server!");
-                closePinModal();
+        
+                const result = await response.json();
+        
+                if (result.success) {
+                    alert("PIN Anda berhasil diubah!");
+                    closePinModal();
+                } else {
+                    alert("Gagal mengubah PIN: " + result.message);
+                }
                 
             } catch (error) {
                 console.error("Error updating PIN:", error);
-                alert("Gagal terhubung ke server. Periksa koneksi internet Anda.");
+                alert("Terjadi kesalahan koneksi atau CORS. Silakan periksa kembali server deploy Anda.");
             } finally {
                 btnSimpan.disabled = false;
                 btnSimpan.textContent = "Simpan PIN";
