@@ -72,19 +72,21 @@
             <p class="text-[11px] text-slate-500 mb-4">Pastikan PIN baru Anda mudah diingat namun aman.</p>
             
             <form id="pinForm" onsubmit="handleUpdatePin(event)">
+                <!-- Bagian Input Form di dalam Modal -->
                 <div class="space-y-3 mb-5">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1">PIN Lama</label>
-                        <input type="password" id="oldPin" required maxlength="6" pattern="\d*" inputmode="numeric" placeholder="••••••" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm text-center tracking-widest focus:outline-hidden focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-slate-50 font-mono">
+                        <!-- Menggunakan type="text", inputmode="numeric", dan pattern untuk memicu numpad HP -->
+                        <input type="text" id="oldPin" required maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="••••••" class="pin-input w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm text-center tracking-widest focus:outline-hidden focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-slate-50 font-mono">
                     </div>
                     <hr class="border-slate-100 my-1">
                     <div>
                         <label class="block text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1">PIN Baru</label>
-                        <input type="password" id="newPin" required maxlength="6" pattern="\d*" inputmode="numeric" placeholder="••••••" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm text-center tracking-widest focus:outline-hidden focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-slate-50 font-mono">
+                        <input type="text" id="newPin" required maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="••••••" class="pin-input w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm text-center tracking-widest focus:outline-hidden focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-slate-50 font-mono">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1">Konfirmasi PIN Baru</label>
-                        <input type="password" id="confirmPin" required maxlength="6" pattern="\d*" inputmode="numeric" placeholder="••••••" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm text-center tracking-widest focus:outline-hidden focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-slate-50 font-mono">
+                        <input type="text" id="confirmPin" required maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="••••••" class="pin-input w-full px-3 py-1.5 border border-slate-200 rounded-lg text-sm text-center tracking-widest focus:outline-hidden focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-slate-50 font-mono">
                     </div>
                 </div>
                 
@@ -160,6 +162,12 @@
             }, 4000);
         }
 
+        document.querySelectorAll('.pin-input').forEach(input => {
+            input.addEventListener('input', function(e) {
+                // Ganti semua karakter yang BUKAN angka (0-9) dengan string kosong
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+        });
         // Fungsi Modal Pengubah PIN
         function openPinModal() {
             document.getElementById("pinModal").classList.remove("hidden");
