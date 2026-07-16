@@ -111,9 +111,24 @@
   // URL Deployment Web App Google Apps Script Anda
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwoz7fGFbbV5kDdKDGCvYxHsJG3Nm5_0KAk-9Nu7kYO05U_FW1MwI8DBch2amyT45pZmQ/exec";
   
-  // Simulasi Session User Login dari Portal Utama SOT
-  // Pada implementasi riil, ambil variable nama ini dari localStorage/session setelah proses login berhasil
-  const CURRENT_USER = localStorage.getItem("sot_username") || "Tamu"; 
+  const userSessionString = localStorage.getItem("user");
+  let usernameFromStorage = "Tamu";
+  
+  // 2. Jika datanya ada, bongkar JSON-nya untuk mengambil properti .nama
+  if (userSessionString) {
+    try {
+      const userData = JSON.parse(userSessionString);
+      if (userData && userData.nama) {
+        usernameFromStorage = userData.nama;
+      }
+    } catch (err) {
+      console.error("Gagal membaca session user:", err);
+    }
+  }
+  
+  // 3. Cek parameter URL terlebih dahulu (?user=...), jika tidak ada baru gunakan dari localStorage
+  const urlParams = new URLSearchParams(window.location.search);
+  const CURRENT_USER = urlParams.get('user') || usernameFromStorage;
   
   let rkmDataCache = [];
   let bootstrapModal;
