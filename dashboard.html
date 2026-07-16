@@ -52,12 +52,12 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="menu-wrapper">
-            <a href="eskalasi.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="eskalasi">Eskalasi</a>
-            <a href="RKM.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="RKM">RKM</a>
-            <a href="sr.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="dokPerbaikan">Dok. Perbaikan</a>
-            <a href="tasks.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="tasks">Tasks</a>
-            <a href="syncflow.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="syncflow">Syncflow</a>
-            <a href="access.html" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="accesControl">Access Control</a>
+            <a href="#" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="eskalasi">Eskalasi</a>
+            <a href="#" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="RKM">RKM</a>
+            <a href="#" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="dokPerbaikan">Dok. Perbaikan</a>
+            <a href="#" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="tasks">Tasks</a>
+            <a href="#" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="syncflow">Syncflow</a>
+            <a href="#" class="menu-card bg-white p-6 rounded-xl border border-slate-200 shadow-xs text-center text-blue-600 font-bold text-sm hover:-translate-y-1 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition duration-200" id="accesControl">Access Control</a>
         </div>
     </main>
 
@@ -116,15 +116,28 @@
         if (!userData) {
             window.location.href = "login.html";
         } else {
-            document.getElementById("user-name").textContent = userData.nama;
+            const namaUser = userData.nama;
+            document.getElementById("user-name").textContent = namaUser;
             
-            // 3. Logika Menampilkan Menu berdasarkan Akses
+            // Mapping nama file HTML berdasarkan ID Element Menu Anda
+            const fileMapping = {
+                "eskalasi": "eskalasi.html",
+                "RKM": "RKM.html",
+                "dokPerbaikan": "sr.html",
+                "tasks": "tasks.html",
+                "syncflow": "syncflow.html",
+                "accesControl": "access.html"
+            };
+        
+            // Logika Menampilkan Menu sekaligus Menyisipkan Parameter Nama User ke Link
             const akses = userData.akses;
             for (let key in akses) {
                 if (akses[key] === "Y") {
                     const menuElement = document.getElementById(key);
-                    if (menuElement) {
+                    if (menuElement && fileMapping[key]) {
                         menuElement.style.display = "block";
+                        // Mengirimkan parameter nama user agar terbaca di halaman tujuan (misal: RKM.html?user=Dede Hidayat)
+                        menuElement.href = `${fileMapping[key]}?user=${encodeURIComponent(namaUser)}`;
                     }
                 }
             }
