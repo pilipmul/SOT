@@ -129,18 +129,25 @@
     const url = `${WEB_APP_URL}?action=getRKM&currentUser=${encodeURIComponent(CURRENT_USER)}`;
     
     fetch(url)
-      .then(res => res.json())
+      .then(res => {
+        // Memastikan server merespons dengan status HTTP OK (200)
+        if (!res.ok) {
+          throw new Error("HTTP error, status = " + res.status);
+        }
+        return res.json();
+      })
       .then(response => {
-        if (response.success) {
+        // Melindungi dari response null atau undefined
+        if (response && response.success) {
           rkmDataCache = response.data;
           renderTable(response.data, response.hasEditAccess);
         } else {
-          alert("Gagal memuat data: " + response.message);
+          alert("Gagal memuat data: " + (response ? response.message : "Format data salah"));
         }
       })
       .catch(err => {
-        console.error(err);
-        alert("Terjadi kesalahan koneksi server backend.");
+        console.error("Detail Error:", err);
+        alert("Terjadi kesalahan sistem: " + err.message);
       });
   }
 
