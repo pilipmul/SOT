@@ -17,9 +17,17 @@
 <div class="container-fluid py-4">
   <div class="card bg-white p-4">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-      <div>
-        <h3 class="fw-bold mb-0">Rapat Kerja Mingguan (RKM)</h3>
-        <p class="text-muted mb-0">User Aktif: <span id="txtCurrentUser" class="fw-bold text-primary">-</span></p>
+      <div class="d-flex align-items-center gap-3">
+        <a href="https://pilipmul.github.io/SOT/dashboard.html" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+          </svg>
+          Back
+        </a>
+        <div>
+          <h3 class="fw-bold mb-0">Rapat Kerja Mingguan (RKM)</h3>
+          <p class="text-muted mb-0">User Aktif: <span id="txtCurrentUser" class="fw-bold text-primary">-</span></p>
+        </div>
       </div>
       <button id="btnTambah" class="btn btn-success hidden" onclick="openModal()">
         + Tambah Agenda Baru
@@ -112,18 +120,29 @@
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwoz7fGFbbV5kDdKDGCvYxHsJG3Nm5_0KAk-9Nu7kYO05U_FW1MwI8DBch2amyT45pZmQ/exec";
   
   const userSessionString = localStorage.getItem("user");
-  let usernameFromStorage = "Tamu";
   
-  // 2. Jika datanya ada, bongkar JSON-nya untuk mengambil properti .nama
-  if (userSessionString) {
-    try {
-      const userData = JSON.parse(userSessionString);
-      if (userData && userData.nama) {
-        usernameFromStorage = userData.nama;
-      }
-    } catch (err) {
-      console.error("Gagal membaca session user:", err);
+  // PROTEKSI HALAMAN: Tendang jika tidak ada session login
+  if (!userSessionString) {
+    alert("Akses ditolak! Anda harus login terlebih dahulu.");
+    window.location.href = "login.html";
+  }
+
+  let usernameFromStorage = "Tamu";
+  try {
+    const userData = JSON.parse(userSessionString);
+    
+    // Validasi apakah user memiliki izin akses spesifik modul RKM
+    if (!userData || !userData.akses || userData.akses.RKM !== "Y") {
+      alert("Anda tidak memiliki izin untuk mengakses modul RKM.");
+      window.location.href = "https://pilipmul.github.io/SOT/dashboard.html";
     }
+    
+    if (userData && userData.nama) {
+      usernameFromStorage = userData.nama;
+    }
+  } catch (err) {
+    console.error("Gagal membaca session user:", err);
+    window.location.href = "login.html";
   }
   
   // 3. Cek parameter URL terlebih dahulu (?user=...), jika tidak ada baru gunakan dari localStorage
