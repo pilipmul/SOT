@@ -38,7 +38,7 @@
       <table class="table table-striped table-hover align-middle border">
         <thead class="table-dark sticky-top">
           <tr>
-            <th>No</th>
+            <th>Tanggal</th>
             <th>Sumber</th>
             <th>Rencana</th>
             <th>Kendala</th>
@@ -71,8 +71,8 @@
           <input type="hidden" id="inpRowNum">
           <div class="row g-3">
             <div class="col-md-4">
-              <label class="form-label fw-semibold">No Agenda</label>
-              <input type="text" id="inpNo" class="form-validate form-control" required>
+              <label class="form-label fw-semibold">Tanggal</label>
+              <input type="text" id="inpTanggal" class="form-validate form-control" placeholder="Contoh: 17 Jun 26" required>
             </div>
             <div class="col-md-8">
               <label class="form-label fw-semibold">Sumber</label>
@@ -203,7 +203,7 @@
     data.forEach((item, index) => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td><b>${item.no}</b></td>
+        <td><b>${item.tanggal || '-'}</b></td>
         <td>${item.sumber}</td>
         <td>${item.rencana}</td>
         <td>${item.kendala || '-'}</td>
@@ -234,7 +234,7 @@
       document.getElementById("modalTitle").innerText = "Edit Agenda RKM";
       const item = rkmDataCache[index];
       document.getElementById("inpRowNum").value = item.rowNum;
-      document.getElementById("inpNo").value = item.no;
+      document.getElementById("inpTanggal").value = item.tanggal;
       document.getElementById("inpSumber").value = item.sumber;
       document.getElementById("inpRencana").value = item.rencana;
       document.getElementById("inpKendala").value = item.kendala;
@@ -259,7 +259,7 @@
     const rowNum = document.getElementById("inpRowNum").value;
     const payload = {
       rowNum: rowNum ? parseInt(rowNum) : null,
-      no: document.getElementById("inpNo").value,
+      tanggal: document.getElementById("inpTanggal").value,
       sumber: document.getElementById("inpSumber").value,
       rencana: document.getElementById("inpRencana").value,
       kendala: document.getElementById("inpKendala").value,
