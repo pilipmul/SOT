@@ -282,12 +282,12 @@
                     }); 
                 }
             });
-
+        
             try {
                 const response = await fetch(ESKIN_API + "?action=submitEskalasi", {
                     method: "POST",
                     body: JSON.stringify({
-                        kode: document.getElementById("displayKode").value, // <-- Ditambahkan di sini
+                        kode: document.getElementById("displayKode").value, // <-- PASTIKAN NAMA FIELD "kode"
                         subject: document.getElementById("subject").value,
                         diajukan: document.getElementById("diajukan").value,
                         diketahui: document.getElementById("diketahui").value,
