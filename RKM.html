@@ -216,12 +216,14 @@
     data.forEach((item, index) => {
       const tr = document.createElement("tr");
 
+      // Terapkan class pewarnaan baris
       if (item.status === "Done") {
         tr.classList.add("row-done");
       } else if (item.status === "Close") {
         tr.classList.add("row-close");
       }
 
+      // Tentukan style tombol status
       let statusBadgeClass = "bg-primary";
       if (item.status === "Done" || item.status === "Close") statusBadgeClass = "bg-dark text-white";
 
@@ -235,7 +237,7 @@
         <td class="text-center">
           ${hasEditAccess ? `
             <span class="badge ${statusBadgeClass} btn-status-edit shadow-sm" onclick="openModal(${index})" title="Click to edit">
-              ${item.status || 'Open'} ✏️
+              ${item.status || 'Open'}
             </span>
           ` : `
             <span class="badge ${statusBadgeClass}">${item.status || 'Open'}</span>
