@@ -10,7 +10,6 @@
     (function checkAuth() {
       const userSessionString = localStorage.getItem("user");
       
-      // 1. Jika belum login -> langsung instan pergi ke halaman login (tanpa alert)
       if (!userSessionString) {
         window.location.replace("login.html");
         return;
@@ -18,13 +17,10 @@
 
       try {
         const userData = JSON.parse(userSessionString);
-        
-        // 2. Jika tidak memiliki akses modul RKM -> langsung instan balik ke dashboard
         if (!userData || !userData.akses || userData.akses.RKM !== "Y") {
           window.location.replace("https://pilipmul.github.io/SOT/dashboard.html");
         }
       } catch (err) {
-        // Jika data di localStorage rusak/corrupt
         window.location.replace("login.html");
       }
     })();
@@ -36,6 +32,10 @@
     .card { border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     .table-responsive { max-height: 70vh; overflow-y: auto; }
     .hidden { display: none !important; }
+
+    /* Style warna status di tabel */
+    .row-done { background-color: #00ff00 !important; color: #000 !important; }
+    .row-close { background-color: #808080 !important; color: #fff !important; }
   </style>
 </head>
 <body>
@@ -61,7 +61,7 @@
     </div>
 
     <div class="table-responsive">
-      <table class="table table-striped table-hover align-middle border">
+      <table class="table table-bordered table-hover align-middle border">
         <thead class="table-dark sticky-top">
           <tr>
             <th>Tanggal</th>
@@ -72,12 +72,13 @@
             <th>Update</th>
             <th>Target</th>
             <th>Realisasi</th>
+            <th>Status Case</th>
             <th id="thAksi" class="hidden text-center">Aksi</th>
           </tr>
         </thead>
         <tbody id="rkmTableBody">
           <tr>
-            <td colspan="9" class="text-center text-muted py-4">Memuat data RKM...</td>
+            <td colspan="10" class="text-center text-muted py-4">Memuat data RKM...</td>
           </tr>
         </tbody>
       </table>
@@ -85,6 +86,7 @@
   </div>
 </div>
 
+<!-- MODAL FORM -->
 <div class="modal fade" id="rkmModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
@@ -98,15 +100,15 @@
           <div class="row g-3">
             <div class="col-md-4">
               <label class="form-label fw-semibold">Tanggal</label>
-              <input type="text" id="inpTanggal" class="form-validate form-control" placeholder="Contoh: 17 Jun 26" required>
+              <input type="text" id="inpTanggal" class="form-control" placeholder="Contoh: 17 Jun 26" required>
             </div>
             <div class="col-md-8">
               <label class="form-label fw-semibold">Sumber</label>
-              <input type="text" id="inpSumber" class="form-validate form-control" required>
+              <input type="text" id="inpSumber" class="form-control" required>
             </div>
             <div class="col-12">
               <label class="form-label fw-semibold">Rencana Kegiatan</label>
-              <textarea id="inpRencana" class="form-validate form-control" rows="3" required></textarea>
+              <textarea id="inpRencana" class="form-control" rows="3" required></textarea>
             </div>
             <div class="col-12">
               <label class="form-label fw-semibold">Kendala</label>
@@ -114,7 +116,7 @@
             </div>
             <div class="col-md-6">
               <label class="form-label fw-semibold">PIC</label>
-              <input type="text" id="inpPic" class="form-validate form-control" required>
+              <input type="text" id="inpPic" class="form-control" required>
             </div>
             <div class="col-md-6">
               <label class="form-label fw-semibold">Target Selesai</label>
@@ -124,9 +126,18 @@
               <label class="form-label fw-semibold">Update Progress</label>
               <textarea id="inpUpdate" class="form-control" rows="2"></textarea>
             </div>
-            <div class="col-12">
+            <div class="col-md-8">
               <label class="form-label fw-semibold">Realisasi / Hasil Akhir</label>
               <input type="text" id="inpRealisasi" class="form-control">
+            </div>
+            <!-- INPUT PILIHAN STATUS CASE / AKSI -->
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Status / Penutupan Case</label>
+              <select id="inpStatus" class="form-select fw-bold">
+                <option value="Open">Open (Berjalan)</option>
+                <option value="Done" style="background-color: #00ff00;">Done (Selesai)</option>
+                <option value="Close" style="background-color: #808080; color: #fff;">Close (Ditutup)</option>
+              </select>
             </div>
           </div>
         </form>
@@ -144,33 +155,21 @@
 <script>
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwoz7fGFbbV5kDdKDGCvYxHsJG3Nm5_0KAk-9Nu7kYO05U_FW1MwI8DBch2amyT45pZmQ/exec";
   
-  // 1. Ambil data asli dari localStorage (Session sebenarnya)
-  let actualUserSession = null;
   let usernameFromStorage = "Tamu";
-  
   try {
-    actualUserSession = JSON.parse(localStorage.getItem("user"));
-    if (actualUserSession && actualUserSession.nama) {
-      usernameFromStorage = actualUserSession.nama;
+    const userData = JSON.parse(localStorage.getItem("user"));
+    if (userData && userData.nama) {
+      usernameFromStorage = userData.nama;
     }
   } catch (err) {
     console.error("Gagal membaca session:", err);
   }
 
-  // 2. Proteksi URL Spoofing: 
-  // SELALU gunakan nama dari localStorage untuk identitas asli backend.
-  // URL parameter hanya boleh digunakan jika nilainya cocok dengan nama session pengguna.
-  const urlParams = new URLSearchParams(window.location.search);
-  const urlUser = urlParams.get('user');
-
-  // Jika URL parameter diisi nama lain yang berbeda dengan localStorage, abaikan / paksa gunakan nama dari localStorage
   const CURRENT_USER = usernameFromStorage;
-
   let rkmDataCache = [];
   let bootstrapModal;
 
   document.addEventListener("DOMContentLoaded", () => {
-    // Tampilkan nama pengguna resmi yang terverifikasi dari localStorage
     document.getElementById("txtCurrentUser").innerText = CURRENT_USER;
     bootstrapModal = new bootstrap.Modal(document.getElementById('rkmModal'));
     fetchRKMData();
@@ -207,12 +206,20 @@
     }
 
     if (data.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="${hasEditAccess ? 9 : 8}" class="text-center text-muted py-3">Tidak ada agenda kerja minggu ini.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="${hasEditAccess ? 10 : 9}" class="text-center text-muted py-3">Tidak ada agenda kerja minggu ini.</td></tr>`;
       return;
     }
 
     data.forEach((item, index) => {
       const tr = document.createElement("tr");
+
+      // Set class warna berdasarkan status case
+      if (item.status === "Done") {
+        tr.classList.add("row-done");
+      } else if (item.status === "Close") {
+        tr.classList.add("row-close");
+      }
+
       tr.innerHTML = `
         <td><b>${item.tanggal || '-'}</b></td>
         <td>${item.sumber}</td>
@@ -222,6 +229,7 @@
         <td>${item.update || '-'}</td>
         <td>${item.target || '-'}</td>
         <td>${item.realisasi || '-'}</td>
+        <td><b>${item.status || 'Open'}</b></td>
         ${hasEditAccess ? `
           <td class="text-center">
             <div class="btn-group btn-group-sm">
@@ -239,6 +247,7 @@
     const form = document.getElementById("rkmForm");
     form.reset();
     document.getElementById("inpRowNum").value = "";
+    document.getElementById("inpStatus").value = "Open";
 
     if (index !== null) {
       document.getElementById("modalTitle").innerText = "Edit Agenda RKM";
@@ -252,6 +261,7 @@
       document.getElementById("inpTarget").value = item.target;
       document.getElementById("inpUpdate").value = item.update;
       document.getElementById("inpRealisasi").value = item.realisasi;
+      document.getElementById("inpStatus").value = item.status || "Open";
     } else {
       document.getElementById("modalTitle").innerText = "Tambah Agenda RKM";
     }
@@ -275,7 +285,8 @@
       pic: document.getElementById("inpPic").value,
       target: document.getElementById("inpTarget").value,
       update: document.getElementById("inpUpdate").value,
-      realisasi: document.getElementById("inpRealisasi").value
+      realisasi: document.getElementById("inpRealisasi").value,
+      status: document.getElementById("inpStatus").value
     };
 
     const url = `${WEB_APP_URL}?action=saveRKM&currentUser=${encodeURIComponent(CURRENT_USER)}`;
