@@ -118,10 +118,26 @@
               <label class="form-label fw-semibold">Case (Rencana & Kendala)</label>
               <textarea id="inpCase" class="form-control" rows="3" required></textarea>
             </div>
+            
+            <!-- ISIAN PIC DENGAN MULTI-SELECT -->
             <div class="col-md-6">
-              <label class="form-label fw-semibold">PIC</label>
-              <input type="text" id="inpPic" class="form-control" required>
+              <label class="form-label fw-semibold">PIC <small class="text-muted">(Bisa pilih >1)</small></label>
+              <select id="inpPic" class="form-select" multiple size="5" required>
+                <option value="GA">GA</option>
+                <option value="Head Ops.">Head Ops.</option>
+                <option value="ME">ME</option>
+                <option value="TRO">TRO</option>
+                <option value="FA">FA</option>
+                <option value="Head FA">Head FA</option>
+                <option value="Security">Security</option>
+                <option value="All">All</option>
+                <option value="CS">CS</option>
+                <option value="Kasir">Kasir</option>
+                <option value="MKT">MKT</option>
+              </select>
+              <small class="text-muted d-block mt-1">Tahan tombol <b>Ctrl</b> (atau <b>Cmd</b> di Mac) untuk memilih beberapa PIC.</small>
             </div>
+
             <div class="col-md-6">
               <label class="form-label fw-semibold">Target Selesai</label>
               <input type="text" id="inpTarget" class="form-control" placeholder="Contoh: 20-07-2026 atau W3 Juli">
@@ -216,22 +232,25 @@
     data.forEach((item, index) => {
       const tr = document.createElement("tr");
 
-      // Terapkan class pewarnaan baris
       if (item.status === "Done") {
         tr.classList.add("row-done");
       } else if (item.status === "Close") {
         tr.classList.add("row-close");
       }
 
-      // Tentukan style tombol status
       let statusBadgeClass = "bg-primary";
       if (item.status === "Done" || item.status === "Close") statusBadgeClass = "bg-dark text-white";
+
+      // Render Badge PIC secara terpisah jika terdapat multiple PIC
+      const picBadges = item.pic 
+        ? item.pic.split(",").map(p => `<span class="badge bg-secondary me-1 mb-1">${p.trim()}</span>`).join("")
+        : '-';
 
       tr.innerHTML = `
         <td><b>${item.tanggal || '-'}</b></td>
         <td>${item.sumber || '-'}</td>
         <td>${item.case || '-'}</td>
-        <td><span class="badge bg-secondary">${item.pic || '-'}</span></td>
+        <td>${picBadges}</td>
         <td>${item.update || '-'}</td>
         <td>${item.target || '-'}</td>
         <td class="text-center">
@@ -254,6 +273,9 @@
     document.getElementById("inpRowNum").value = "";
     document.getElementById("inpStatus").value = "Open";
 
+    const selectPic = document.getElementById("inpPic");
+    Array.from(selectPic.options).forEach(opt => opt.selected = false);
+
     const btnDelete = document.getElementById("btnDeleteModal");
 
     if (index !== null) {
@@ -263,10 +285,19 @@
       document.getElementById("inpTanggal").value = item.tanggal;
       document.getElementById("inpSumber").value = item.sumber;
       document.getElementById("inpCase").value = item.case;
-      document.getElementById("inpPic").value = item.pic;
       document.getElementById("inpTarget").value = item.target;
       document.getElementById("inpUpdate").value = item.update;
       document.getElementById("inpStatus").value = item.status || "Open";
+
+      // Set Multi-Select PIC yang terpilih
+      if (item.pic) {
+        const selectedPics = item.pic.split(",").map(p => p.trim());
+        Array.from(selectPic.options).forEach(opt => {
+          if (selectedPics.includes(opt.value)) {
+            opt.selected = true;
+          }
+        });
+      }
 
       btnDelete.classList.remove("hidden");
     } else {
@@ -283,15 +314,19 @@
       return;
     }
 
+    // Ambil semua pilihan PIC yang terpilih
+    const selectedPicOptions = Array.from(document.getElementById("inpPic").selectedOptions).map(opt => opt.value);
+    const picValue = selectedPicOptions.join(", ");
+
     const rowNum = document.getElementById("inpRowNum").value;
     const payload = {
       rowNum: rowNum ? parseInt(rowNum) : null,
       tanggal: document.getElementById("inpTanggal").value,
       sumber: document.getElementById("inpSumber").value,
       case: document.getElementById("inpCase").value,
-      pic: document.getElementById("inpPic").value,
-      update: document.getElementById("inpUpdate").value,
+      pic: picValue,
       target: document.getElementById("inpTarget").value,
+      update: document.getElementById("inpUpdate").value,
       status: document.getElementById("inpStatus").value
     };
 
