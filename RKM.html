@@ -70,25 +70,23 @@
       </button>
     </div>
 
-    <!-- TABEL COMPACT (9 KOLOM, TANPA KOLOM AKSI) -->
+    <!-- TABEL RINGKAS 7 KOLOM -->
     <div class="table-responsive">
       <table class="table table-bordered align-middle border">
         <thead class="table-dark sticky-top">
           <tr>
             <th>Tanggal</th>
             <th>Sumber</th>
-            <th>Rencana</th>
-            <th>Kendala</th>
+            <th>Case</th>
             <th>PIC</th>
             <th>Update</th>
             <th>Target</th>
-            <th>Realisasi</th>
             <th class="text-center">Status</th>
           </tr>
         </thead>
         <tbody id="rkmTableBody">
           <tr>
-            <td colspan="9" class="text-center text-muted py-4">Loading RKM data...</td>
+            <td colspan="7" class="text-center text-muted py-4">Loading RKM data...</td>
           </tr>
         </tbody>
       </table>
@@ -117,12 +115,8 @@
               <input type="text" id="inpSumber" class="form-control" required>
             </div>
             <div class="col-12">
-              <label class="form-label fw-semibold">Rencana Kegiatan</label>
-              <textarea id="inpRencana" class="form-control" rows="3" required></textarea>
-            </div>
-            <div class="col-12">
-              <label class="form-label fw-semibold">Kendala</label>
-              <textarea id="inpKendala" class="form-control" rows="2"></textarea>
+              <label class="form-label fw-semibold">Case (Rencana & Kendala)</label>
+              <textarea id="inpCase" class="form-control" rows="3" required></textarea>
             </div>
             <div class="col-md-6">
               <label class="form-label fw-semibold">PIC</label>
@@ -133,14 +127,10 @@
               <input type="text" id="inpTarget" class="form-control" placeholder="Contoh: 20-07-2026 atau W3 Juli">
             </div>
             <div class="col-12">
-              <label class="form-label fw-semibold">Update Progress</label>
-              <textarea id="inpUpdate" class="form-control" rows="2"></textarea>
+              <label class="form-label fw-semibold">Update Progress & Realisasi</label>
+              <textarea id="inpUpdate" class="form-control" rows="3"></textarea>
             </div>
-            <div class="col-md-7">
-              <label class="form-label fw-semibold">Realisasi / Hasil Akhir</label>
-              <input type="text" id="inpRealisasi" class="form-control">
-            </div>
-            <div class="col-md-5">
+            <div class="col-12">
               <label class="form-label fw-semibold">Status Case</label>
               <select id="inpStatus" class="form-select fw-bold">
                 <option value="Open">Open (In Progress)</option>
@@ -153,7 +143,6 @@
       </div>
       <div class="modal-footer d-flex justify-content-between">
         <div>
-          <!-- TOMBOL DELETE DALAM MODAL -->
           <button type="button" id="btnDeleteModal" class="btn btn-danger hidden" onclick="deleteFromModal()">
             Delete
           </button>
@@ -220,34 +209,29 @@
     }
 
     if (data.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Tidak ada agenda kerja minggu ini.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-3">Tidak ada agenda kerja minggu ini.</td></tr>`;
       return;
     }
 
     data.forEach((item, index) => {
       const tr = document.createElement("tr");
 
-      // Terapkan class pewarnaan baris
       if (item.status === "Done") {
         tr.classList.add("row-done");
       } else if (item.status === "Close") {
         tr.classList.add("row-close");
       }
 
-      // Tentukan style tombol status
       let statusBadgeClass = "bg-primary";
-      if (item.status === "Done") statusBadgeClass = "bg-dark text-white";
-      else if (item.status === "Close") statusBadgeClass = "bg-dark text-white";
+      if (item.status === "Done" || item.status === "Close") statusBadgeClass = "bg-dark text-white";
 
       tr.innerHTML = `
         <td><b>${item.tanggal || '-'}</b></td>
-        <td>${item.sumber}</td>
-        <td>${item.rencana}</td>
-        <td>${item.kendala || '-'}</td>
-        <td><span class="badge bg-secondary">${item.pic}</span></td>
+        <td>${item.sumber || '-'}</td>
+        <td>${item.case || '-'}</td>
+        <td><span class="badge bg-secondary">${item.pic || '-'}</span></td>
         <td>${item.update || '-'}</td>
         <td>${item.target || '-'}</td>
-        <td>${item.realisasi || '-'}</td>
         <td class="text-center">
           ${hasEditAccess ? `
             <span class="badge ${statusBadgeClass} btn-status-edit shadow-sm" onclick="openModal(${index})" title="Click to edit">
@@ -276,19 +260,15 @@
       document.getElementById("inpRowNum").value = item.rowNum;
       document.getElementById("inpTanggal").value = item.tanggal;
       document.getElementById("inpSumber").value = item.sumber;
-      document.getElementById("inpRencana").value = item.rencana;
-      document.getElementById("inpKendala").value = item.kendala;
+      document.getElementById("inpCase").value = item.case;
       document.getElementById("inpPic").value = item.pic;
       document.getElementById("inpTarget").value = item.target;
       document.getElementById("inpUpdate").value = item.update;
-      document.getElementById("inpRealisasi").value = item.realisasi;
       document.getElementById("inpStatus").value = item.status || "Open";
 
-      // Tampilkan tombol Delete saat mode edit
       btnDelete.classList.remove("hidden");
     } else {
       document.getElementById("modalTitle").innerText = "Add New Agenda";
-      // Sembunyikan tombol Delete saat buat agenda baru
       btnDelete.classList.add("hidden");
     }
     bootstrapModal.show();
@@ -306,12 +286,10 @@
       rowNum: rowNum ? parseInt(rowNum) : null,
       tanggal: document.getElementById("inpTanggal").value,
       sumber: document.getElementById("inpSumber").value,
-      rencana: document.getElementById("inpRencana").value,
-      kendala: document.getElementById("inpKendala").value,
+      case: document.getElementById("inpCase").value,
       pic: document.getElementById("inpPic").value,
-      target: document.getElementById("inpTarget").value,
       update: document.getElementById("inpUpdate").value,
-      realisasi: document.getElementById("inpRealisasi").value,
+      target: document.getElementById("inpTarget").value,
       status: document.getElementById("inpStatus").value
     };
 
@@ -333,7 +311,6 @@
     .catch(err => alert("Failed to save data to Google Sheets."));
   }
 
-  // Fungsi Hapus Data dari dalam Modal dengan Konfirmasi Peringatan
   function deleteFromModal() {
     const rowNum = document.getElementById("inpRowNum").value;
     if (!rowNum) return;
