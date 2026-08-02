@@ -43,12 +43,13 @@
       background: transparent;
       border: none;
       color: #fff;
-      font-size: 0.85rem;
+      font-size: 0.65rem;
       margin-left: 4px;
       padding: 2px 4px;
       cursor: pointer;
       opacity: 0.75;
       transition: opacity 0.2s ease, color 0.2s ease;
+      vertical-align: middle;
     }
     .btn-filter-header:hover, .btn-filter-header.active {
       opacity: 1;
@@ -152,31 +153,31 @@
           <tr>
             <th class="th-header-center">
               Tanggal
-              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'tanggal')">☰</button>
+              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'tanggal')">▼</button>
             </th>
             <th class="th-header-center">
               Sumber
-              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'sumber')">☰</button>
+              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'sumber')">▼</button>
             </th>
             <th class="th-header-center">
               Case
-              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'case')">☰</button>
+              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'case')">▼</button>
             </th>
             <th class="th-header-center">
               PIC
-              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'pic')">☰</button>
+              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'pic')">▼</button>
             </th>
             <th class="th-header-center">
               Update
-              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'update')">☰</button>
+              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'update')">▼</button>
             </th>
             <th class="th-header-center">
               Target
-              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'target')">☰</button>
+              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'target')">▼</button>
             </th>
             <th class="th-header-center">
               Status
-              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'status')">☰</button>
+              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'status')">▼</button>
             </th>
           </tr>
         </thead>
@@ -392,7 +393,7 @@
       .catch(err => console.error("Detail Error:", err));
   }
 
-  /* FITUR POPUP FILTER & SORTING KOLOM HEADER (PERBAIKAN POSISI DROPDOWN) */
+  /* FITUR POPUP FILTER & SORTING KOLOM HEADER */
   function toggleFilterMenu(e, columnKey) {
     e.stopPropagation();
     activeColumn = columnKey;
