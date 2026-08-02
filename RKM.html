@@ -33,9 +33,9 @@
     .table-responsive { max-height: 70vh; overflow-y: auto; }
     .hidden { display: none !important; }
 
-    /* Style warna status di tabel */
-    .row-done { background-color: #00ff00 !important; color: #000 !important; }
-    .row-close { background-color: #808080 !important; color: #fff !important; }
+    /* Pemaksaan Warna Baris di Frontend */
+    tr.row-done td { background-color: #00ff00 !important; color: #000000 !important; }
+    tr.row-close td { background-color: #808080 !important; color: #ffffff !important; }
   </style>
 </head>
 <body>
@@ -61,7 +61,7 @@
     </div>
 
     <div class="table-responsive">
-      <table class="table table-bordered table-hover align-middle border">
+      <table class="table table-bordered align-middle">
         <thead class="table-dark sticky-top">
           <tr>
             <th>Tanggal</th>
@@ -126,16 +126,15 @@
               <label class="form-label fw-semibold">Update Progress</label>
               <textarea id="inpUpdate" class="form-control" rows="2"></textarea>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-7">
               <label class="form-label fw-semibold">Realisasi / Hasil Akhir</label>
               <input type="text" id="inpRealisasi" class="form-control">
             </div>
-            <!-- INPUT PILIHAN STATUS CASE / AKSI -->
-            <div class="col-md-4">
-              <label class="form-label fw-semibold">Status / Penutupan Case</label>
+            <div class="col-md-5">
+              <label class="form-label fw-semibold">Status Case</label>
               <select id="inpStatus" class="form-select fw-bold">
                 <option value="Open">Open (Berjalan)</option>
-                <option value="Done" style="background-color: #00ff00;">Done (Selesai)</option>
+                <option value="Done" style="background-color: #00ff00; color: #000;">Done (Selesai)</option>
                 <option value="Close" style="background-color: #808080; color: #fff;">Close (Ditutup)</option>
               </select>
             </div>
@@ -191,9 +190,7 @@
           alert("Gagal memuat data: " + (response ? response.message : "Format data salah"));
         }
       })
-      .catch(err => {
-        console.error("Detail Error:", err);
-      });
+      .catch(err => console.error("Detail Error:", err));
   }
 
   function renderTable(data, hasEditAccess) {
@@ -213,7 +210,7 @@
     data.forEach((item, index) => {
       const tr = document.createElement("tr");
 
-      // Set class warna berdasarkan status case
+      // Terapkan class pewarnaan baris di HTML
       if (item.status === "Done") {
         tr.classList.add("row-done");
       } else if (item.status === "Close") {
@@ -229,7 +226,7 @@
         <td>${item.update || '-'}</td>
         <td>${item.target || '-'}</td>
         <td>${item.realisasi || '-'}</td>
-        <td><b>${item.status || 'Open'}</b></td>
+        <td><span class="badge ${item.status === 'Done' ? 'bg-dark' : 'bg-primary'}">${item.status || 'Open'}</span></td>
         ${hasEditAccess ? `
           <td class="text-center">
             <div class="btn-group btn-group-sm">
