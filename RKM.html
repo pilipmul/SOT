@@ -43,12 +43,12 @@
       background: transparent;
       border: none;
       color: #fff;
-      font-size: 0.75rem;
+      font-size: 0.85rem;
       margin-left: 4px;
       padding: 2px 4px;
       cursor: pointer;
-      opacity: 0.7;
-      transition: opacity 0.2s ease;
+      opacity: 0.75;
+      transition: opacity 0.2s ease, color 0.2s ease;
     }
     .btn-filter-header:hover, .btn-filter-header.active {
       opacity: 1;
@@ -152,31 +152,31 @@
           <tr>
             <th class="th-header-center">
               Tanggal
-              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'tanggal')">🔍</button>
+              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'tanggal')">☰</button>
             </th>
             <th class="th-header-center">
               Sumber
-              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'sumber')">🔍</button>
+              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'sumber')">☰</button>
             </th>
             <th class="th-header-center">
               Case
-              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'case')">🔍</button>
+              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'case')">☰</button>
             </th>
             <th class="th-header-center">
               PIC
-              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'pic')">🔍</button>
+              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'pic')">☰</button>
             </th>
             <th class="th-header-center">
               Update
-              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'update')">🔍</button>
+              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'update')">☰</button>
             </th>
             <th class="th-header-center">
               Target
-              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'target')">🔍</button>
+              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'target')">☰</button>
             </th>
             <th class="th-header-center">
               Status
-              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'status')">🔍</button>
+              <button class="btn-filter-header" onclick="toggleFilterMenu(event, 'status')">☰</button>
             </th>
           </tr>
         </thead>
@@ -392,7 +392,7 @@
       .catch(err => console.error("Detail Error:", err));
   }
 
-  /* FITUR POPUP FILTER & SORTING KOLOM HEADER */
+  /* FITUR POPUP FILTER & SORTING KOLOM HEADER (PERBAIKAN POSISI DROPDOWN) */
   function toggleFilterMenu(e, columnKey) {
     e.stopPropagation();
     activeColumn = columnKey;
@@ -401,11 +401,28 @@
     document.getElementById("filterHeaderTitle").innerText = `Filter: ${columnKey.toUpperCase()}`;
     document.getElementById("filterSearchInput").value = filtersState[columnKey] || "";
 
-    // Posisikan Popup tepat di bawah tombol filter
-    const rect = e.target.getBoundingClientRect();
-    dropdown.style.left = `${rect.left - 180}px`;
-    dropdown.style.top = `${rect.bottom + window.scrollY + 5}px`;
+    // Tampilkan dropdown terlebih dahulu untuk mendapatkan nilainya
     dropdown.style.display = "block";
+
+    const rect = e.target.getBoundingClientRect();
+    const dropdownWidth = dropdown.offsetWidth || 220;
+    const windowWidth = window.innerWidth;
+
+    // Hitung posisi left agar tidak terpotong di tepi kiri maupun kanan layar
+    let leftPos = rect.left - 180;
+    
+    // Pastikan tidak melenceng ke sebelah kiri (batas min 10px dari tepi kiri layar)
+    if (leftPos < 10) {
+      leftPos = Math.max(10, rect.left);
+    }
+    
+    // Pastikan tidak melebihi tepi kanan layar
+    if (leftPos + dropdownWidth > windowWidth - 10) {
+      leftPos = windowWidth - dropdownWidth - 10;
+    }
+
+    dropdown.style.left = `${leftPos}px`;
+    dropdown.style.top = `${rect.bottom + window.scrollY + 5}px`;
     
     setTimeout(() => document.getElementById("filterSearchInput").focus(), 100);
   }
