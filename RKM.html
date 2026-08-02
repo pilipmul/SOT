@@ -46,6 +46,52 @@
       transform: scale(1.08);
       opacity: 0.85;
     }
+
+    /* CUSTOM TAG INPUT STYLE UNTUK PIC */
+    .pic-tag-container {
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      padding: 6px;
+      background-color: #fff;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      min-height: 42px;
+    }
+    .pic-tag-container:focus-within {
+      border-color: #86b7fe;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    .pic-tag {
+      background-color: #0d6efd;
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pic-tag .btn-remove {
+      cursor: pointer;
+      font-weight: bold;
+      line-height: 1;
+      opacity: 0.8;
+    }
+    .pic-tag .btn-remove:hover {
+      opacity: 1;
+      color: #ffc107;
+    }
+    .pic-input-search {
+      border: none;
+      outline: none;
+      flex-grow: 1;
+      min-width: 120px;
+      padding: 2px 4px;
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
@@ -119,23 +165,29 @@
               <textarea id="inpCase" class="form-control" rows="3" required></textarea>
             </div>
             
-            <!-- ISIAN PIC DENGAN MULTI-SELECT -->
+            <!-- ISIAN PIC INTERAKTIF (TAG / AUTOCOMPLETE) -->
             <div class="col-md-6">
-              <label class="form-label fw-semibold">PIC <small class="text-muted">(Bisa pilih >1)</small></label>
-              <select id="inpPic" class="form-select" multiple size="5" required>
-                <option value="GA">GA</option>
-                <option value="Head Ops.">Head Ops.</option>
-                <option value="ME">ME</option>
-                <option value="TRO">TRO</option>
-                <option value="FA">FA</option>
-                <option value="Head FA">Head FA</option>
-                <option value="Security">Security</option>
-                <option value="All">All</option>
-                <option value="CS">CS</option>
-                <option value="Kasir">Kasir</option>
-                <option value="MKT">MKT</option>
-              </select>
-              <small class="text-muted d-block mt-1">Tahan tombol <b>Ctrl</b> (atau <b>Cmd</b> di Mac) untuk memilih beberapa PIC.</small>
+              <label class="form-label fw-semibold">PIC</label>
+              <div class="pic-tag-container" id="picTagContainer" onclick="focusPicInput()">
+                <!-- Tag PIC pilihan akan muncul di sini secara dinamis -->
+                <input type="text" id="inpPicSearch" class="pic-input-search" placeholder="Ketik PIC..." list="picDatalist" oninput="handlePicSelect(this)">
+              </div>
+              <small class="text-muted">Ketik nama PIC untuk memilih dari daftar opsi.</small>
+
+              <!-- Datalist berisi daftar opsi resmi PIC -->
+              <datalist id="picDatalist">
+                <option value="GA"></option>
+                <option value="Head Ops."></option>
+                <option value="ME"></option>
+                <option value="TRO"></option>
+                <option value="FA"></option>
+                <option value="Head FA"></option>
+                <option value="Security"></option>
+                <option value="All"></option>
+                <option value="CS"></option>
+                <option value="Kasir"></option>
+                <option value="MKT"></option>
+              </datalist>
             </div>
 
             <div class="col-md-6">
@@ -177,6 +229,9 @@
 <script>
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwoz7fGFbbV5kDdKDGCvYxHsJG3Nm5_0KAk-9Nu7kYO05U_FW1MwI8DBch2amyT45pZmQ/exec";
   
+  const VALID_PICS = ["GA", "Head Ops.", "ME", "TRO", "FA", "Head FA", "Security", "All", "CS", "Kasir", "MKT"];
+  let selectedPicsArray = []; // Array menyimpan PIC yang dipilih
+
   let usernameFromStorage = "Tamu";
   try {
     const userData = JSON.parse(localStorage.getItem("user"));
@@ -196,6 +251,46 @@
     bootstrapModal = new bootstrap.Modal(document.getElementById('rkmModal'));
     fetchRKMData();
   });
+
+  /* LOGIKA MULTI-TAG INPUT UNTUK PIC */
+  function focusPicInput() {
+    document.getElementById("inpPicSearch").focus();
+  }
+
+  function handlePicSelect(input) {
+    const val = input.value.trim();
+    // Cari pencocokan eksak dengan opsi resmi
+    const match = VALID_PICS.find(p => p.toLowerCase() === val.toLowerCase());
+
+    if (match) {
+      if (!selectedPicsArray.includes(match)) {
+        selectedPicsArray.push(match);
+        renderPicTags();
+      }
+      input.value = ""; // Reset input setelah memilih
+    }
+  }
+
+  function removePic(picName) {
+    selectedPicsArray = selectedPicsArray.filter(p => p !== picName);
+    renderPicTags();
+  }
+
+  function renderPicTags() {
+    const container = document.getElementById("picTagContainer");
+    const inputSearch = document.getElementById("inpPicSearch");
+
+    // Hapus semua tag lama sebelum merender ulang
+    container.querySelectorAll(".pic-tag").forEach(el => el.remove());
+
+    // Sisipkan tag baru tepat sebelum elemen input search
+    selectedPicsArray.forEach(pic => {
+      const tag = document.createElement("span");
+      tag.className = "pic-tag";
+      tag.innerHTML = `${pic} <span class="btn-remove" onclick="removePic('${pic}')">&times;</span>`;
+      container.insertBefore(tag, inputSearch);
+    });
+  }
 
   function fetchRKMData() {
     const url = `${WEB_APP_URL}?action=getRKM&currentUser=${encodeURIComponent(CURRENT_USER)}`;
@@ -241,7 +336,7 @@
       let statusBadgeClass = "bg-primary";
       if (item.status === "Done" || item.status === "Close") statusBadgeClass = "bg-dark text-white";
 
-      // Render Badge PIC secara terpisah jika terdapat multiple PIC
+      // Render Badge PIC secara terpisah
       const picBadges = item.pic 
         ? item.pic.split(",").map(p => `<span class="badge bg-secondary me-1 mb-1">${p.trim()}</span>`).join("")
         : '-';
@@ -273,8 +368,8 @@
     document.getElementById("inpRowNum").value = "";
     document.getElementById("inpStatus").value = "Open";
 
-    const selectPic = document.getElementById("inpPic");
-    Array.from(selectPic.options).forEach(opt => opt.selected = false);
+    selectedPicsArray = []; // Reset array PIC
+    renderPicTags();
 
     const btnDelete = document.getElementById("btnDeleteModal");
 
@@ -289,14 +384,10 @@
       document.getElementById("inpUpdate").value = item.update;
       document.getElementById("inpStatus").value = item.status || "Open";
 
-      // Set Multi-Select PIC yang terpilih
+      // Memuat data PIC yang tersimpan
       if (item.pic) {
-        const selectedPics = item.pic.split(",").map(p => p.trim());
-        Array.from(selectPic.options).forEach(opt => {
-          if (selectedPics.includes(opt.value)) {
-            opt.selected = true;
-          }
-        });
+        selectedPicsArray = item.pic.split(",").map(p => p.trim()).filter(p => p !== "");
+        renderPicTags();
       }
 
       btnDelete.classList.remove("hidden");
@@ -314,9 +405,11 @@
       return;
     }
 
-    // Ambil semua pilihan PIC yang terpilih
-    const selectedPicOptions = Array.from(document.getElementById("inpPic").selectedOptions).map(opt => opt.value);
-    const picValue = selectedPicOptions.join(", ");
+    // Validasi opsional jika PIC wajib diisi
+    if (selectedPicsArray.length === 0) {
+      alert("Pilih minimal satu PIC.");
+      return;
+    }
 
     const rowNum = document.getElementById("inpRowNum").value;
     const payload = {
@@ -324,7 +417,7 @@
       tanggal: document.getElementById("inpTanggal").value,
       sumber: document.getElementById("inpSumber").value,
       case: document.getElementById("inpCase").value,
-      pic: picValue,
+      pic: selectedPicsArray.join(", "), // Menggabungkan tag ke string dipisah koma
       target: document.getElementById("inpTarget").value,
       update: document.getElementById("inpUpdate").value,
       status: document.getElementById("inpStatus").value
