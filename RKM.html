@@ -144,23 +144,33 @@
 <script>
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwoz7fGFbbV5kDdKDGCvYxHsJG3Nm5_0KAk-9Nu7kYO05U_FW1MwI8DBch2amyT45pZmQ/exec";
   
+  // 1. Ambil data asli dari localStorage (Session sebenarnya)
+  let actualUserSession = null;
   let usernameFromStorage = "Tamu";
+  
   try {
-    const userData = JSON.parse(localStorage.getItem("user"));
-    if (userData && userData.nama) {
-      usernameFromStorage = userData.nama;
+    actualUserSession = JSON.parse(localStorage.getItem("user"));
+    if (actualUserSession && actualUserSession.nama) {
+      usernameFromStorage = actualUserSession.nama;
     }
   } catch (err) {
-    console.error("Gagal membaca nama user:", err);
+    console.error("Gagal membaca session:", err);
   }
-  
+
+  // 2. Proteksi URL Spoofing: 
+  // SELALU gunakan nama dari localStorage untuk identitas asli backend.
+  // URL parameter hanya boleh digunakan jika nilainya cocok dengan nama session pengguna.
   const urlParams = new URLSearchParams(window.location.search);
-  const CURRENT_USER = urlParams.get('user') || usernameFromStorage;
-  
+  const urlUser = urlParams.get('user');
+
+  // Jika URL parameter diisi nama lain yang berbeda dengan localStorage, abaikan / paksa gunakan nama dari localStorage
+  const CURRENT_USER = usernameFromStorage;
+
   let rkmDataCache = [];
   let bootstrapModal;
 
   document.addEventListener("DOMContentLoaded", () => {
+    // Tampilkan nama pengguna resmi yang terverifikasi dari localStorage
     document.getElementById("txtCurrentUser").innerText = CURRENT_USER;
     bootstrapModal = new bootstrap.Modal(document.getElementById('rkmModal'));
     fetchRKMData();
