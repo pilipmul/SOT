@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rapat Kerja Mingguan - SOT</title>
+  <title>Weekly Work Meeting - SOT</title>
 
   <!-- PROTEKSI LOGIN INSTAN SEBELUM ELEMEN TAMPILAN DIDERENDER -->
   <script>
@@ -33,9 +33,19 @@
     .table-responsive { max-height: 70vh; overflow-y: auto; }
     .hidden { display: none !important; }
 
-    /* Pemaksaan Warna Baris di Frontend */
+    /* Pemaksaan Warna Baris */
     tr.row-done td { background-color: #00ff00 !important; color: #000000 !important; }
     tr.row-close td { background-color: #808080 !important; color: #ffffff !important; }
+
+    /* Style Tombol Status Edit */
+    .btn-status-edit {
+      cursor: pointer;
+      transition: transform 0.1s ease, opacity 0.2s ease;
+    }
+    .btn-status-edit:hover {
+      transform: scale(1.08);
+      opacity: 0.85;
+    }
   </style>
 </head>
 <body>
@@ -52,16 +62,17 @@
         </a>
         <div>
           <h3 class="fw-bold mb-0">Rapat Kerja Mingguan (RKM)</h3>
-          <p class="text-muted mb-0">User Aktif: <span id="txtCurrentUser" class="fw-bold text-primary">-</span></p>
+          <p class="text-muted mb-0">Active User: <span id="txtCurrentUser" class="fw-bold text-primary">-</span></p>
         </div>
       </div>
       <button id="btnTambah" class="btn btn-success hidden" onclick="openModal()">
-        + Tambah Agenda Baru
+        + New
       </button>
     </div>
 
+    <!-- TABEL COMPACT (9 KOLOM, TANPA KOLOM AKSI) -->
     <div class="table-responsive">
-      <table class="table table-bordered align-middle">
+      <table class="table table-bordered align-middle border">
         <thead class="table-dark sticky-top">
           <tr>
             <th>Tanggal</th>
@@ -72,13 +83,12 @@
             <th>Update</th>
             <th>Target</th>
             <th>Realisasi</th>
-            <th>Status</th>
-            <th id="thAksi" class="hidden text-center">Aksi</th>
+            <th class="text-center">Status</th>
           </tr>
         </thead>
         <tbody id="rkmTableBody">
           <tr>
-            <td colspan="10" class="text-center text-muted py-4">Memuat data RKM...</td>
+            <td colspan="9" class="text-center text-muted py-4">Loading RKM data...</td>
           </tr>
         </tbody>
       </table>
@@ -86,12 +96,12 @@
   </div>
 </div>
 
-<!-- MODAL FORM -->
+<!-- MODAL FORM EDIT / ADD -->
 <div class="modal fade" id="rkmModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title fw-bold" id="modalTitle">Tambah Agenda RKM</h5>
+        <h5 class="modal-title fw-bold" id="modalTitle">Add New Agenda</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -131,19 +141,27 @@
               <input type="text" id="inpRealisasi" class="form-control">
             </div>
             <div class="col-md-5">
-              <label class="form-label fw-semibold">Status</label>
+              <label class="form-label fw-semibold">Status Case</label>
               <select id="inpStatus" class="form-select fw-bold">
-                <option value="Open">Open (Berjalan)</option>
-                <option value="Done" style="background-color: #00ff00; color: #000;">Done (Selesai)</option>
-                <option value="Close" style="background-color: #808080; color: #fff;">Close (Ditutup)</option>
+                <option value="Open">Open (In Progress)</option>
+                <option value="Done" style="background-color: #00ff00; color: #000;">Done (Completed)</option>
+                <option value="Close" style="background-color: #808080; color: #fff;">Close (Closed)</option>
               </select>
             </div>
           </div>
         </form>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-primary" onclick="submitForm()">Simpan Data</button>
+      <div class="modal-footer d-flex justify-content-between">
+        <div>
+          <!-- TOMBOL DELETE DALAM MODAL -->
+          <button type="button" id="btnDeleteModal" class="btn btn-danger hidden" onclick="deleteFromModal()">
+            Delete
+          </button>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="submitForm()">Save</button>
+        </div>
       </div>
     </div>
   </div>
@@ -199,23 +217,27 @@
 
     if (hasEditAccess) {
       document.getElementById("btnTambah").classList.remove("hidden");
-      document.getElementById("thAksi").classList.remove("hidden");
     }
 
     if (data.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="${hasEditAccess ? 10 : 9}" class="text-center text-muted py-3">Tidak ada agenda kerja minggu ini.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-3">Tidak ada agenda kerja minggu ini.</td></tr>`;
       return;
     }
 
     data.forEach((item, index) => {
       const tr = document.createElement("tr");
 
-      // Terapkan class pewarnaan baris di HTML
+      // Terapkan class pewarnaan baris
       if (item.status === "Done") {
         tr.classList.add("row-done");
       } else if (item.status === "Close") {
         tr.classList.add("row-close");
       }
+
+      // Tentukan style tombol status
+      let statusBadgeClass = "bg-primary";
+      if (item.status === "Done") statusBadgeClass = "bg-dark text-white";
+      else if (item.status === "Close") statusBadgeClass = "bg-dark text-white";
 
       tr.innerHTML = `
         <td><b>${item.tanggal || '-'}</b></td>
@@ -226,15 +248,15 @@
         <td>${item.update || '-'}</td>
         <td>${item.target || '-'}</td>
         <td>${item.realisasi || '-'}</td>
-        <td><span class="badge ${item.status === 'Done' ? 'bg-dark' : 'bg-primary'}">${item.status || 'Open'}</span></td>
-        ${hasEditAccess ? `
-          <td class="text-center">
-            <div class="btn-group btn-group-sm">
-              <button class="btn btn-warning" onclick="openModal(${index})">Edit</button>
-              <button class="btn btn-danger" onclick="deleteItem(${item.rowNum})">Hapus</button>
-            </div>
-          </td>
-        ` : ""}
+        <td class="text-center">
+          ${hasEditAccess ? `
+            <span class="badge ${statusBadgeClass} btn-status-edit shadow-sm" onclick="openModal(${index})" title="Click to edit">
+              ${item.status || 'Open'} ✏️
+            </span>
+          ` : `
+            <span class="badge ${statusBadgeClass}">${item.status || 'Open'}</span>
+          `}
+        </td>
       `;
       tbody.appendChild(tr);
     });
@@ -245,6 +267,8 @@
     form.reset();
     document.getElementById("inpRowNum").value = "";
     document.getElementById("inpStatus").value = "Open";
+
+    const btnDelete = document.getElementById("btnDeleteModal");
 
     if (index !== null) {
       document.getElementById("modalTitle").innerText = "Edit Agenda RKM";
@@ -259,8 +283,13 @@
       document.getElementById("inpUpdate").value = item.update;
       document.getElementById("inpRealisasi").value = item.realisasi;
       document.getElementById("inpStatus").value = item.status || "Open";
+
+      // Tampilkan tombol Delete saat mode edit
+      btnDelete.classList.remove("hidden");
     } else {
-      document.getElementById("modalTitle").innerText = "Tambah Agenda RKM";
+      document.getElementById("modalTitle").innerText = "Add New Agenda";
+      // Sembunyikan tombol Delete saat buat agenda baru
+      btnDelete.classList.add("hidden");
     }
     bootstrapModal.show();
   }
@@ -301,27 +330,34 @@
         alert(res.message);
       }
     })
-    .catch(err => alert("Gagal menyimpan data ke Google Sheets."));
+    .catch(err => alert("Failed to save data to Google Sheets."));
   }
 
-  function deleteItem(rowNum) {
-    if (!confirm("Apakah Anda yakin ingin menghapus baris agenda ini secara permanen?")) return;
+  // Fungsi Hapus Data dari dalam Modal dengan Konfirmasi Peringatan
+  function deleteFromModal() {
+    const rowNum = document.getElementById("inpRowNum").value;
+    if (!rowNum) return;
+
+    if (!confirm("⚠️ PERINGATAN:\nApakah Anda yakin ingin menghapus agenda kerja ini secara permanen?")) {
+      return;
+    }
 
     const url = `${WEB_APP_URL}?action=deleteRKM&currentUser=${encodeURIComponent(CURRENT_USER)}`;
     
     fetch(url, {
       method: "POST",
-      body: JSON.stringify({ rowNum: rowNum })
+      body: JSON.stringify({ rowNum: parseInt(rowNum) })
     })
     .then(res => res.json())
     .then(res => {
       if (res.success) {
+        bootstrapModal.hide();
         fetchRKMData();
       } else {
         alert(res.message);
       }
     })
-    .catch(err => alert("Gagal menghapus data."));
+    .catch(err => alert("Failed to delete data."));
   }
 </script>
 </body>
