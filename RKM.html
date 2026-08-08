@@ -196,7 +196,7 @@
   <div class="d-flex flex-column gap-2">
     <div class="fw-bold text-secondary border-bottom pb-1" id="filterHeaderTitle">Filter Column</div>
 
-    <!-- CONTAINER SHORTING A-Z (AKAN DISEMBUNYIKAN DI KOLOM STATUS) -->
+    <!-- CONTAINER SHORTING A-Z (DISEMBUNYIKAN PADA KOLOM STATUS) -->
     <div id="sortContainer">
       <button class="btn btn-sm btn-outline-primary text-start w-100 mb-1" onclick="applySort('asc')">
         ▲ Sort A-Z
@@ -342,10 +342,10 @@
   let hasEditAccessGlobal = false;
   let bootstrapModal;
 
-  // Variabel penampung state Sort & Filter Per Kolom (Status berupa Array)
-  let activeColumn = null;
+  // Set default status tercentang semua saat pertama kali dimuat
+  let isStatusFilteredExplicitly = false;
   let filtersState = {
-    tanggal: "", sumber: "", case: "", pic: "", update: "", target: "", status: []
+    tanggal: "", sumber: "", case: "", pic: "", update: "", target: "", status: ["open", "done", "close"]
   };
   let sortState = { col: null, dir: null };
 
@@ -495,8 +495,9 @@
 
   function clearColumnFilter() {
     if (activeColumn === 'status') {
-      filtersState.status = [];
-      document.querySelectorAll(".chk-status-filter").forEach(chk => chk.checked = false);
+      // Reset centang semua saat Clear Filter
+      filtersState.status = ["open", "done", "close"];
+      document.querySelectorAll(".chk-status-filter").forEach(chk => chk.checked = true);
     } else {
       filtersState[activeColumn] = "";
       document.getElementById("filterSearchInput").value = "";
@@ -515,12 +516,16 @@
       const query = filtersState[key];
       
       if (key === 'status') {
-        // Logika Multiple Choice untuk Status
-        if (Array.isArray(query) && query.length > 0) {
-          result = result.filter(item => {
-            const val = (item.status || "open").toString().toLowerCase();
-            return query.includes(val);
-          });
+        // Jika tidak ada checkbox yang dipilih (query kosong/length === 0), kembalikan array kosong agar data hilang semua
+        if (Array.isArray(query)) {
+          if (query.length === 0) {
+            result = [];
+          } else {
+            result = result.filter(item => {
+              const val = (item.status || "open").toString().toLowerCase();
+              return query.includes(val);
+            });
+          }
         }
       } else if (query) {
         // Logika Teks Filter Standar
