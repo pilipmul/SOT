@@ -83,7 +83,7 @@
                                         <svg class="w-2.5 h-2.5 fill-current text-slate-300" viewBox="0 0 10 6"><path d="M0 0l5 6 5-6H0z"/></svg>
                                     </button>
                                 </div>
-                                <div id="filter-menu-eskalasi" class="hidden absolute left-1/2 -translate-x-1/2 top-full mt-1 w-52 bg-white text-slate-800 rounded-lg shadow-xl border border-slate-200 p-3 z-50 normal-case font-normal text-left"></div>
+                                <div id="filter-menu-eskalasi" class="hidden absolute left-1/2 -translate-x-1/2 top-full mt-1 w-48 bg-white text-slate-800 rounded-lg shadow-xl border border-slate-200 p-3 z-50 normal-case font-normal text-left"></div>
                             </th>
                             <th scope="col" class="px-4 py-3 font-semibold relative">
                                 <div class="flex items-center justify-center gap-1.5">
@@ -92,7 +92,7 @@
                                         <svg class="w-2.5 h-2.5 fill-current text-slate-300" viewBox="0 0 10 6"><path d="M0 0l5 6 5-6H0z"/></svg>
                                     </button>
                                 </div>
-                                <div id="filter-menu-RKM" class="hidden absolute left-1/2 -translate-x-1/2 top-full mt-1 w-52 bg-white text-slate-800 rounded-lg shadow-xl border border-slate-200 p-3 z-50 normal-case font-normal text-left"></div>
+                                <div id="filter-menu-RKM" class="hidden absolute left-1/2 -translate-x-1/2 top-full mt-1 w-48 bg-white text-slate-800 rounded-lg shadow-xl border border-slate-200 p-3 z-50 normal-case font-normal text-left"></div>
                             </th>
                             <th scope="col" class="px-4 py-3 font-semibold relative">
                                 <div class="flex items-center justify-center gap-1.5">
@@ -101,7 +101,7 @@
                                         <svg class="w-2.5 h-2.5 fill-current text-slate-300" viewBox="0 0 10 6"><path d="M0 0l5 6 5-6H0z"/></svg>
                                     </button>
                                 </div>
-                                <div id="filter-menu-dokPerbaikan" class="hidden absolute left-1/2 -translate-x-1/2 top-full mt-1 w-52 bg-white text-slate-800 rounded-lg shadow-xl border border-slate-200 p-3 z-50 normal-case font-normal text-left"></div>
+                                <div id="filter-menu-dokPerbaikan" class="hidden absolute left-1/2 -translate-x-1/2 top-full mt-1 w-48 bg-white text-slate-800 rounded-lg shadow-xl border border-slate-200 p-3 z-50 normal-case font-normal text-left"></div>
                             </th>
                             <th scope="col" class="px-4 py-3 font-semibold relative">
                                 <div class="flex items-center justify-center gap-1.5">
@@ -110,7 +110,7 @@
                                         <svg class="w-2.5 h-2.5 fill-current text-slate-300" viewBox="0 0 10 6"><path d="M0 0l5 6 5-6H0z"/></svg>
                                     </button>
                                 </div>
-                                <div id="filter-menu-schedulePD" class="hidden absolute left-1/2 -translate-x-1/2 top-full mt-1 w-52 bg-white text-slate-800 rounded-lg shadow-xl border border-slate-200 p-3 z-50 normal-case font-normal text-left"></div>
+                                <div id="filter-menu-schedulePD" class="hidden absolute left-1/2 -translate-x-1/2 top-full mt-1 w-48 bg-white text-slate-800 rounded-lg shadow-xl border border-slate-200 p-3 z-50 normal-case font-normal text-left"></div>
                             </th>
                             <th scope="col" class="px-4 py-3 font-semibold relative">
                                 <div class="flex items-center justify-center gap-1.5">
@@ -119,7 +119,7 @@
                                         <svg class="w-2.5 h-2.5 fill-current text-slate-300" viewBox="0 0 10 6"><path d="M0 0l5 6 5-6H0z"/></svg>
                                     </button>
                                 </div>
-                                <div id="filter-menu-syncflow" class="hidden absolute left-1/2 -translate-x-1/2 top-full mt-1 w-52 bg-white text-slate-800 rounded-lg shadow-xl border border-slate-200 p-3 z-50 normal-case font-normal text-left"></div>
+                                <div id="filter-menu-syncflow" class="hidden absolute left-1/2 -translate-x-1/2 top-full mt-1 w-48 bg-white text-slate-800 rounded-lg shadow-xl border border-slate-200 p-3 z-50 normal-case font-normal text-left"></div>
                             </th>
                             <th scope="col" class="px-4 py-3 font-semibold relative">
                                 <div class="flex items-center justify-center gap-1.5">
@@ -128,7 +128,7 @@
                                         <svg class="w-2.5 h-2.5 fill-current text-slate-300" viewBox="0 0 10 6"><path d="M0 0l5 6 5-6H0z"/></svg>
                                     </button>
                                 </div>
-                                <div id="filter-menu-accesControl" class="hidden absolute right-0 top-full mt-1 w-52 bg-white text-slate-800 rounded-lg shadow-xl border border-slate-200 p-3 z-50 normal-case font-normal text-left"></div>
+                                <div id="filter-menu-accesControl" class="hidden absolute right-0 top-full mt-1 w-48 bg-white text-slate-800 rounded-lg shadow-xl border border-slate-200 p-3 z-50 normal-case font-normal text-left"></div>
                             </th>
                         </tr>
                     </thead>
@@ -147,17 +147,15 @@
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbwoz7fGFbbV5kDdKDGCvYxHsJG3Nm5_0KAk-9Nu7kYO05U_FW1MwI8DBch2amyT45pZmQ/exec";
 
-        // Global State untuk Menyimpan Data & State Filter/Sort
         let rawUsersData = [];
         const columns = ['nama', 'eskalasi', 'RKM', 'dokPerbaikan', 'schedulePD', 'syncflow', 'accesControl'];
         
         const filterState = {
-            sortKey: null,      // Key kolom yang sedang di-sort
-            sortDir: 'asc',     // 'asc' atau 'desc'
-            filters: {}         // Struktur: { key: { search: '', selected: Set([...]) } }
+            sortKey: null,
+            sortDir: 'asc',
+            filters: {}
         };
 
-        // Inisialisasi State Filter
         columns.forEach(col => {
             filterState.filters[col] = {
                 search: '',
@@ -174,7 +172,6 @@
                 const res = await fetch(API_URL + "?action=getUsers", { method: "POST" });
                 rawUsersData = await res.json();
                 
-                // Set awal pilihan filter: Centang semua item unik
                 columns.forEach(col => {
                     const uniqueVals = getUniqueValues(col);
                     filterState.filters[col].selected = new Set(uniqueVals);
@@ -188,7 +185,6 @@
             }
         }
 
-        // Helper label untuk representasi data checkbox pada kolom akses
         function formatDisplayValue(col, val) {
             if (col === 'nama') return val || '(Kosong)';
             return val === 'Y' ? 'Akses (Y)' : 'Tanpa Akses (Tidak)';
@@ -199,17 +195,14 @@
             return vals.sort();
         }
 
-        // Render Ulang Tabel dengan Mengaplikasikan Filter dan Sort
         function renderFilteredTable() {
             let processed = [...rawUsersData];
 
-            // 1. Filter Data
             columns.forEach(col => {
                 const f = filterState.filters[col];
                 processed = processed.filter(user => f.selected.has(user[col] || ""));
             });
 
-            // 2. Sort Data
             if (filterState.sortKey) {
                 const k = filterState.sortKey;
                 const dir = filterState.sortDir === 'asc' ? 1 : -1;
@@ -220,7 +213,6 @@
                 });
             }
 
-            // 3. Render HTML Body
             const tbody = document.getElementById("userBody");
             tbody.innerHTML = "";
 
@@ -245,11 +237,9 @@
             });
         }
 
-        // Buka / Tutup Menu Dropdown Filter
         function toggleFilterMenu(colKey, event) {
             event.stopPropagation();
             
-            // Sembunyikan menu filter lain yang sedang terbuka
             columns.forEach(c => {
                 if (c !== colKey) {
                     const el = document.getElementById(`filter-menu-${c}`);
@@ -268,23 +258,23 @@
             }
         }
 
-        // Membangun Konten UI Dalam Menu Popover Filter
         function buildFilterUI(colKey) {
             const menu = document.getElementById(`filter-menu-${colKey}`);
             const allUnique = getUniqueValues(colKey);
             const state = filterState.filters[colKey];
+            const isNamaHeader = colKey === 'nama';
 
-            // Filter item unik berdasarkan pencarian text box
-            const filteredUnique = allUnique.filter(val => {
-                const label = formatDisplayValue(colKey, val);
-                return label.toLowerCase().includes(state.search.toLowerCase());
-            });
+            const filteredUnique = isNamaHeader 
+                ? allUnique.filter(val => formatDisplayValue(colKey, val).toLowerCase().includes(state.search.toLowerCase()))
+                : allUnique;
 
             const isAllSelected = allUnique.length > 0 && allUnique.every(v => state.selected.has(v));
 
-            menu.innerHTML = `
-                <div class="space-y-3" onclick="event.stopPropagation()">
-                    <!-- 1. Tombol Sort A-Z / Z-A -->
+            let htmlContent = `<div class="space-y-3" onclick="event.stopPropagation()">`;
+
+            // Hanya tampilkan Sort & Search Box jika header adalah 'nama'
+            if (isNamaHeader) {
+                htmlContent += `
                     <div class="flex gap-1 border-b border-slate-200 pb-2">
                         <button onclick="applySort('${colKey}', 'asc')" class="flex-1 py-1 px-2 text-xs font-medium rounded bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center gap-1">
                             ↑ A-Z
@@ -294,48 +284,55 @@
                         </button>
                     </div>
 
-                    <!-- 2. Search Box -->
                     <div>
                         <input type="text" placeholder="Cari..." value="${state.search}" 
                             oninput="handleFilterSearch('${colKey}', this.value)"
                             class="w-full text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:outline-none focus:border-blue-500">
                     </div>
+                `;
+            }
 
-                    <!-- 3. Pilihan Select All & Item Checkbox -->
-                    <div class="max-h-40 overflow-y-auto space-y-1 text-xs border border-slate-100 p-1 rounded">
-                        <label class="flex items-center gap-2 p-1 hover:bg-slate-50 rounded cursor-pointer font-semibold border-b border-slate-100">
-                            <input type="checkbox" ${isAllSelected ? 'checked' : ''} onchange="toggleSelectAll('${colKey}', this.checked)" class="rounded text-blue-600 focus:ring-0">
-                            <span>(Pilih Semua)</span>
-                        </label>
-                        ${
-                            filteredUnique.map(val => {
-                                const isChecked = state.selected.has(val);
-                                return `
-                                    <label class="flex items-center gap-2 p-1 hover:bg-slate-50 rounded cursor-pointer">
-                                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleItemSelect('${colKey}', '${val}', this.checked)" class="rounded text-blue-600 focus:ring-0">
-                                        <span class="truncate">${formatDisplayValue(colKey, val)}</span>
-                                    </label>
-                                `;
-                            }).join('')
-                        }
-                    </div>
-
-                    <!-- 4. Tombol Reset / Tutup -->
-                    <div class="flex justify-between items-center pt-1 border-t border-slate-200">
-                        <button onclick="resetFilter('${colKey}')" class="text-xs text-blue-600 hover:underline">Reset</button>
-                        <button onclick="document.getElementById('filter-menu-${colKey}').classList.add('hidden')" class="text-xs bg-slate-900 text-white px-2.5 py-1 rounded hover:bg-slate-800">Tutup</button>
-                    </div>
-                </div>
+            // Opsi Checkbox Items
+            htmlContent += `
+                <div class="max-h-40 overflow-y-auto space-y-1 text-xs border border-slate-100 p-1 rounded">
             `;
+
+            // Hanya tampilkan 'Pilih Semua' pada header 'nama'
+            if (isNamaHeader) {
+                htmlContent += `
+                    <label class="flex items-center gap-2 p-1 hover:bg-slate-50 rounded cursor-pointer font-semibold border-b border-slate-100">
+                        <input type="checkbox" ${isAllSelected ? 'checked' : ''} onchange="toggleSelectAll('${colKey}', this.checked)" class="rounded text-blue-600 focus:ring-0">
+                        <span>(Pilih Semua)</span>
+                    </label>
+                `;
+            }
+
+            htmlContent += filteredUnique.map(val => {
+                const isChecked = state.selected.has(val);
+                return `
+                    <label class="flex items-center gap-2 p-1 hover:bg-slate-50 rounded cursor-pointer">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleItemSelect('${colKey}', '${val}', this.checked)" class="rounded text-blue-600 focus:ring-0">
+                        <span class="truncate">${formatDisplayValue(colKey, val)}</span>
+                    </label>
+                `;
+            }).join('');
+
+            htmlContent += `
+                </div>
+                <div class="flex justify-between items-center pt-1 border-t border-slate-200">
+                    <button onclick="resetFilter('${colKey}')" class="text-xs text-blue-600 hover:underline">Reset</button>
+                    <button onclick="document.getElementById('filter-menu-${colKey}').classList.add('hidden')" class="text-xs bg-slate-900 text-white px-2.5 py-1 rounded hover:bg-slate-800">Tutup</button>
+                </div>
+            </div>`;
+
+            menu.innerHTML = htmlContent;
         }
 
-        // Handler Filter: Pencarian Teks
         function handleFilterSearch(colKey, text) {
             filterState.filters[colKey].search = text;
             buildFilterUI(colKey);
         }
 
-        // Handler Filter: Select All
         function toggleSelectAll(colKey, isChecked) {
             const allUnique = getUniqueValues(colKey);
             if (isChecked) {
@@ -347,7 +344,6 @@
             renderFilteredTable();
         }
 
-        // Handler Filter: Toggle Pilihan Individu (Multiple Choice)
         function toggleItemSelect(colKey, val, isChecked) {
             if (isChecked) {
                 filterState.filters[colKey].selected.add(val);
@@ -358,7 +354,6 @@
             renderFilteredTable();
         }
 
-        // Handler Sorting
         function applySort(colKey, direction) {
             filterState.sortKey = colKey;
             filterState.sortDir = direction;
@@ -366,7 +361,6 @@
             document.getElementById(`filter-menu-${colKey}`).classList.add('hidden');
         }
 
-        // Reset Filter per Kolom
         function resetFilter(colKey) {
             const allUnique = getUniqueValues(colKey);
             filterState.filters[colKey].search = '';
@@ -378,7 +372,6 @@
             renderFilteredTable();
         }
 
-        // Tutup semua popover filter jika mengklik di luar tabel/header
         document.addEventListener('click', () => {
             columns.forEach(c => {
                 const el = document.getElementById(`filter-menu-${c}`);
@@ -399,7 +392,6 @@
         async function updateAkses(row, col, el) {
             const val = el.checked ? "Y" : "";
             
-            // Update nilai di memori lokal agar filter langsung konsisten
             const targetUser = rawUsersData.find(u => u.row === row);
             if (targetUser) {
                 const mapCols = { 4: 'eskalasi', 5: 'RKM', 6: 'dokPerbaikan', 7: 'schedulePD', 8: 'syncflow', 9: 'accesControl' };
@@ -421,7 +413,6 @@
             }
         }
 
-        // Jalankan load data hanya setelah dipastikan lolos proteksi head
         window.onload = loadUsers;
     </script>
 
