@@ -196,7 +196,7 @@
   <div class="d-flex flex-column gap-2">
     <div class="fw-bold text-secondary border-bottom pb-1" id="filterHeaderTitle">Filter Column</div>
 
-    <!-- TOMBOL SORT (HANYA TAMPIL DI KOLOM SELAIN STATUS) -->
+    <!-- CONTAINER SHORTING A-Z (AKAN DISEMBUNYIKAN DI KOLOM STATUS) -->
     <div id="sortContainer">
       <button class="btn btn-sm btn-outline-primary text-start w-100 mb-1" onclick="applySort('asc')">
         ▲ Sort A-Z
@@ -207,7 +207,7 @@
       <hr class="my-1">
     </div>
 
-    <!-- AREA FILTER INPUT TEKS (UNTUK KOLOM SELAIN STATUS) -->
+    <!-- AREA FILTER INPUT TIPE TEKS (UNTUK KOLOM SELAIN STATUS) -->
     <div id="textFilterContainer">
       <label class="form-label mb-0 small fw-semibold">Filter Search:</label>
       <input type="text" id="filterSearchInput" class="form-control form-control-sm" placeholder="Type to filter..." oninput="applyTextFilter()">
@@ -342,11 +342,84 @@
   let hasEditAccessGlobal = false;
   let bootstrapModal;
 
-  // Variabel penampung state Sort & Filter Per Kolom
+  // Variabel penampung state Sort & Filter Per Kolom (Status berupa Array)
   let activeColumn = null;
   let filtersState = {
     tanggal: "", sumber: "", case: "", pic: "", update: "", target: "", status: []
   };
+  let sortState = { col: null, dir: null };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("txtCurrentUser").innerText = CURRENT_USER;
+    bootstrapModal = new bootstrap.Modal(document.getElementById('rkmModal'));
+    fetchRKMData();
+
+    // Sembunyikan popup filter jika mengklik area luar
+    document.addEventListener("click", (e) => {
+      const dropdown = document.getElementById("filterDropdown");
+      if (!dropdown.contains(e.target) && !e.target.classList.contains("btn-filter-header")) {
+        dropdown.style.display = "none";
+      }
+    });
+  });
+
+  /* LOGIKA MULTI-TAG INPUT UNTUK PIC */
+  function focusPicInput() {
+    document.getElementById("inpPicSearch").focus();
+  }
+
+  function handlePicSelect(input) {
+    const val = input.value.trim();
+    const match = VALID_PICS.find(p => p.toLowerCase() === val.toLowerCase());
+
+    if (match) {
+      if (!selectedPicsArray.includes(match)) {
+        selectedPicsArray.push(match);
+        renderPicTags();
+      }
+      input.value = "";
+    }
+  }
+
+  function removePic(picName) {
+    selectedPicsArray = selectedPicsArray.filter(p => p !== picName);
+    renderPicTags();
+  }
+
+  function renderPicTags() {
+    const container = document.getElementById("picTagContainer");
+    const inputSearch = document.getElementById("inpPicSearch");
+
+    container.querySelectorAll(".pic-tag").forEach(el => el.remove());
+
+    selectedPicsArray.forEach(pic => {
+      const tag = document.createElement("span");
+      tag.className = "pic-tag";
+      tag.innerHTML = `${pic} <span class="btn-remove" onclick="removePic('${pic}')">&times;</span>`;
+      container.insertBefore(tag, inputSearch);
+    });
+  }
+
+  /* LOGIKA FETCH DATA BACKEND */
+  function fetchRKMData() {
+    const url = `${WEB_APP_URL}?action=getRKM&currentUser=${encodeURIComponent(CURRENT_USER)}`;
+    
+    fetch(url)
+      .then(res => {
+        if (!res.ok) throw new Error("HTTP error status = " + res.status);
+        return res.json();
+      })
+      .then(response => {
+        if (response && response.success) {
+          rkmDataCache = response.data;
+          hasEditAccessGlobal = response.hasEditAccess;
+          processDataAndRender();
+        } else {
+          alert("Gagal memuat data: " + (response ? response.message : "Format data salah"));
+        }
+      })
+      .catch(err => console.error("Detail Error:", err));
+  }
 
   /* FITUR POPUP FILTER HEADER */
   function toggleFilterMenu(e, columnKey) {
@@ -361,11 +434,11 @@
     const statusContainer = document.getElementById("statusFilterContainer");
 
     if (columnKey === 'status') {
-      // Sembunyikan Sort A-Z / Z-A dan input teks
+      // Sembunyikan Sort A-Z / Z-A dan Search Teks
       sortContainer.style.display = "none";
       textContainer.style.display = "none";
       
-      // Tampilkan filter checkbox status
+      // Tampilkan Checkbox Status
       statusContainer.style.display = "block";
 
       // Set centang checkbox sesuai state tersimpan
@@ -373,7 +446,7 @@
         chk.checked = filtersState.status.includes(chk.value.toLowerCase());
       });
     } else {
-      // Tampilkan Sort dan input teks standar
+      // Tampilkan Sort dan Search Teks
       sortContainer.style.display = "block";
       textContainer.style.display = "block";
       statusContainer.style.display = "none";
@@ -398,13 +471,19 @@
     }
   }
 
+  function applySort(direction) {
+    sortState = { col: activeColumn, dir: direction };
+    processDataAndRender();
+    document.getElementById("filterDropdown").style.display = "none";
+  }
+
   function applyTextFilter() {
     const val = document.getElementById("filterSearchInput").value;
     filtersState[activeColumn] = val.toLowerCase();
     processDataAndRender();
   }
 
-  /* LOGIKA MENANGGAPI MULTIPLE CHOICE STATUS */
+  /* LOGIKA MULTIPLE CHOICE FILTER STATUS */
   function applyStatusFilter() {
     const checkedValues = [];
     document.querySelectorAll(".chk-status-filter:checked").forEach(chk => {
@@ -436,7 +515,7 @@
       const query = filtersState[key];
       
       if (key === 'status') {
-        // Logika Multiple Choice untuk Kolom Status
+        // Logika Multiple Choice untuk Status
         if (Array.isArray(query) && query.length > 0) {
           result = result.filter(item => {
             const val = (item.status || "open").toString().toLowerCase();
@@ -482,7 +561,6 @@
     }
 
     data.forEach((item) => {
-      // Cari index asli data di cache agar modal edit tepat sasaran
       const originalIndex = rkmDataCache.findIndex(d => d.rowNum === item.rowNum);
       const tr = document.createElement("tr");
 
